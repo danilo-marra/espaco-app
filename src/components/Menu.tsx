@@ -16,7 +16,7 @@ export function Menu() {
     <div>
       <button
         type="button"
-        className="fixed top-4 left-4 md:hidden text-gray-500 focus:outline-none z-30"
+        className="fixed top-5 left-5 md:hidden text-gray-500 focus:outline-none z-30"
         onClick={() => setIsMenuOpen(!isMenuOpen)}
       >
         <List size={24} weight="bold" />
@@ -48,8 +48,8 @@ export function Menu() {
           </li>
           <hr />
           <li className="hover:text-blue-300 cursor-pointer flex items-center space-x-2">
-            <UsersThree size={24} />
-            <NavLink to={'/sessoes'}>Sessoes</NavLink>
+            <CalendarBlank size={24} />
+            <NavLink to={'/sessoes'}>Sessões</NavLink>
           </li>
           <hr />
           <li className="hover:text-blue-300 cursor-pointer flex items-center space-x-2">

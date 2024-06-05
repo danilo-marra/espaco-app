@@ -1,4 +1,4 @@
-import { PacienteSessao } from '../tipos'
+import { PacienteSessao } from '../../tipos'
 
 interface DetalhamentoPacienteProps {
   paciente: PacienteSessao

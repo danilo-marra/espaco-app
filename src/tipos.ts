@@ -1,20 +1,9 @@
-// tipos.ts
-// export interface Sessao {
-//   data: string
-//   terapeuta: string
-//   status: string
-// }
-
-// export interface Paciente {
-//   nome: string
-//   sessoes: Sessao[]
-//   totalPago: number
-//   totalDevido: number
-// }
-
 export interface Paciente {
+  id: string
   nome: string
   responsavel: string
+  telefone: string
+  email: string
   cpfResponsavel: string
   endereco: string
 }
@@ -28,12 +17,22 @@ export interface SessaoDt {
   dtSessao6?: Date
 }
 
-// Interface de Sessão do Paciente
 export interface SessaoPaciente {
-  id: string
   pacienteInfo: Paciente
   valor: number
-  notaFiscal: boolean
+  planoSaude: boolean
+  notaFiscalEmitida: boolean
+  notaFiscalEnviada: boolean
   sessoesDt?: SessaoDt[]
   psicologa: string
+}
+
+export interface Terapeuta {
+  id: string
+  nome: string
+  telefone: string
+  email: string
+  endereco: string
+  curriculo: string
+  chavePix: string
 }

@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
-import { SessaoPaciente, SessaoDt } from '../../src/tipos'
+import { v4 as uuidv4 } from 'uuid'
+
+import { SessaoPaciente, SessaoDt } from '../../tipos'
 import Modal from 'react-modal'
 
 // Configuração do modal
@@ -17,7 +19,9 @@ export function NovaSessao({ isOpen, onAddSessao, onClose }: NovaSessaoProps) {
   const [cpfResponsavel, setCpfResponsavel] = useState('')
   const [endereco, setEndereco] = useState('')
   const [valor, setValor] = useState(0)
-  const [notaFiscal, setNotaFiscal] = useState(false)
+  const [planoSaude, setPlanoSaude] = useState(false)
+  const [notaFiscalEmitida, setNotaFiscalEmitida] = useState(false)
+  const [notaFiscalEnviada, setNotaFiscalEnviada] = useState(false)
   const [psicologa, setPsicologa] = useState('')
   const [datas, setDatas] = useState<SessaoDt>({
     dtSessao1: undefined,
@@ -32,15 +36,17 @@ export function NovaSessao({ isOpen, onAddSessao, onClose }: NovaSessaoProps) {
     e.preventDefault()
 
     const novaSessao: SessaoPaciente = {
-      id: new Date().toISOString(),
       pacienteInfo: {
+        id: uuidv4(),
         nome,
         responsavel,
         cpfResponsavel,
         endereco,
       },
       valor,
-      notaFiscal,
+      planoSaude,
+      notaFiscalEmitida,
+      notaFiscalEnviada,
       psicologa,
       sessoesDt: [datas],
     }
@@ -58,7 +64,7 @@ export function NovaSessao({ isOpen, onAddSessao, onClose }: NovaSessaoProps) {
       <h2>Adicionar Nova Sessão</h2>
       <form onSubmit={handleSubmit}>
         <div>
-          <label>Nome do Paciente:</label>
+          <label className="text-2xl">Nome do Paciente:</label>
           <input
             type="text"
             value={nome}
@@ -103,11 +109,27 @@ export function NovaSessao({ isOpen, onAddSessao, onClose }: NovaSessaoProps) {
           />
         </div>
         <div>
+          <label>Plano de Saúde?</label>
+          <input
+            type="checkbox"
+            checked={planoSaude}
+            onChange={(e) => setPlanoSaude(e.target.checked)}
+          />
+        </div>
+        <div>
           <label>Nota Fiscal Emitida?</label>
           <input
             type="checkbox"
-            checked={notaFiscal}
-            onChange={(e) => setNotaFiscal(e.target.checked)}
+            checked={notaFiscalEmitida}
+            onChange={(e) => setNotaFiscalEmitida(e.target.checked)}
+          />
+        </div>
+        <div>
+          <label>Nota Fiscal Enviada?</label>
+          <input
+            type="checkbox"
+            checked={notaFiscalEnviada}
+            onChange={(e) => setNotaFiscalEnviada(e.target.checked)}
           />
         </div>
         <div>

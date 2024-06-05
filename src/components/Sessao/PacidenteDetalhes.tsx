@@ -1,6 +1,6 @@
 // PacienteDetalhes.tsx
 import React from 'react'
-import { SessaoPaciente } from '../tipos'
+import { SessaoPaciente } from '../../tipos'
 
 interface PacienteDetalhesProps {
   paciente: SessaoPaciente

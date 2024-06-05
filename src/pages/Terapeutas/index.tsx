@@ -1,29 +1,114 @@
+// Terapeutas.tsx
 import { useState } from 'react'
-import { PencilSimple, TrashSimple, Eye, Plus } from '@phosphor-icons/react'
-import { HistoricoPaciente } from '../../components/HistoricoPaciente'
-import { Paciente } from '../../tipos'
-import { Header } from '../../components/Header'
+import { Terapeuta } from '../../tipos'
+import { NovoTerapeuta } from '../../components/Terapeuta/NovoTerapeuta'
+
+import Modal from 'react-modal'
+import { v4 as uuidv4 } from 'uuid'
+import {
+  Eye,
+  PencilSimple,
+  Person,
+  Plus,
+  TrashSimple,
+  User,
+  UsersThree,
+} from '@phosphor-icons/react'
+import { VisualizarCurriculo } from '../../components/Terapeuta/VisualizarCurriculo'
+
+// const file = new File(['teste'], 'curriculo.txt', { type: 'text/plain' })
+
+const initialTerapeutas: Terapeuta[] = [
+  {
+    id: uuidv4(),
+    nome: 'Juliana Barbosa',
+    telefone: '(61)9571-3244',
+    email: 'jujupsi@gmail.com',
+    endereco: 'SHCES 301, B, 201 ',
+    curriculo: 'https://www.linkedin.com/in/danilomarra/',
+    chavePix: '9999110',
+  },
+]
 
 export function Terapeutas() {
   const [isMenuOpen] = useState<boolean>(false)
-  const [selectedPaciente, setSelectedPaciente] = useState<Paciente | null>(
+  const [isNovoTerapeutaOpen, setIsNovoTerapeutaOpen] = useState<boolean>(false)
+  const [isEditarTerapeutaOpen, setIsEditarTerapeutaOpen] =
+    useState<boolean>(false)
+  const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState<boolean>(false)
+  const [terapeutas, setTerapeutas] = useState<Terapeuta[]>(() => {
+    const savedTerapeutas = localStorage.getItem('terapeutas')
+    return savedTerapeutas ? JSON.parse(savedTerapeutas) : initialTerapeutas
+  })
+  const [terapeutaAtual, setTerapeutaAtual] = useState<Terapeuta | null>(null)
+  const [terapeutaADeletar, setTerapeutaADeletar] = useState<string | null>(
     null,
   )
+  const [isVisualizarCurriculoOpen, setIsVisualizarCurriculoOpen] =
+    useState<boolean>(false)
+  const [curriculoUrl, setCurriculoUrl] = useState<string>('')
 
-  const pacientes: Paciente[] = [
-    {
-      nome: 'Davi',
-      sessoes: [
-        { data: '01/02/2024', terapeuta: 'Juliana', status: 'Realizada' },
-        { data: '08/02/2024', terapeuta: 'Juliana', status: 'Realizada' },
-      ],
-      totalPago: 200,
-      totalDevido: 100,
-    },
-  ]
+  const openEditarTerapeuta = (terapeuta: Terapeuta) => {
+    setTerapeutaAtual(terapeuta)
+    setIsEditarTerapeutaOpen(true)
+  }
 
-  const handleViewHistorico = (paciente: Paciente) => {
-    setSelectedPaciente(paciente)
+  const closeEditarTerapeuta = () => {
+    setTerapeutaAtual(null)
+    setIsEditarTerapeutaOpen(false)
+  }
+
+  const confirmDeleteTerapeuta = (id: string) => {
+    setTerapeutaADeletar(id)
+    setIsConfirmDeleteOpen(true)
+  }
+
+  const closeConfirmDelete = () => {
+    setTerapeutaADeletar(null)
+    setIsConfirmDeleteOpen(false)
+  }
+
+  const deleteTerapeuta = () => {
+    if (terapeutaADeletar) {
+      const updatedTerapeutas = terapeutas.filter(
+        (terapeuta) => terapeuta.id !== terapeutaADeletar,
+      )
+      setTerapeutas(updatedTerapeutas)
+      localStorage.setItem('terapeutas', JSON.stringify(updatedTerapeutas))
+      closeConfirmDelete()
+    }
+  }
+
+  const openNovoTerapeuta = () => {
+    setIsNovoTerapeutaOpen(true)
+  }
+
+  const closeNovoTerapeuta = () => {
+    setIsNovoTerapeutaOpen(false)
+  }
+
+  const addNovoTerapeuta = (novoTerapeuta: Terapeuta) => {
+    const updatedTerapeutas = [...terapeutas, novoTerapeuta]
+    setTerapeutas(updatedTerapeutas)
+    localStorage.setItem('terapeutas', JSON.stringify(updatedTerapeutas))
+    closeNovoTerapeuta()
+  }
+
+  const updateTerapeuta = (updatedTerapeuta: Terapeuta) => {
+    const updatedTerapeutas = terapeutas.map((terapeuta) =>
+      terapeuta.id === updatedTerapeuta.id ? updatedTerapeuta : terapeuta,
+    )
+    setTerapeutas(updatedTerapeutas)
+    localStorage.setItem('terapeutas', JSON.stringify(updatedTerapeutas))
+    closeEditarTerapeuta()
+  }
+
+  const [selectedTerapeuta, setSelectedTerapeuta] = useState('Todos')
+
+  const handleTerapeutaChange = (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    setSelectedTerapeuta(event.target.value)
   }
 
   return (
@@ -31,82 +116,162 @@ export function Terapeutas() {
       <main
         className={`flex-1 bg-gray-100 p-8 transition-all duration-300 ease-in-out ${isMenuOpen ? 'md:ml-64' : 'ml-0'}`}
       >
-        <Header />
         <div>
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-2xl font-bold">Terapeutas</h1>
             <button
               type="button"
-              className="flex items-center bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              className="flex items-center bg-azul text-white px-4 py-2 rounded hover:bg-sky-600 duration-150"
+              onClick={openNovoTerapeuta}
             >
               <Plus size={20} weight="bold" className="mr-2" />
-              Novo Registro
+              Novo Terapeuta
             </button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
             <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
-              <span>Icone Terapeutas</span>
+              <User size={24} />
+              <label htmlFor="terapeutas" className="text-xl font-semibold">
+                Terapeuta:
+              </label>
+              <select
+                className="text-xl"
+                name="terapeutas"
+                id="terapeutas"
+                value={selectedTerapeuta}
+                onChange={handleTerapeutaChange}
+              >
+                <option value="Todos">Todos</option>
+                {terapeutas.map((terapeuta) => (
+                  <option key={terapeuta.id} value={terapeuta.nome}>
+                    {terapeuta.nome}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
+              <UsersThree size={24} />
               <span className="text-xl font-semibold">
-                Total de Terapeutas Cadastradas
+                Total de Terapeutas: {terapeutas.length}
               </span>
             </div>
             <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
-              <span>Icone Pacientes</span>
+              <Person size={24} />
               <span className="text-xl font-semibold">
-                Total de Pacientes Cadastrados
+                Total de Pacientes: 8
               </span>
-            </div>
-            <div className="flex items-center justify-between p-4 bg-white rounded shadow">
-              <span>Icone seta esquerda</span>
-              <h2 className="text-xl font-semibold">
-                Agenda Mês de Fevereiro/2024
-              </h2>
-              <span>Icone seta direita</span>
             </div>
           </div>
           <table className="listaTerapeutas w-full bg-white rounded shadow">
-            <thead className="bg-blue-800 text-white">
+            <thead className="bg-rosa text-white">
               <tr>
-                <th className="p-4 text-left">Terapeuta</th>
-                <th className="p-4 text-left">Paciente</th>
-                <th className="p-4 text-left">Dia da Semana</th>
-                <th className="p-4 text-left">Horário</th>
+                <th className="p-4 text-left">Nome</th>
+                <th className="p-4 text-left">Telefone</th>
+                <th className="p-4 text-left">Email</th>
+                <th className="p-4 text-left">Endereço</th>
+                <th className="p-4 text-left">Currículo</th>
+                <th className="p-4 text-left">Chave PIX</th>
                 <th className="p-4 text-left">Ações</th>
               </tr>
             </thead>
             <tbody>
-              {pacientes.map((paciente, index) => (
-                <tr key={index} className="border-b">
-                  <td className="p-4">Juliana</td>
-                  <td className="p-4">{paciente.nome}</td>
-                  <td className="p-4">Segunda</td>
-                  <td className="p-4">9h30</td>
-                  <td className="p-4 flex space-x-2">
-                    <button
-                      className="text-blue-500 hover:text-blue-700"
-                      onClick={() => handleViewHistorico(paciente)}
-                    >
-                      <Eye size={20} weight="bold" />
-                    </button>
-                    <button className="text-green-500 hover:text-green-700">
-                      <PencilSimple size={20} weight="bold" />
-                    </button>
-                    <button className="text-red-500 hover:text-red-700">
-                      <TrashSimple size={20} weight="bold" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {terapeutas
+                .filter(
+                  (terapeuta) =>
+                    selectedTerapeuta === 'Todos' ||
+                    terapeuta.nome === selectedTerapeuta,
+                )
+                .map((terapeuta) => (
+                  <tr key={terapeuta.id} className="border-b">
+                    <td className="p-4">{terapeuta.nome}</td>
+                    <td className="p-4">{terapeuta.telefone}</td>
+                    <td className="p-4">{terapeuta.email}</td>
+                    <td className="p-4">{terapeuta.endereco}</td>
+                    <td className="p-4">
+                      <button
+                        className="text-blue-500 hover:text-blue-700"
+                        onClick={() => {
+                          setCurriculoUrl(terapeuta.curriculo)
+                          setIsVisualizarCurriculoOpen(true)
+                        }}
+                      >
+                        <Eye size={20} weight="bold" />
+                      </button>
+                    </td>
+                    <td className="p-4">{terapeuta.chavePix}</td>
+                    <td className="p-4 flex space-x-2">
+                      <button
+                        className="text-green-500 hover:text-green-700"
+                        onClick={() => openEditarTerapeuta(terapeuta)}
+                      >
+                        <PencilSimple size={20} weight="bold" />
+                      </button>
+                      <button
+                        className="text-red-500 hover:text-red-700"
+                        onClick={() => confirmDeleteTerapeuta(terapeuta.id)}
+                      >
+                        <TrashSimple size={20} weight="bold" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>
       </main>
-      {selectedPaciente && (
-        <HistoricoPaciente
-          paciente={selectedPaciente}
-          onClose={() => setSelectedPaciente(null)}
+      {isNovoTerapeutaOpen && (
+        <NovoTerapeuta
+          isOpen={isNovoTerapeutaOpen}
+          onClose={closeNovoTerapeuta}
+          onSave={addNovoTerapeuta}
         />
       )}
+      {isEditarTerapeutaOpen && terapeutaAtual && (
+        <NovoTerapeuta
+          isOpen={isEditarTerapeutaOpen}
+          onClose={closeEditarTerapeuta}
+          onSave={updateTerapeuta}
+          terapeuta={terapeutaAtual}
+        />
+      )}
+      <Modal
+        isOpen={isConfirmDeleteOpen}
+        onRequestClose={closeConfirmDelete}
+        contentLabel="Confirmação de Exclusão"
+        className="fixed inset-0 flex items-center justify-center z-50"
+        overlayClassName="fixed inset-0 bg-black bg-opacity-50"
+      >
+        <div className="bg-white p-8 rounded shadow-lg w-96">
+          <h2 className="text-2xl font-bold mb-4">Confirmação de Exclusão</h2>
+          <p className="mb-6">Tem certeza que deseja excluir esta terapeuta?</p>
+          <div className="flex justify-end space-x-4">
+            <button
+              className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
+              onClick={closeConfirmDelete}
+            >
+              Não
+            </button>
+            <button
+              className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+              onClick={deleteTerapeuta}
+            >
+              Sim
+            </button>
+          </div>
+        </div>
+      </Modal>
+      <Modal
+        isOpen={isVisualizarCurriculoOpen}
+        onRequestClose={() => setIsVisualizarCurriculoOpen(false)}
+        contentLabel="Visualizar Currículo"
+        className="fixed inset-0 flex items-center justify-center z-50"
+        overlayClassName="fixed inset-0 bg-black bg-opacity-50"
+      >
+        <VisualizarCurriculo
+          url={curriculoUrl}
+          onClose={() => setIsVisualizarCurriculoOpen(false)}
+        />
+      </Modal>
     </div>
   )
 }

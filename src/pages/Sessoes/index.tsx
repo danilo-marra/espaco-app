@@ -1,6 +1,5 @@
-// src/components/Sessoes.tsx
-
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { v4 as uuidv4 } from 'uuid'
 import {
   PencilSimple,
   TrashSimple,
@@ -11,87 +10,54 @@ import {
   CaretRight,
   HandCoins,
 } from '@phosphor-icons/react'
-import { SessaoPaciente, SessaoDt } from '../../tipos'
-import { Header } from '../../components/Header'
-import { PacienteDetalhes } from '../../components/PacidenteDetalhes'
-import { NovaSessao } from '../../components/NovaSessao'
-
-const initialSessoesDt: SessaoPaciente[] = [
-  {
-    id: '01',
-    pacienteInfo: {
-      nome: 'Davi',
-      responsavel: 'Pai do Davi',
-      cpfResponsavel: '123.456.789-00',
-      endereco: 'Rua A, 123',
-    },
-    valor: 200,
-    notaFiscal: true,
-    psicologa: 'Juliana',
-    sessoesDt: [
-      {
-        dtSessao1: new Date(),
-        dtSessao2: new Date(),
-        dtSessao3: new Date(),
-        dtSessao4: undefined,
-        dtSessao5: undefined,
-        dtSessao6: undefined,
-      },
-    ],
-  },
-  {
-    id: '02',
-    pacienteInfo: {
-      nome: 'Heitor',
-      responsavel: 'Avó do Heitor',
-      cpfResponsavel: '987.654.321-00',
-      endereco: 'Rua B, 456',
-    },
-    valor: 400,
-    notaFiscal: false,
-    psicologa: 'Juliana',
-    sessoesDt: [
-      {
-        dtSessao1: new Date(),
-        dtSessao2: new Date(),
-        dtSessao3: new Date(),
-        dtSessao4: new Date(),
-        dtSessao5: new Date(),
-        dtSessao6: undefined,
-      },
-    ],
-  },
-  {
-    id: '03',
-    pacienteInfo: {
-      nome: 'Matheus',
-      responsavel: 'Mãe do Matheus',
-      cpfResponsavel: '123.444.222-69',
-      endereco: 'Rua B, 456',
-    },
-    valor: 600,
-    notaFiscal: true,
-    psicologa: 'Mariana',
-    sessoesDt: [
-      {
-        dtSessao1: new Date(),
-        dtSessao2: undefined,
-        dtSessao3: undefined,
-        dtSessao4: undefined,
-        dtSessao5: undefined,
-        dtSessao6: undefined,
-      },
-    ],
-  },
-]
+import { SessaoPaciente, SessaoDt, Paciente } from '../../tipos'
+import { PacienteDetalhes } from '../../components/Sessao/PacidenteDetalhes'
+import { NovaSessao } from '../../components/Sessao/NovaSessao'
+import { initialPacientes } from '../Pacientes'
 
 export function Sessoes() {
+  const [pacientes, setPacientes] = useState<Paciente[]>([])
+  const [sessoes, setSessoes] = useState<SessaoPaciente[]>([])
+
+  useEffect(() => {
+    setPacientes(initialPacientes)
+  }, [])
+
+  useEffect(() => {
+    const initialSessoesDt: SessaoPaciente[] = pacientes.map((paciente) => ({
+      pacienteInfo: {
+        id: uuidv4(),
+        nome: paciente.nome,
+        responsavel: paciente.responsavel,
+        telefone: paciente.telefone,
+        email: paciente.email,
+        cpfResponsavel: paciente.cpfResponsavel,
+        endereco: paciente.endereco,
+      },
+      valor: 200,
+      planoSaude: false,
+      notaFiscalEmitida: true,
+      notaFiscalEnviada: false,
+      psicologa: 'Juliana',
+      sessoesDt: [
+        {
+          dtSessao1: new Date(),
+          dtSessao2: new Date(),
+          dtSessao3: new Date(),
+          dtSessao4: undefined,
+          dtSessao5: undefined,
+          dtSessao6: undefined,
+        },
+      ],
+    }))
+    setSessoes(initialSessoesDt)
+  }, [pacientes])
+
   const [isMenuOpen] = useState<boolean>(false)
   const [isPopupOpen, setIsPopupOpen] = useState<boolean>(false)
   const [isNovaSessaoOpen, setIsNovaSessaoOpen] = useState<boolean>(false)
   const [selectedPaciente, setSelectedPaciente] =
     useState<SessaoPaciente | null>(null)
-  const [sessoes, setSessoes] = useState<SessaoPaciente[]>(initialSessoesDt)
 
   const openPopup = (paciente: SessaoPaciente) => {
     setSelectedPaciente(paciente)
@@ -148,7 +114,7 @@ export function Sessoes() {
   const handleDeleteSessao = (sessaoToDelete: string) => {
     if (window.confirm('Você tem certeza que quer deletar esta sessão?')) {
       const sessaoWithoutDeletedOne = sessoes.filter(
-        (sessao) => sessao.id !== sessaoToDelete,
+        (sessao) => sessao.pacienteInfo.id !== sessaoToDelete,
       )
       setSessoes(sessaoWithoutDeletedOne)
     }
@@ -159,7 +125,6 @@ export function Sessoes() {
       <main
         className={`flex-1 bg-gray-100 p-8 transition-all duration-300 ease-in-out ${isMenuOpen ? 'md:ml-64' : 'ml-0'}`}
       >
-        <Header />
         <div>
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-2xl font-bold">Sessoes</h1>
@@ -169,7 +134,7 @@ export function Sessoes() {
               onClick={openNovaSessao}
             >
               <Plus size={20} weight="bold" className="mr-2" />
-              Novo Registro
+              Nova Sessão
             </button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
@@ -201,31 +166,16 @@ export function Sessoes() {
               <span className="text-xl font-semibold">Receita: R$920,00</span>
             </div>
           </div>
-          <div>
-            <label htmlFor="psicólogo">Psicólogo(a): </label>
-            <select name="terapeutas" id="terapeutas">
-              <option value="Todos">Todos</option>
-              <option value="Juliana">Juliana</option>
-              <option value="Julia">Julia</option>
-              <option value="Francisca">Francisca</option>
-            </select>
-          </div>
-          <div>
-            <span>Mês</span>
-          </div>
-          <div>
-            <span>R$ Paciente: </span>
-          </div>
-          <div>
-            <span>R$ PSI: </span>
-          </div>
+
           <table className="listaTerapeutas w-full bg-white rounded shadow">
             <thead className="bg-rosa text-white">
               <tr>
                 <th className="p-4 text-left">Paciente</th>
                 <th className="p-4 text-left">Responsável</th>
                 <th className="p-4 text-left">Valor da Sessão</th>
-                <th className="p-4 text-left">Nota Fiscal Emitida?</th>
+                <th className="p-4 text-left">Plano de Saúde</th>
+                <th className="p-4 text-left">NF Emitida?</th>
+                <th className="p-4 text-left">NF Enviada?</th>
                 <th className="p-4 text-left">Sessão 1</th>
                 <th className="p-4 text-left">Sessão 2</th>
                 <th className="p-4 text-left">Sessão 3</th>
@@ -248,10 +198,16 @@ export function Sessoes() {
                     <td className="p-4">{sessao.pacienteInfo.nome}</td>
                     <td className="p-4">{sessao.pacienteInfo.responsavel}</td>
                     <td className="p-4">{formatCurrency(sessao.valor)}</td>
-                    <td className="p-4">{sessao.notaFiscal ? 'Sim' : 'Não'}</td>
+                    <td className="p-4">{sessao.planoSaude ? 'Sim' : 'Não'}</td>
+                    <td className="p-4">
+                      {sessao.notaFiscalEmitida ? 'Sim' : 'Não'}
+                    </td>
+                    <td className="p-4">
+                      {sessao.notaFiscalEnviada ? 'Sim' : 'Não'}
+                    </td>
                     {sessao.sessoesDt &&
-                      sessao.sessoesDt.map((data, index) => (
-                        <React.Fragment key={index}>
+                      sessao.sessoesDt.map((data, sessionIndex) => (
+                        <React.Fragment key={sessionIndex}>
                           <td className="p-4">{formatDate(data.dtSessao1)}</td>
                           <td className="p-4">{formatDate(data.dtSessao2)}</td>
                           <td className="p-4">{formatDate(data.dtSessao3)}</td>
@@ -272,7 +228,9 @@ export function Sessoes() {
                         <PencilSimple size={20} weight="bold" />
                       </button>
                       <button
-                        onClick={() => handleDeleteSessao(sessao.id)}
+                        onClick={() =>
+                          handleDeleteSessao(sessao.pacienteInfo.id)
+                        }
                         className="text-red-500 hover:text-red-700"
                       >
                         <TrashSimple size={20} weight="bold" />
