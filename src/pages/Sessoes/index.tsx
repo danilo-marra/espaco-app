@@ -38,7 +38,7 @@ export function Sessoes() {
       planoSaude: false,
       notaFiscalEmitida: true,
       notaFiscalEnviada: false,
-      psicologa: 'Juliana',
+      terapeuta: 'Nome da Terapeuta',
       sessoesDt: [
         {
           dtSessao1: new Date(),
@@ -141,7 +141,7 @@ export function Sessoes() {
             <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
               <User size={24} />
               <label htmlFor="psicólogo" className="text-xl font-semibold">
-                Psicólogo(a):
+                Terapeuta:
               </label>
               <select className="text-xl" name="terapeutas" id="terapeutas">
                 <option value="Todos">Todos</option>
@@ -172,6 +172,7 @@ export function Sessoes() {
               <tr>
                 <th className="p-4 text-left">Paciente</th>
                 <th className="p-4 text-left">Responsável</th>
+                <th className="p-4 text-left">Terapeuta</th>
                 <th className="p-4 text-left">Valor da Sessão</th>
                 <th className="p-4 text-left">Plano de Saúde</th>
                 <th className="p-4 text-left">NF Emitida?</th>
@@ -197,6 +198,7 @@ export function Sessoes() {
                   <tr key={index} className="border-b">
                     <td className="p-4">{sessao.pacienteInfo.nome}</td>
                     <td className="p-4">{sessao.pacienteInfo.responsavel}</td>
+                    <td className="p-4">{sessao.terapeuta}</td>
                     <td className="p-4">{formatCurrency(sessao.valor)}</td>
                     <td className="p-4">{sessao.planoSaude ? 'Sim' : 'Não'}</td>
                     <td className="p-4">
@@ -252,6 +254,7 @@ export function Sessoes() {
           isOpen={isNovaSessaoOpen}
           onAddSessao={addNovaSessao}
           onClose={closeNovaSessao}
+          pacientes={pacientes}
         />
       )}
     </div>

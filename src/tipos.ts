@@ -24,7 +24,7 @@ export interface SessaoPaciente {
   notaFiscalEmitida: boolean
   notaFiscalEnviada: boolean
   sessoesDt?: SessaoDt[]
-  psicologa: string
+  terapeuta: string
 }
 
 export interface Terapeuta {

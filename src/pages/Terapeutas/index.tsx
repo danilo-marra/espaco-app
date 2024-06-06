@@ -18,7 +18,7 @@ import { VisualizarCurriculo } from '../../components/Terapeuta/VisualizarCurric
 
 // const file = new File(['teste'], 'curriculo.txt', { type: 'text/plain' })
 
-const initialTerapeutas: Terapeuta[] = [
+export const initialTerapeutas: Terapeuta[] = [
   {
     id: uuidv4(),
     nome: 'Juliana Barbosa',
@@ -27,6 +27,15 @@ const initialTerapeutas: Terapeuta[] = [
     endereco: 'SHCES 301, B, 201 ',
     curriculo: 'https://www.linkedin.com/in/danilomarra/',
     chavePix: '9999110',
+  },
+  {
+    id: uuidv4(),
+    nome: 'Rebbeca Alves',
+    telefone: '(61)97001-1234',
+    email: 'rebalves@gmail.com',
+    endereco: 'SHCES 101, B, 201 ',
+    curriculo: 'https://www.linkedin.com/in/danilomarra/',
+    chavePix: '89888899',
   },
 ]
 

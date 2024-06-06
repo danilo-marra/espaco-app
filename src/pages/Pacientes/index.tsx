@@ -23,6 +23,15 @@ export const initialPacientes: Paciente[] = [
     cpfResponsavel: '123.456.789-00',
     endereco: 'Rua A, 123',
   },
+  {
+    id: uuidv4(),
+    nome: 'Maria',
+    responsavel: 'Mãe da Maria',
+    telefone: '(61)9999-8888',
+    email: 'mariadaMaria@gmail.com',
+    cpfResponsavel: '987.654.321-00',
+    endereco: 'Rua B, 456',
+  },
 ]
 
 export function Pacientes() {
