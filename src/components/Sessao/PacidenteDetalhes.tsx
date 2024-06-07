@@ -29,7 +29,7 @@ export const PacienteDetalhes: React.FC<PacienteDetalhesProps> = ({
           <strong>Endereço:</strong> {paciente.pacienteInfo.endereco}
         </p>
         <p>
-          <strong>Psicóloga:</strong> {paciente.terapeuta}
+          <strong>Psicóloga:</strong> Teste
         </p>
         <button
           type="button"

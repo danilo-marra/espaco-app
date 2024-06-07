@@ -120,6 +120,25 @@ export function Terapeutas() {
     setSelectedTerapeuta(event.target.value)
   }
 
+  const [currentPage, setCurrentPage] = useState(1)
+  const terapeutasPorPagina = 10 // Número de terapeutas por página
+  const totalPaginas = Math.ceil(terapeutas.length / terapeutasPorPagina)
+
+  const handleClickPaginaAnterior = () => {
+    setCurrentPage((prev) => Math.max(prev - 1, 1))
+  }
+
+  const handleClickProximaPagina = () => {
+    setCurrentPage((prev) => Math.min(prev + 1, totalPaginas))
+  }
+
+  const indexOfLastTerapeuta = currentPage * terapeutasPorPagina
+  const indexOfFirstTerapeuta = indexOfLastTerapeuta - terapeutasPorPagina
+  const terapeutasAtuais = terapeutas.slice(
+    indexOfFirstTerapeuta,
+    indexOfLastTerapeuta,
+  )
+
   return (
     <div className="flex min-h-screen">
       <main
@@ -184,7 +203,7 @@ export function Terapeutas() {
               </tr>
             </thead>
             <tbody>
-              {terapeutas
+              {terapeutasAtuais
                 .filter(
                   (terapeuta) =>
                     selectedTerapeuta === 'Todos' ||
@@ -226,6 +245,25 @@ export function Terapeutas() {
                 ))}
             </tbody>
           </table>
+          <div className="flex justify-evenly mt-4 items-center">
+            <button
+              onClick={handleClickPaginaAnterior}
+              className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 cursor-pointer"
+              disabled={currentPage === 1}
+            >
+              Página Anterior
+            </button>
+            <span>
+              Página {currentPage} de {totalPaginas}
+            </span>
+            <button
+              onClick={handleClickProximaPagina}
+              className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 cursor-pointer"
+              disabled={currentPage === totalPaginas}
+            >
+              Próxima Página
+            </button>
+          </div>
         </div>
       </main>
       {isNovoTerapeutaOpen && (

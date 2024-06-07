@@ -1,3 +1,12 @@
+export interface Terapeuta {
+  id: string
+  nome: string
+  telefone: string
+  email: string
+  endereco: string
+  curriculo: string
+  chavePix: string
+}
 export interface Paciente {
   id: string
   nome: string
@@ -6,6 +15,8 @@ export interface Paciente {
   email: string
   cpfResponsavel: string
   endereco: string
+  origem: 'Indicação' | 'Instagram' | 'Busca no Google'
+  terapeuta: Terapeuta
 }
 
 export interface SessaoDt {
@@ -24,15 +35,4 @@ export interface SessaoPaciente {
   notaFiscalEmitida: boolean
   notaFiscalEnviada: boolean
   sessoesDt?: SessaoDt[]
-  terapeuta: string
-}
-
-export interface Terapeuta {
-  id: string
-  nome: string
-  telefone: string
-  email: string
-  endereco: string
-  curriculo: string
-  chavePix: string
 }

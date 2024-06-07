@@ -1,7 +1,7 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Modal from 'react-modal'
 import { useForm, SubmitHandler } from 'react-hook-form'
-import { Paciente } from '../../tipos'
+import { Paciente, Terapeuta } from '../../tipos'
 import { v4 as uuidv4 } from 'uuid'
 import InputMask from 'react-input-mask'
 
@@ -12,6 +12,7 @@ interface NovoPacienteProps {
   onClose: () => void
   onSave: (paciente: Paciente) => void
   paciente?: Paciente
+  terapeutas: Terapeuta[]
 }
 
 type FormData = Omit<Paciente, 'id'>
@@ -21,6 +22,7 @@ export function NovoPaciente({
   onClose,
   onSave,
   paciente,
+  terapeutas,
 }: NovoPacienteProps) {
   const {
     register,
@@ -30,6 +32,10 @@ export function NovoPaciente({
     formState: { errors },
   } = useForm<FormData>()
 
+  const [selectedTerapeuta, setSelectedTerapeuta] = useState<Terapeuta | null>(
+    null,
+  )
+
   useEffect(() => {
     if (paciente) {
       setValue('nome', paciente.nome)
@@ -38,17 +44,27 @@ export function NovoPaciente({
       setValue('email', paciente.email)
       setValue('cpfResponsavel', paciente.cpfResponsavel)
       setValue('endereco', paciente.endereco)
+      setValue('origem', paciente.origem)
+      setSelectedTerapeuta(paciente.terapeuta)
     } else {
       reset()
     }
   }, [paciente, setValue, reset])
 
+  const [error, setError] = useState<string | null>(null)
+
   const onSubmit: SubmitHandler<FormData> = (data) => {
-    const novoPaciente: Paciente = {
-      id: paciente ? paciente.id : uuidv4(),
-      ...data,
+    if (selectedTerapeuta !== null) {
+      const novoPaciente: Paciente = {
+        id: paciente ? paciente.id : uuidv4(),
+        ...data,
+        terapeuta: selectedTerapeuta,
+      }
+
+      onSave(novoPaciente)
+    } else if (selectedTerapeuta === null) {
+      setError('Selecione um(a) terapeuta antes de salvar.')
     }
-    onSave(novoPaciente)
   }
 
   return (
@@ -190,7 +206,9 @@ export function NovoPaciente({
             </label>
             <textarea
               id="endereco"
-              {...register('endereco', { required: 'Endereço é obrigatório' })}
+              {...register('endereco', {
+                required: 'Endereço é obrigatório',
+              })}
               className="mt-1 block w-full rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 border-2 border-indigo-300"
             />
             {errors.endereco && (
@@ -199,6 +217,61 @@ export function NovoPaciente({
               </p>
             )}
           </div>
+          <div>
+            <label
+              className="block text-sm font-medium text-gray-700"
+              htmlFor="origem"
+            >
+              Origem:
+            </label>
+            <select
+              {...register('origem', { required: 'Selecione a origem' })}
+              id="origem"
+              className="mt-1 block w-full rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 border-2 border-indigo-300"
+            >
+              <option value="">Selecione</option>
+              <option value="Indicação">Indicação</option>
+              <option value="Instagram">Instagram</option>
+              <option value="Busca no Google">Busca no Google</option>
+              <option value="Outros">Outros</option>
+            </select>
+            {errors.origem && (
+              <p className="text-red-500 text-xs mt-1">
+                {errors.origem.message}
+              </p>
+            )}
+          </div>
+          <div>
+            <label
+              className="block text-sm font-medium text-gray-700"
+              htmlFor="terapeuta"
+            >
+              Selecionar terapeuta:
+            </label>
+            <select
+              id="terapeuta"
+              className="mt-1 block w-full rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 border-2 border-indigo-300"
+              value={selectedTerapeuta ? selectedTerapeuta.id : ''}
+              onChange={(e) => {
+                const selectedId = e.target.value
+                const selected = terapeutas.find(
+                  (terapeuta) => terapeuta.id === selectedId,
+                )
+                setSelectedTerapeuta(selected || null)
+              }}
+            >
+              <option value="" disabled>
+                Selecione
+              </option>
+              {terapeutas.map((terapeuta) => (
+                <option key={terapeuta.id} value={terapeuta.id}>
+                  {terapeuta.nome}
+                </option>
+              ))}
+            </select>
+            {error && <p className="text-red-500">{error}</p>}
+          </div>
+
           <div className="flex justify-end space-x-4">
             <button
               type="button"

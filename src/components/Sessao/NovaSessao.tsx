@@ -24,11 +24,11 @@ export function NovaSessao({
   const [responsavel, setResponsavel] = useState('')
   const [cpfResponsavel, setCpfResponsavel] = useState('')
   const [endereco, setEndereco] = useState('')
+  const [terapeuta, setTerapeuta] = useState('')
   const [valor, setValor] = useState(0)
   const [planoSaude, setPlanoSaude] = useState(false)
   const [notaFiscalEmitida, setNotaFiscalEmitida] = useState(false)
   const [notaFiscalEnviada, setNotaFiscalEnviada] = useState(false)
-  const [terapeuta, setTerapeuta] = useState('')
   const [datas, setDatas] = useState<SessaoDt>({
     dtSessao1: undefined,
     dtSessao2: undefined,
@@ -142,6 +142,22 @@ export function NovaSessao({
           </div>
           <div>
             <label
+              htmlFor="terapeuta"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Terapeuta:
+            </label>
+            <input
+              id="terapeuta"
+              type="text"
+              value={terapeuta}
+              onChange={(e) => setTerapeuta(e.target.value)}
+              required
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            />
+          </div>
+          <div>
+            <label
               htmlFor="endereco"
               className="block text-sm font-medium text-gray-700"
             >
@@ -218,43 +234,30 @@ export function NovaSessao({
               Nota Fiscal Enviada?
             </label>
           </div>
-          <div>
-            <label
-              htmlFor="terapeuta"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Terapeuta:
-            </label>
-            <input
-              id="terapeuta"
-              type="text"
-              value={terapeuta}
-              onChange={(e) => setTerapeuta(e.target.value)}
-              required
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-            />
+
+          <div className="grid grid-cols-2 gap-4">
+            {Array.from({ length: 6 }, (_, index) => (
+              <div key={index}>
+                <label
+                  htmlFor={`dataSessao${index + 1}`}
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Data Sessão {index + 1}:
+                </label>
+                <input
+                  id={`dataSessao${index + 1}`}
+                  type="date"
+                  onChange={({ target: { value } }) =>
+                    setDatas((prevDatas) => ({
+                      ...prevDatas,
+                      [`dtSessao${index + 1}`]: new Date(value),
+                    }))
+                  }
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                />
+              </div>
+            ))}
           </div>
-          {Array.from({ length: 6 }, (_, index) => (
-            <div key={index}>
-              <label
-                htmlFor={`dataSessao${index + 1}`}
-                className="block text-sm font-medium text-gray-700"
-              >
-                Data Sessão {index + 1}:
-              </label>
-              <input
-                id={`dataSessao${index + 1}`}
-                type="date"
-                onChange={(e) =>
-                  setDatas({
-                    ...datas,
-                    [`dtSessao${index + 1}`]: new Date(e.target.value),
-                  })
-                }
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-              />
-            </div>
-          ))}
           <div className="flex justify-end space-x-4">
             <button
               type="submit"

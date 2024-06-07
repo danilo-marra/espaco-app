@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import {
-  Eye,
   PencilSimple,
   Person,
   Plus,
@@ -8,10 +7,11 @@ import {
   User,
   UsersThree,
 } from '@phosphor-icons/react'
-import { Paciente } from '../../tipos'
+import { Paciente, Terapeuta } from '../../tipos'
 import { NovoPaciente } from '../../components/Paciente/NovoPaciente'
 import Modal from 'react-modal'
 import { v4 as uuidv4 } from 'uuid'
+import { initialTerapeutas } from '../Terapeutas'
 
 export const initialPacientes: Paciente[] = [
   {
@@ -22,6 +22,8 @@ export const initialPacientes: Paciente[] = [
     email: 'paidodavi@gmail.com',
     cpfResponsavel: '123.456.789-00',
     endereco: 'Rua A, 123',
+    origem: 'Busca no Google',
+    terapeuta: initialTerapeutas[0],
   },
   {
     id: uuidv4(),
@@ -31,6 +33,19 @@ export const initialPacientes: Paciente[] = [
     email: 'mariadaMaria@gmail.com',
     cpfResponsavel: '987.654.321-00',
     endereco: 'Rua B, 456',
+    origem: 'Instagram',
+    terapeuta: initialTerapeutas[1],
+  },
+  {
+    id: uuidv4(),
+    nome: 'Carlos',
+    responsavel: 'Pai do Carlos',
+    telefone: '(61)9888-7766',
+    email: 'carlos@gmail.com',
+    cpfResponsavel: '111.222.333-44',
+    endereco: 'Rua C, 789',
+    origem: 'Indicação',
+    terapeuta: initialTerapeutas[0],
   },
 ]
 
@@ -42,14 +57,27 @@ export function Pacientes() {
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState<boolean>(false)
   const [pacientes, setPacientes] = useState<Paciente[]>(() => {
     const savedPacientes = localStorage.getItem('pacientes')
-    return savedPacientes ? JSON.parse(savedPacientes) : initialPacientes
+    const parsedPacientes = savedPacientes
+      ? JSON.parse(savedPacientes)
+      : initialPacientes
+    return parsedPacientes.sort((a: Paciente, b: Paciente) =>
+      a.nome.localeCompare(b.nome),
+    )
   })
   const [pacienteAtual, setPacienteAtual] = useState<Paciente | null>(null)
   const [pacienteADeletar, setPacienteADeletar] = useState<string | null>(null)
+  const [terapeutas, setTerapeutas] = useState<Terapeuta[]>(initialTerapeutas)
 
   useEffect(() => {
     localStorage.setItem('pacientes', JSON.stringify(pacientes))
   }, [pacientes])
+
+  const [searchQuery, setSearchQuery] = useState<string>('')
+
+  // Filter pacientes based on search query
+  const filteredPacientes = pacientes.filter((paciente) =>
+    paciente.nome.toLowerCase().includes(searchQuery.toLowerCase()),
+  )
 
   const openNovoPaciente = () => {
     setIsNovoPacienteOpen(true)
@@ -60,7 +88,11 @@ export function Pacientes() {
   }
 
   const addNovoPaciente = (novoPaciente: Paciente) => {
-    setPacientes([...pacientes, novoPaciente])
+    if (!novoPaciente) {
+      throw new Error('Objeto Invalido para Paciente.')
+    }
+    setPacientes((prevPacientes) => [...prevPacientes, novoPaciente])
+    setTerapeutas(initialTerapeutas)
     closeNovoPaciente()
   }
 
@@ -110,6 +142,25 @@ export function Pacientes() {
     setSelectedPaciente(event.target.value)
   }
 
+  const [currentPage, setCurrentPage] = useState(1)
+  const pacientesPorPagina = 10 // Número de pacientes por página
+  const totalPaginas = Math.ceil(filteredPacientes.length / pacientesPorPagina)
+
+  const handleClickPaginaAnterior = () => {
+    setCurrentPage((prev) => Math.max(prev - 1, 1))
+  }
+
+  const handleClickProximaPagina = () => {
+    setCurrentPage((prev) => Math.min(prev + 1, totalPaginas))
+  }
+
+  const indexOfLastPaciente = currentPage * pacientesPorPagina
+  const indexOfFirstPaciente = indexOfLastPaciente - pacientesPorPagina
+  const pacientesAtuais = filteredPacientes.slice(
+    indexOfFirstPaciente,
+    indexOfLastPaciente,
+  )
+
   return (
     <div className="flex min-h-screen">
       <main
@@ -157,9 +208,33 @@ export function Pacientes() {
             <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
               <UsersThree size={24} />
               <span className="text-xl font-semibold">
-                Total de Terapeutas: 8
+                Total de Terapeutas: {terapeutas.length}
               </span>
             </div>
+          </div>
+
+          <div className="relative mb-4">
+            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+              <svg
+                className="w-4 h-4 text-gray-500 dark:text-gray-400"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </div>
+            <input
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-gray-900 focus:outline-none text-sm"
+              type="text"
+              placeholder="Buscar..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
           <table className="listaPacientes w-full bg-white rounded shadow">
             <thead className="bg-rosa text-white">
@@ -170,15 +245,19 @@ export function Pacientes() {
                 <th className="p-4 text-left">Email</th>
                 <th className="p-4 text-left">CPF Responsável</th>
                 <th className="p-4 text-left">Endereço</th>
+                <th className="p-4 text-left">Origem</th>
+                <th className="p-4 text-left">Terapeuta</th>
                 <th className="p-4 text-left">Ações</th>
               </tr>
             </thead>
             <tbody>
-              {pacientes
+              {pacientesAtuais
                 .filter(
                   (paciente) =>
                     selectedPaciente === 'Todos' ||
-                    paciente.nome === selectedPaciente,
+                    paciente.nome
+                      .toLowerCase()
+                      .includes(searchQuery.toLowerCase()),
                 )
                 .map((paciente) => (
                   <tr key={paciente.id} className="border-b">
@@ -188,17 +267,21 @@ export function Pacientes() {
                     <td className="p-4">{paciente.email}</td>
                     <td className="p-4">{paciente.cpfResponsavel}</td>
                     <td className="p-4">{paciente.endereco}</td>
+                    <td className="p-4">{paciente.origem}</td>
+
+                    <td className="p-4">
+                      {paciente.terapeuta ? paciente.terapeuta.nome : 'N/A'}
+                    </td>
                     <td className="p-4 flex space-x-2">
-                      <button className="text-blue-500 hover:text-blue-700">
-                        <Eye size={20} weight="bold" />
-                      </button>
                       <button
+                        title="Editar Paciente"
                         className="text-green-500 hover:text-green-700"
                         onClick={() => openEditarPaciente(paciente)}
                       >
                         <PencilSimple size={20} weight="bold" />
                       </button>
                       <button
+                        title="Excluir Paciente"
                         className="text-red-500 hover:text-red-700"
                         onClick={() => confirmDeletePaciente(paciente.id)}
                       >
@@ -209,6 +292,25 @@ export function Pacientes() {
                 ))}
             </tbody>
           </table>
+          <div className="flex justify-evenly mt-4 items-center">
+            <button
+              onClick={handleClickPaginaAnterior}
+              className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 cursor-pointer"
+              disabled={currentPage === 1}
+            >
+              Página Anterior
+            </button>
+            <span>
+              Página {currentPage} de {totalPaginas}
+            </span>
+            <button
+              onClick={handleClickProximaPagina}
+              className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 cursor-pointer"
+              disabled={currentPage === totalPaginas}
+            >
+              Próxima Página
+            </button>
+          </div>
         </div>
       </main>
       {isNovoPacienteOpen && (
@@ -216,6 +318,7 @@ export function Pacientes() {
           isOpen={isNovoPacienteOpen}
           onClose={closeNovoPaciente}
           onSave={addNovoPaciente}
+          terapeutas={terapeutas}
         />
       )}
       {isEditarPacienteOpen && pacienteAtual && (
@@ -224,6 +327,7 @@ export function Pacientes() {
           onClose={closeEditarPaciente}
           onSave={updatePaciente}
           paciente={pacienteAtual}
+          terapeutas={terapeutas}
         />
       )}
       <Modal
