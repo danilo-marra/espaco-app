@@ -1,6 +1,6 @@
 // Terapeutas.tsx
-import { useState } from 'react'
-import { Terapeuta } from '../../tipos'
+import { Dispatch, SetStateAction, useState } from 'react'
+import { Paciente, Terapeuta } from '../../tipos'
 import { NovoTerapeuta } from '../../components/Terapeuta/NovoTerapeuta'
 
 import Modal from 'react-modal'
@@ -39,16 +39,21 @@ export const initialTerapeutas: Terapeuta[] = [
   },
 ]
 
-export function Terapeutas() {
+export function Terapeutas({
+  terapeutas,
+  setTerapeutas,
+  pacientes,
+}: {
+  terapeutas: Terapeuta[]
+  setTerapeutas: Dispatch<SetStateAction<Terapeuta[]>>
+  pacientes: Paciente[]
+  setPacientes: Dispatch<SetStateAction<Paciente[]>>
+}) {
   const [isMenuOpen] = useState<boolean>(false)
   const [isNovoTerapeutaOpen, setIsNovoTerapeutaOpen] = useState<boolean>(false)
   const [isEditarTerapeutaOpen, setIsEditarTerapeutaOpen] =
     useState<boolean>(false)
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState<boolean>(false)
-  const [terapeutas, setTerapeutas] = useState<Terapeuta[]>(() => {
-    const savedTerapeutas = localStorage.getItem('terapeutas')
-    return savedTerapeutas ? JSON.parse(savedTerapeutas) : initialTerapeutas
-  })
   const [terapeutaAtual, setTerapeutaAtual] = useState<Terapeuta | null>(null)
   const [terapeutaADeletar, setTerapeutaADeletar] = useState<string | null>(
     null,
@@ -186,7 +191,7 @@ export function Terapeutas() {
             <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
               <Person size={24} />
               <span className="text-xl font-semibold">
-                Total de Pacientes: 8
+                Total de Pacientes: {pacientes.length}
               </span>
             </div>
           </div>
@@ -229,12 +234,14 @@ export function Terapeutas() {
                     <td className="p-4">{terapeuta.chavePix}</td>
                     <td className="p-4 flex space-x-2">
                       <button
+                        title="Editar paciente"
                         className="text-green-500 hover:text-green-700"
                         onClick={() => openEditarTerapeuta(terapeuta)}
                       >
                         <PencilSimple size={20} weight="bold" />
                       </button>
                       <button
+                        title="Excluir paciente"
                         className="text-red-500 hover:text-red-700"
                         onClick={() => confirmDeleteTerapeuta(terapeuta.id)}
                       >

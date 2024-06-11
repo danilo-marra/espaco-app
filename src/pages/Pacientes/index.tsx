@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import {
   PencilSimple,
   Person,
@@ -49,25 +49,23 @@ export const initialPacientes: Paciente[] = [
   },
 ]
 
-export function Pacientes() {
+export function Pacientes({
+  terapeutas,
+  pacientes,
+  setPacientes,
+}: {
+  terapeutas: Terapeuta[]
+  pacientes: Paciente[]
+  setPacientes: Dispatch<SetStateAction<Paciente[]>>
+}) {
   const [isMenuOpen] = useState<boolean>(false)
   const [isNovoPacienteOpen, setIsNovoPacienteOpen] = useState<boolean>(false)
   const [isEditarPacienteOpen, setIsEditarPacienteOpen] =
     useState<boolean>(false)
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState<boolean>(false)
-  const [pacientes, setPacientes] = useState<Paciente[]>(() => {
-    const savedPacientes = localStorage.getItem('pacientes')
-    const parsedPacientes = savedPacientes
-      ? JSON.parse(savedPacientes)
-      : initialPacientes
-    return parsedPacientes.sort((a: Paciente, b: Paciente) =>
-      a.nome.localeCompare(b.nome),
-    )
-  })
+
   const [pacienteAtual, setPacienteAtual] = useState<Paciente | null>(null)
   const [pacienteADeletar, setPacienteADeletar] = useState<string | null>(null)
-  const [terapeutas, setTerapeutas] = useState<Terapeuta[]>(initialTerapeutas)
-
   useEffect(() => {
     localStorage.setItem('pacientes', JSON.stringify(pacientes))
   }, [pacientes])
@@ -92,7 +90,7 @@ export function Pacientes() {
       throw new Error('Objeto Invalido para Paciente.')
     }
     setPacientes((prevPacientes) => [...prevPacientes, novoPaciente])
-    setTerapeutas(initialTerapeutas)
+
     closeNovoPaciente()
   }
 
@@ -112,6 +110,7 @@ export function Pacientes() {
         paciente.id === pacienteAtualizado.id ? pacienteAtualizado : paciente,
       ),
     )
+
     closeEditarPaciente()
   }
 
@@ -134,13 +133,7 @@ export function Pacientes() {
     setIsConfirmDeleteOpen(false)
   }
 
-  const [selectedPaciente, setSelectedPaciente] = useState('Todos')
-
-  const handlePacienteChange = (
-    event: React.ChangeEvent<HTMLSelectElement>,
-  ) => {
-    setSelectedPaciente(event.target.value)
-  }
+  const [selectedPaciente] = useState('Todos')
 
   const [currentPage, setCurrentPage] = useState(1)
   const pacientesPorPagina = 10 // Número de pacientes por página
@@ -161,6 +154,9 @@ export function Pacientes() {
     indexOfLastPaciente,
   )
 
+  console.log(pacientes)
+  console.log(pacientesAtuais)
+
   return (
     <div className="flex min-h-screen">
       <main
@@ -179,26 +175,17 @@ export function Pacientes() {
             </button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
+            <div className="flex items-center space-x-4 p-4 bg-white rounded shadow ">
               <User size={24} />
-              <label htmlFor="pacientes" className="text-xl font-semibold">
-                Paciente:
-              </label>
-              <select
-                className="text-xl"
-                name="pacientes"
-                id="pacientes"
-                value={selectedPaciente}
-                onChange={handlePacienteChange}
-              >
-                <option value="Todos">Todos</option>
-                {pacientes.map((paciente) => (
-                  <option key={paciente.id} value={paciente.nome}>
-                    {paciente.nome}
-                  </option>
-                ))}
-              </select>
+              <input
+                className="text-xl w-full  text-gray-800 focus:outline-none"
+                type="text"
+                placeholder="Buscar paciente"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
             </div>
+
             <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
               <Person size={24} />
               <span className="text-xl font-semibold">
@@ -213,29 +200,6 @@ export function Pacientes() {
             </div>
           </div>
 
-          <div className="relative mb-4">
-            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-              <svg
-                className="w-4 h-4 text-gray-500 dark:text-gray-400"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </div>
-            <input
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-gray-900 focus:outline-none text-sm"
-              type="text"
-              placeholder="Buscar..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
           <table className="listaPacientes w-full bg-white rounded shadow">
             <thead className="bg-rosa text-white">
               <tr>

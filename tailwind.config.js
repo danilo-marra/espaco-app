@@ -14,4 +14,5 @@ export default {
     },
   },
   plugins: [],
+  // eslint-disable-next-line prettier/prettier
 };
