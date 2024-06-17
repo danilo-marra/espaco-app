@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useEffect, useState } from 'react'
+import { Dispatch, SetStateAction, useState } from 'react'
 import {
   PencilSimple,
   Person,
@@ -11,43 +11,47 @@ import { Paciente, Terapeuta } from '../../tipos'
 import { NovoPaciente } from '../../components/Paciente/NovoPaciente'
 import Modal from 'react-modal'
 import { v4 as uuidv4 } from 'uuid'
-import { initialTerapeutas } from '../Terapeutas'
+import initialTerapeutas from '../Terapeutas'
 
-export const initialPacientes: Paciente[] = [
-  {
-    id: uuidv4(),
-    nome: 'Davi',
-    responsavel: 'Pai do Davi',
-    telefone: '(61)9911-9188',
-    email: 'paidodavi@gmail.com',
-    cpfResponsavel: '123.456.789-00',
-    endereco: 'Rua A, 123',
-    origem: 'Busca no Google',
-    terapeuta: initialTerapeutas[0],
-  },
-  {
-    id: uuidv4(),
-    nome: 'Maria',
-    responsavel: 'Mãe da Maria',
-    telefone: '(61)9999-8888',
-    email: 'mariadaMaria@gmail.com',
-    cpfResponsavel: '987.654.321-00',
-    endereco: 'Rua B, 456',
-    origem: 'Instagram',
-    terapeuta: initialTerapeutas[1],
-  },
-  {
-    id: uuidv4(),
-    nome: 'Carlos',
-    responsavel: 'Pai do Carlos',
-    telefone: '(61)9888-7766',
-    email: 'carlos@gmail.com',
-    cpfResponsavel: '111.222.333-44',
-    endereco: 'Rua C, 789',
-    origem: 'Indicação',
-    terapeuta: initialTerapeutas[0],
-  },
-]
+export default function initialPacientes(): Paciente[] {
+  const terapeutas = initialTerapeutas()
+
+  return [
+    {
+      id: uuidv4(),
+      nome: 'Davi',
+      responsavel: 'Pai do Davi',
+      telefone: '(61)9911-9188',
+      email: 'paidodavi@gmail.com',
+      cpfResponsavel: '123.456.789-00',
+      endereco: 'Rua A, 123',
+      origem: 'Busca no Google',
+      terapeuta: terapeutas[0],
+    },
+    {
+      id: uuidv4(),
+      nome: 'Maria',
+      responsavel: 'Mãe da Maria',
+      telefone: '(61)9999-8888',
+      email: 'mariadaMaria@gmail.com',
+      cpfResponsavel: '987.654.321-00',
+      endereco: 'Rua B, 456',
+      origem: 'Instagram',
+      terapeuta: terapeutas[1],
+    },
+    {
+      id: uuidv4(),
+      nome: 'Carlos',
+      responsavel: 'Pai do Carlos',
+      telefone: '(61)9888-7766',
+      email: 'carlos@gmail.com',
+      cpfResponsavel: '111.222.333-44',
+      endereco: 'Rua C, 789',
+      origem: 'Indicação',
+      terapeuta: terapeutas[0],
+    },
+  ]
+}
 
 export function Pacientes({
   terapeutas,
@@ -66,9 +70,6 @@ export function Pacientes({
 
   const [pacienteAtual, setPacienteAtual] = useState<Paciente | null>(null)
   const [pacienteADeletar, setPacienteADeletar] = useState<string | null>(null)
-  useEffect(() => {
-    localStorage.setItem('pacientes', JSON.stringify(pacientes))
-  }, [pacientes])
 
   const [searchQuery, setSearchQuery] = useState<string>('')
 
@@ -153,9 +154,6 @@ export function Pacientes({
     indexOfFirstPaciente,
     indexOfLastPaciente,
   )
-
-  console.log(pacientes)
-  console.log(pacientesAtuais)
 
   return (
     <div className="flex min-h-screen">

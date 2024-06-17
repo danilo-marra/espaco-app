@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import {
   PencilSimple,
@@ -10,18 +10,20 @@ import {
   CaretRight,
   HandCoins,
 } from '@phosphor-icons/react'
-import { SessaoPaciente, SessaoDt, Paciente } from '../../tipos'
+import { SessaoPaciente, SessaoDt, Paciente, Terapeuta } from '../../tipos'
 import { PacienteDetalhes } from '../../components/Sessao/PacidenteDetalhes'
 import { NovaSessao } from '../../components/Sessao/NovaSessao'
-import { initialPacientes } from '../Pacientes'
 
-export function Sessoes() {
-  const [pacientes, setPacientes] = useState<Paciente[]>([])
+export function Sessoes({
+  terapeutas,
+  pacientes,
+}: {
+  pacientes: Paciente[]
+  setPacientes: Dispatch<SetStateAction<Paciente[]>>
+  terapeutas: Terapeuta[]
+  setTerapeutas: Dispatch<SetStateAction<Terapeuta[]>>
+}) {
   const [sessoes, setSessoes] = useState<SessaoPaciente[]>([])
-
-  useEffect(() => {
-    setPacientes(initialPacientes)
-  }, [])
 
   useEffect(() => {
     const initialSessoesDt: SessaoPaciente[] = pacientes.map((paciente) => ({
@@ -33,12 +35,13 @@ export function Sessoes() {
         email: paciente.email,
         cpfResponsavel: paciente.cpfResponsavel,
         endereco: paciente.endereco,
+        origem: paciente.origem,
+        terapeuta: paciente.terapeuta,
       },
       valor: 200,
       planoSaude: false,
       notaFiscalEmitida: true,
       notaFiscalEnviada: false,
-      terapeuta: 'Nome da Terapeuta',
       sessoesDt: [
         {
           dtSessao1: new Date(),
@@ -51,7 +54,7 @@ export function Sessoes() {
       ],
     }))
     setSessoes(initialSessoesDt)
-  }, [pacientes])
+  }, [pacientes, terapeutas])
 
   const [isMenuOpen] = useState<boolean>(false)
   const [isPopupOpen, setIsPopupOpen] = useState<boolean>(false)
@@ -84,12 +87,14 @@ export function Sessoes() {
   const formatDate = (date?: Date) => {
     return date
       ? date.toLocaleDateString('pt-BR', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric',
-        })
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      })
       : 'N/A'
   }
+
+  // console.log(terapeutas)
 
   const countSessions = (sessoesDt: SessaoDt[]) => {
     return sessoesDt.reduce((count, sessao) => {
@@ -198,7 +203,9 @@ export function Sessoes() {
                   <tr key={index} className="border-b">
                     <td className="p-4">{sessao.pacienteInfo.nome}</td>
                     <td className="p-4">{sessao.pacienteInfo.responsavel}</td>
-                    <td className="p-4">{sessao.terapeuta}</td>
+                    <td className="p-4">
+                      {sessao.pacienteInfo.terapeuta.nome}
+                    </td>
                     <td className="p-4">{formatCurrency(sessao.valor)}</td>
                     <td className="p-4">{sessao.planoSaude ? 'Sim' : 'Não'}</td>
                     <td className="p-4">

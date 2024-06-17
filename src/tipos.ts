@@ -36,3 +36,11 @@ export interface SessaoPaciente {
   notaFiscalEnviada: boolean
   sessoesDt?: SessaoDt[]
 }
+
+export interface Transacao {
+  id: number
+  descricao: string
+  tipo: 'entrada' | 'saida'
+  valor: number
+  dtCriacao: 'string'
+}

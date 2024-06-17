@@ -39,7 +39,7 @@ export function Menu() {
           <hr />
           <li className="hover:text-blue-300 cursor-pointer flex items-center space-x-2">
             <Money size={24} />
-            <NavLink to={'/financeiro'}>Financeiro</NavLink>
+            <NavLink to={'/transacoes'}>Transações</NavLink>
           </li>
           <hr />
           <li className="hover:text-blue-300 cursor-pointer flex items-center space-x-2">

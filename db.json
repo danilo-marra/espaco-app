@@ -1,0 +1,32 @@
+{
+  "transacoes": [
+    {
+      "id": 1,
+      "descricao": "terapeuta",
+      "tipo": "saida",
+      "valor": 450,
+      "dtCriacao": "2024-04-12T12:04:36.625Z"
+    },
+    {
+      "id": 2,
+      "descricao": "paciente",
+      "tipo": "entrada",
+      "valor": 1200,
+      "dtCriacao": "2024-06-12T12:08:26.625Z"
+    },
+    {
+      "id": 3,
+      "descricao": "fornecedor",
+      "tipo": "saida",
+      "valor": 800,
+      "dtCriacao": "2024-06-20T09:15:42.625Z"
+    },
+    {
+      "id": 4,
+      "descricao": "aluguel sala",
+      "tipo": "entrada",
+      "valor": 1800,
+      "dtCriacao": "2024-07-21T09:15:42.625Z"
+    }
+  ]
+}

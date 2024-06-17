@@ -18,31 +18,33 @@ import { VisualizarCurriculo } from '../../components/Terapeuta/VisualizarCurric
 
 // const file = new File(['teste'], 'curriculo.txt', { type: 'text/plain' })
 
-export const initialTerapeutas: Terapeuta[] = [
-  {
-    id: uuidv4(),
-    nome: 'Juliana Barbosa',
-    telefone: '(61)9571-3244',
-    email: 'jujupsi@gmail.com',
-    endereco: 'SHCES 301, B, 201 ',
-    curriculo: 'https://www.linkedin.com/in/danilomarra/',
-    chavePix: '9999110',
-  },
-  {
-    id: uuidv4(),
-    nome: 'Rebbeca Alves',
-    telefone: '(61)97001-1234',
-    email: 'rebalves@gmail.com',
-    endereco: 'SHCES 101, B, 201 ',
-    curriculo: 'https://www.linkedin.com/in/danilomarra/',
-    chavePix: '89888899',
-  },
-]
+export default function initialTerapeutas(): Terapeuta[] {
+  return [
+    {
+      id: uuidv4(),
+      nome: 'Juliana Barbosa',
+      telefone: '(61)9571-3244',
+      email: 'jujupsi@gmail.com',
+      endereco: 'SHCES 301, B, 201 ',
+      curriculo: 'https://www.linkedin.com/in/danilomarra/',
+      chavePix: '9999110',
+    },
+    {
+      id: uuidv4(),
+      nome: 'Rebbeca Alves',
+      telefone: '(61)97001-1234',
+      email: 'rebalves@gmail.com',
+      endereco: 'SHCES 101, B, 201 ',
+      curriculo: 'https://www.linkedin.com/in/danilomarra/',
+      chavePix: '89888899',
+    },
+  ]
+}
 
 export function Terapeutas({
   terapeutas,
-  setTerapeutas,
   pacientes,
+  setTerapeutas,
 }: {
   terapeutas: Terapeuta[]
   setTerapeutas: Dispatch<SetStateAction<Terapeuta[]>>

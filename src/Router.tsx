@@ -4,7 +4,7 @@ import { Agenda } from './pages/Agenda'
 import { Pacientes } from './pages/Pacientes'
 import { Terapeutas } from './pages/Terapeutas'
 import { DefaultLayout } from './layouts/DefaulLayout'
-import { Financeiro } from './pages/Financeiro'
+import { Transacoes } from './pages/Transacoes'
 import { Sessoes } from './pages/Sessoes'
 import { Dispatch, SetStateAction } from 'react'
 import { Paciente, Terapeuta } from './tipos'
@@ -25,7 +25,7 @@ export function Router({
       <Route path="/" element={<DefaultLayout />}>
         <Route path="/" element={<Home />} />
         <Route path="/agenda" element={<Agenda />} />
-        <Route path="/financeiro" element={<Financeiro />} />
+        <Route path="/transacoes" element={<Transacoes />} />
         <Route
           path="/pacientes"
           element={
@@ -36,7 +36,17 @@ export function Router({
             />
           }
         />
-        <Route path="/sessoes" element={<Sessoes />} />
+        <Route
+          path="/sessoes"
+          element={
+            <Sessoes
+              pacientes={pacientes}
+              setPacientes={setPacientes}
+              terapeutas={terapeutas}
+              setTerapeutas={setTerapeutas}
+            />
+          }
+        />
         <Route
           path="/terapeutas"
           element={
