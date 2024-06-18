@@ -17,6 +17,8 @@ import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
+import { dateFormatter, priceFormatter } from '../../utils/formatter'
+import Pagination from '../../components/Pagination'
 
 export function Transacoes() {
   const [isMenuOpen] = useState<boolean>(false)
@@ -24,11 +26,18 @@ export function Transacoes() {
   const [dataAtual, setDataAtual] = useState<Date>(new Date())
   // const dataAtualStr = dataAtual.toISOString().split('T')[0]
   const [summary, setSummary] = useState({ entrada: 0, saida: 0, total: 0 })
-  const [transacoesDoMes, setTransacoesDoMes] = useState<Transacao[]>([])
+  const [searchValue, setSearchValue] = useState<string>('')
+  const [currentPage, setCurrentPage] = useState(1)
+  const transacoesPorPagina = 10
+  const [transacoesVisiveis, setTransacoesVisiveis] = useState<Transacao[]>([])
+  const [totalPaginas, setTotalPaginas] = useState<number>(0)
 
   useEffect(() => {
-    // Atualize o estado transacoesDoMes quando a data atual ou as transações mudarem
-    const newTransacoesDoMes = transacoes.filter((transacao) => {
+    const filteredBySearch = transacoes.filter((transacao) =>
+      transacao.descricao.toLowerCase().includes(searchValue.toLowerCase()),
+    )
+
+    const filteredByDate = filteredBySearch.filter((transacao) => {
       const dataTransacao = new Date(transacao.dtCriacao)
       return (
         dataTransacao.getMonth() === dataAtual.getMonth() &&
@@ -36,9 +45,7 @@ export function Transacoes() {
       )
     })
 
-    setTransacoesDoMes(newTransacoesDoMes)
-
-    const newSummary = newTransacoesDoMes.reduce(
+    const newSummary = filteredByDate.reduce(
       (acc, transacao) => {
         if (transacao.tipo === 'entrada') {
           acc.entrada += transacao.valor
@@ -53,18 +60,28 @@ export function Transacoes() {
     )
 
     setSummary(newSummary)
-  }, [dataAtual, transacoes])
+
+    const offset = (currentPage - 1) * transacoesPorPagina
+    setTransacoesVisiveis(
+      filteredByDate.slice(offset, offset + transacoesPorPagina),
+    )
+    setTotalPaginas(Math.ceil(filteredByDate.length / transacoesPorPagina))
+  }, [dataAtual, transacoes, searchValue, currentPage])
 
   function handleMonthPrev() {
-    const data = new Date(dataAtual)
-    data.setMonth(data.getMonth() - 1)
-    setDataAtual(data)
+    setDataAtual(new Date(dataAtual.getFullYear(), dataAtual.getMonth() - 1, 1))
   }
 
   function handleMonthNext() {
-    const data = new Date(dataAtual)
-    data.setMonth(data.getMonth() + 1)
-    setDataAtual(data)
+    setDataAtual(new Date(dataAtual.getFullYear(), dataAtual.getMonth() + 1, 1))
+  }
+
+  function handleSearchChange(event: React.ChangeEvent<HTMLInputElement>) {
+    setSearchValue(event.target.value)
+  }
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage)
   }
 
   return (
@@ -90,20 +107,22 @@ export function Transacoes() {
                 className="text-xl w-full  text-gray-800 focus:outline-none"
                 type="text"
                 placeholder="Buscar transações..."
+                value={searchValue}
+                onChange={handleSearchChange}
               />
             </div>
 
             <div className="flex items-center space-x-1 p-4 bg-white rounded text-green-500 ">
               <ArrowCircleUp size={24} weight="fill" />
               <span className="text-xl">
-                Entradas: <span>{summary.entrada}</span>
+                Entradas: <span>{priceFormatter.format(summary.entrada)}</span>
               </span>
             </div>
 
             <div className="flex items-center space-x-1 p-4 bg-white rounded shadow text-red-500 ">
               <ArrowCircleDown size={24} weight="fill" />
               <span className="text-xl">
-                Saídas: <span>{summary.saida}</span>
+                Saídas: <span>{priceFormatter.format(summary.saida)}</span>
               </span>
             </div>
 
@@ -112,7 +131,7 @@ export function Transacoes() {
             >
               <CurrencyDollar size={24} />
               <span className="text-xl">
-                Total: <span>{summary.total}</span>
+                Total: <span>{priceFormatter.format(summary.total)}</span>
               </span>
             </div>
           </div>
@@ -168,7 +187,7 @@ export function Transacoes() {
               </tr>
             </thead>
             <tbody>
-              {transacoesDoMes.map((transacao) => {
+              {transacoesVisiveis.map((transacao) => {
                 return (
                   <tr key={transacao.id}>
                     <td className="p-4">{transacao.descricao}</td>
@@ -183,7 +202,7 @@ export function Transacoes() {
                             color="rgb(34 197 94)"
                             weight="fill"
                           />
-                          <span>{transacao.valor}</span>
+                          <span>{priceFormatter.format(transacao.valor)}</span>
                         </div>
                       ) : (
                         <div className="flex items-center space-x-1">
@@ -192,12 +211,12 @@ export function Transacoes() {
                             color="rgb(239 68 68)"
                             weight="fill"
                           />
-                          <span>{transacao.valor}</span>
+                          <span>{priceFormatter.format(transacao.valor)}</span>
                         </div>
                       )}
                     </td>
                     <td className="p-4">
-                      {format(new Date(transacao.dtCriacao), 'dd/MM/yyyy')}
+                      {dateFormatter.format(new Date(transacao.dtCriacao))}
                     </td>
                     <td className="p-4 flex space-x-2">
                       <button
@@ -218,6 +237,11 @@ export function Transacoes() {
               })}
             </tbody>
           </table>
+          <Pagination
+            currentPage={currentPage}
+            totalPaginas={totalPaginas}
+            onPageChange={handlePageChange}
+          />
         </div>
       </main>
     </div>
