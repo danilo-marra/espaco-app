@@ -19,12 +19,13 @@ import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import { dateFormatter, priceFormatter } from '../../utils/formatter'
 import Pagination from '../../components/Pagination'
+import { NovaTransacaoModal } from '../../components/NovaTransacaoModal'
+import * as Dialog from '@radix-ui/react-dialog'
 
 export function Transacoes() {
   const [isMenuOpen] = useState<boolean>(false)
   const { transacoes } = useContext(TransacoesContext)
   const [dataAtual, setDataAtual] = useState<Date>(new Date())
-  // const dataAtualStr = dataAtual.toISOString().split('T')[0]
   const [summary, setSummary] = useState({ entrada: 0, saida: 0, total: 0 })
   const [searchValue, setSearchValue] = useState<string>('')
   const [currentPage, setCurrentPage] = useState(1)
@@ -92,13 +93,19 @@ export function Transacoes() {
         <div>
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-2xl font-bold">Transacoes</h1>
-            <button
-              type="button"
-              className="flex items-center bg-azul text-white px-4 py-2 rounded hover:bg-sky-600 duration-150"
-            >
-              <Plus size={20} weight="bold" className="mr-2" />
-              Nova Transação
-            </button>
+
+            <Dialog.Root>
+              <Dialog.Trigger asChild>
+                <button
+                  type="button"
+                  className="flex items-center bg-azul text-white px-4 py-2 rounded hover:bg-sky-600 duration-150"
+                >
+                  <Plus size={20} weight="bold" className="mr-2" />
+                  Nova Transação
+                </button>
+              </Dialog.Trigger>
+              <NovaTransacaoModal />
+            </Dialog.Root>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
             <div className="flex items-center space-x-4 p-4 bg-white rounded shadow ">
