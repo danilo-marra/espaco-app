@@ -15,7 +15,7 @@ export interface Paciente {
   email: string
   cpfResponsavel: string
   endereco: string
-  origem: 'Indicação' | 'Instagram' | 'Busca no Google'
+  origem: 'Indicação' | 'Instagram' | 'Busca no Google' | undefined
   terapeuta: Terapeuta
 }
 

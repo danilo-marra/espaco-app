@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
-import { SessaoPaciente, SessaoDt, Paciente } from '../../tipos'
+import { SessaoPaciente, SessaoDt, Paciente, Terapeuta } from '../../tipos'
 import Modal from 'react-modal'
 
 // Configuração do modal
@@ -39,6 +39,15 @@ export function NovaSessao({
   })
 
   const handleSubmit = (e: React.FormEvent) => {
+    const terapeutaExemplo: Terapeuta = {
+      id: uuidv4(),
+      nome: 'Nome do Terapeuta',
+      telefone: 'Telefone do Terapeuta',
+      email: 'Email do Terapeuta',
+      endereco: 'Endereço do Terapeuta',
+      curriculo: 'Curriculo do Terapeuta',
+      chavePix: 'Chave Pix do Terapeuta',
+    }
     e.preventDefault()
 
     const novaSessao: SessaoPaciente = {
@@ -50,8 +59,9 @@ export function NovaSessao({
         endereco,
         telefone: '',
         email: '',
+        origem: undefined,
+        terapeuta: terapeutaExemplo,
       },
-      terapeuta,
       valor,
       planoSaude,
       notaFiscalEmitida,
