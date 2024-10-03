@@ -9,14 +9,15 @@ export interface Terapeuta {
 }
 export interface Paciente {
   id: string
-  nome: string
-  responsavel: string
-  telefone: string
-  email: string
+  nomePaciente: string
+  dtNascimento: Date
+  nomeResponsavel: string
+  telefoneResponsavel: string
+  emailResponsavel: string
   cpfResponsavel: string
-  endereco: string
+  enderecoResponsavel: string
   origem: 'Indicação' | 'Instagram' | 'Busca no Google' | undefined
-  terapeuta: Terapeuta
+  nomeTerapeuta: string
 }
 
 export interface SessaoDt {
@@ -37,10 +38,11 @@ export interface SessaoPaciente {
   sessoesDt?: SessaoDt[]
 }
 
+// tipos.ts
 export interface Transacao {
-  id: number
+  id: string
   descricao: string
-  tipo: 'entrada' | 'saida'
   valor: number
-  dtCriacao: 'string'
+  tipo: 'entrada' | 'saida'
+  dtCriacao: Date
 }

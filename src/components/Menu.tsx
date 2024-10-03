@@ -31,10 +31,15 @@ export function Menu() {
             <House weight="fill" size={24} />
             <NavLink to={'/'}>Home</NavLink>
           </li>
-          <hr />
+          {/* <hr />
           <li className="hover:text-blue-300 cursor-pointer flex items-center space-x-2">
             <CalendarBlank size={24} />
             <NavLink to={'/agenda'}>Agenda</NavLink>
+          </li> */}
+          <hr />
+          <li className="hover:text-blue-300 cursor-pointer flex items-center space-x-2">
+            <CalendarBlank size={24} />
+            <NavLink to={'/pacientes2'}>Pacientes2</NavLink>
           </li>
           <hr />
           <li className="hover:text-blue-300 cursor-pointer flex items-center space-x-2">

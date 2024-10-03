@@ -12,26 +12,38 @@ import {
 } from '@phosphor-icons/react'
 import { useContext, useEffect, useState } from 'react'
 import { TransacoesContext } from '../../contexts/TransacoesContext'
-import { Transacao } from '../../tipos'
+import { NovaTransacaoModal } from '../../components/Transacao/NovaTransacaoModal'
+import { EditarTransacaoModal } from '../../components/Transacao/EditarTransacaoModal'
+import type { Transacao } from '../../tipos'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import { dateFormatter, priceFormatter } from '../../utils/formatter'
 import Pagination from '../../components/Pagination'
-import { NovaTransacaoModal } from '../../components/NovaTransacaoModal'
 import * as Dialog from '@radix-ui/react-dialog'
+import axios from 'axios'
 
 export function Transacoes() {
   const [isMenuOpen] = useState<boolean>(false)
-  const { transacoes } = useContext(TransacoesContext)
+  const { transacoes, fetchTransacoes } = useContext(TransacoesContext)
   const [dataAtual, setDataAtual] = useState<Date>(new Date())
   const [summary, setSummary] = useState({ entrada: 0, saida: 0, total: 0 })
   const [searchValue, setSearchValue] = useState<string>('')
   const [currentPage, setCurrentPage] = useState(1)
   const transacoesPorPagina = 10
   const [transacoesVisiveis, setTransacoesVisiveis] = useState<Transacao[]>([])
-  const [totalPaginas, setTotalPaginas] = useState<number>(0)
+  const [totalPages, settotalPages] = useState<number>(0)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [modalMessage, setModalMessage] = useState('')
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [transacaoEditando, setTransacaoEditando] = useState<Transacao | null>(
+    null,
+  )
+
+  useEffect(() => {
+    fetchTransacoes()
+  }, [fetchTransacoes])
 
   useEffect(() => {
     const filteredBySearch = transacoes.filter((transacao) =>
@@ -66,7 +78,7 @@ export function Transacoes() {
     setTransacoesVisiveis(
       filteredByDate.slice(offset, offset + transacoesPorPagina),
     )
-    setTotalPaginas(Math.ceil(filteredByDate.length / transacoesPorPagina))
+    settotalPages(Math.ceil(filteredByDate.length / transacoesPorPagina))
   }, [dataAtual, transacoes, searchValue, currentPage])
 
   function handleMonthPrev() {
@@ -83,6 +95,25 @@ export function Transacoes() {
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage)
+  }
+
+  async function handleDeleteTransacao(id: string) {
+    try {
+      await axios.delete(`http://localhost:3000/transacoes/${id}`)
+      setModalMessage('Transação excluída com sucesso!')
+      setIsModalOpen(true)
+      fetchTransacoes() // Atualiza a lista de transações
+      console.log('Transação excluída:', id)
+    } catch (error) {
+      setModalMessage('Erro ao excluir transação. Tente novamente.')
+      setIsModalOpen(true)
+      console.error('Erro ao excluir transação:', error)
+    }
+  }
+
+  function handleEditTransacao(transacao: Transacao) {
+    setTransacaoEditando(transacao)
+    setIsEditModalOpen(true)
   }
 
   return (
@@ -154,7 +185,7 @@ export function Transacoes() {
                 </h2>
               </div>
               <div>
-                <button>
+                <button type="button">
                   <DatePicker
                     locale={ptBR}
                     selected={dataAtual}
@@ -179,12 +210,12 @@ export function Transacoes() {
               </div>
             </div>
 
-            <button>
+            <button type="button">
               <CaretRight onClick={handleMonthNext} size={24} weight="fill" />
             </button>
           </div>
 
-          <table className="listaPacientes w-full bg-white rounded shadow">
+          <table className="w-full bg-white rounded shadow">
             <thead className="bg-rosa text-white">
               <tr>
                 <th className="p-4 text-left">Descrição</th>
@@ -227,14 +258,18 @@ export function Transacoes() {
                     </td>
                     <td className="p-4 flex space-x-2">
                       <button
-                        title="Editar Paciente"
+                        title="Editar Transação"
                         className="text-green-500 hover:text-green-700"
+                        type="button"
+                        onClick={() => handleEditTransacao(transacao)}
                       >
                         <PencilSimple size={20} weight="bold" />
                       </button>
                       <button
-                        title="Excluir Paciente"
+                        title="Excluir Transação"
                         className="text-red-500 hover:text-red-700"
+                        type="button"
+                        onClick={() => handleDeleteTransacao(transacao.id)}
                       >
                         <TrashSimple size={20} weight="bold" />
                       </button>
@@ -246,11 +281,37 @@ export function Transacoes() {
           </table>
           <Pagination
             currentPage={currentPage}
-            totalPaginas={totalPaginas}
+            totalPages={totalPages}
             onPageChange={handlePageChange}
           />
         </div>
       </main>
+      <Dialog.Root open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <Dialog.Overlay className="fixed inset-0 bg-black opacity-30" />
+        <Dialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded shadow-lg">
+          <Dialog.Title className="text-lg font-bold">Informação</Dialog.Title>
+          <Dialog.Description className="mt-2">
+            {modalMessage}
+          </Dialog.Description>
+          <div className="mt-4 flex justify-end">
+            <Dialog.Close asChild>
+              <button
+                type="button"
+                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+              >
+                Fechar
+              </button>
+            </Dialog.Close>
+          </div>
+        </Dialog.Content>
+      </Dialog.Root>
+      {transacaoEditando && (
+        <EditarTransacaoModal
+          transacaoId={transacaoEditando.id}
+          open={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+        />
+      )}
     </div>
   )
 }

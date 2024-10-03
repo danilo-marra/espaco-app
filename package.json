@@ -17,6 +17,7 @@
     "@radix-ui/react-radio-group": "^1.2.0",
     "@radix-ui/react-visually-hidden": "^1.1.0",
     "@radix-ui/themes": "^3.0.5",
+    "axios": "^1.7.7",
     "date-fns": "^3.6.0",
     "localforage": "^1.10.0",
     "match-sorter": "^6.3.4",
@@ -34,6 +35,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@biomejs/biome": "1.9.2",
     "@rocketseat/eslint-config": "^2.2.2",
     "@testing-library/jest-dom": "^6.4.6",
     "@types/node": "^20.14.2",

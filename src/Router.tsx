@@ -8,6 +8,7 @@ import { Transacoes } from './pages/Transacoes'
 import { Sessoes } from './pages/Sessoes'
 import { Dispatch, SetStateAction } from 'react'
 import { Paciente, Terapeuta } from './tipos'
+import { Pacientes2 } from './pages/Pacientes2'
 
 export function Router({
   terapeutas,
@@ -25,6 +26,7 @@ export function Router({
       <Route path="/" element={<DefaultLayout />}>
         <Route path="/" element={<Home />} />
         <Route path="/agenda" element={<Agenda />} />
+        <Route path="/pacientes2" element={<Pacientes2 />} />
         <Route path="/transacoes" element={<Transacoes />} />
         <Route
           path="/pacientes"
