@@ -1,9 +1,9 @@
 export interface Terapeuta {
   id: string
-  nome: string
-  telefone: string
-  email: string
-  endereco: string
+  nomeTerapeuta: string
+  telefoneTerapeuta: string
+  emailTerapeuta: string
+  enderecoTerapeuta: string
   curriculo: string
   chavePix: string
 }
@@ -16,7 +16,7 @@ export interface Paciente {
   emailResponsavel: string
   cpfResponsavel: string
   enderecoResponsavel: string
-  origem: 'Indicação' | 'Instagram' | 'Busca no Google' | undefined
+  origem: 'Indicação' | 'Instagram' | 'Busca no Google' | 'Outros' | undefined
   nomeTerapeuta: string
 }
 

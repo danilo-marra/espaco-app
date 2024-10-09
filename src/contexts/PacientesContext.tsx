@@ -38,7 +38,7 @@ export function PacienteProvider({ children }: PacienteProviderProps) {
 
   async function editPaciente(paciente: Paciente) {
     try {
-      await fetch(`http://localhost:3000/transacoes/${paciente.id}`, {
+      await fetch(`http://localhost:3000/pacientes/${paciente.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

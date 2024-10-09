@@ -23,6 +23,7 @@ import { dateFormatter, priceFormatter } from '../../utils/formatter'
 import Pagination from '../../components/Pagination'
 import * as Dialog from '@radix-ui/react-dialog'
 import axios from 'axios'
+import { ExcluirModal } from '../../components/ExcluirModal'
 
 export function Transacoes() {
   const [isMenuOpen] = useState<boolean>(false)
@@ -40,6 +41,9 @@ export function Transacoes() {
   const [transacaoEditando, setTransacaoEditando] = useState<Transacao | null>(
     null,
   )
+  const [transacaoParaExcluir, setTransacaoParaExcluir] = useState<
+    string | null
+  >(null)
 
   useEffect(() => {
     fetchTransacoes()
@@ -97,23 +101,35 @@ export function Transacoes() {
     setCurrentPage(newPage)
   }
 
-  async function handleDeleteTransacao(id: string) {
-    try {
-      await axios.delete(`http://localhost:3000/transacoes/${id}`)
-      setModalMessage('Transação excluída com sucesso!')
-      setIsModalOpen(true)
-      fetchTransacoes() // Atualiza a lista de transações
-      console.log('Transação excluída:', id)
-    } catch (error) {
-      setModalMessage('Erro ao excluir transação. Tente novamente.')
-      setIsModalOpen(true)
-      console.error('Erro ao excluir transação:', error)
-    }
-  }
-
   function handleEditTransacao(transacao: Transacao) {
     setTransacaoEditando(transacao)
     setIsEditModalOpen(true)
+  }
+
+  async function handleDeleteTransacao() {
+    if (!transacaoParaExcluir) return
+
+    try {
+      await axios.delete(
+        `http://localhost:3000/transacoes/${transacaoParaExcluir}`,
+      )
+      fetchTransacoes()
+      setModalMessage('transacao excluída com sucesso!')
+      setIsModalOpen(false)
+      console.log('transacao excluída:', transacaoParaExcluir)
+    } catch (error) {
+      setModalMessage('Erro ao excluir transacao!')
+      setIsModalOpen(false)
+      console.error('Erro ao excluir transacao:', error)
+    } finally {
+      setTransacaoParaExcluir(null)
+    }
+  }
+
+  const openModal = (message: string, transacaoId: string) => {
+    setModalMessage(message)
+    setTransacaoParaExcluir(transacaoId)
+    setIsModalOpen(true)
   }
 
   return (
@@ -269,7 +285,12 @@ export function Transacoes() {
                         title="Excluir Transação"
                         className="text-red-500 hover:text-red-700"
                         type="button"
-                        onClick={() => handleDeleteTransacao(transacao.id)}
+                        onClick={() =>
+                          openModal(
+                            'Deseja realmente excluir esta transação?',
+                            transacao.id,
+                          )
+                        }
                       >
                         <TrashSimple size={20} weight="bold" />
                       </button>
@@ -286,25 +307,13 @@ export function Transacoes() {
           />
         </div>
       </main>
-      <Dialog.Root open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <Dialog.Overlay className="fixed inset-0 bg-black opacity-30" />
-        <Dialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded shadow-lg">
-          <Dialog.Title className="text-lg font-bold">Informação</Dialog.Title>
-          <Dialog.Description className="mt-2">
-            {modalMessage}
-          </Dialog.Description>
-          <div className="mt-4 flex justify-end">
-            <Dialog.Close asChild>
-              <button
-                type="button"
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-              >
-                Fechar
-              </button>
-            </Dialog.Close>
-          </div>
-        </Dialog.Content>
-      </Dialog.Root>
+      <ExcluirModal
+        isOpen={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        title="Excluir Transacao"
+        message={modalMessage}
+        onConfirm={handleDeleteTransacao}
+      />
       {transacaoEditando && (
         <EditarTransacaoModal
           transacaoId={transacaoEditando.id}

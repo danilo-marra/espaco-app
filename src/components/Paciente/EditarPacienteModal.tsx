@@ -21,7 +21,7 @@ const EditarPacienteFormSchema = z.object({
   emailResponsavel: z.string(),
   cpfResponsavel: z.string(),
   enderecoResponsavel: z.string(),
-  origem: z.enum(['Indicação', 'Instagram', 'Busca no Google']),
+  origem: z.enum(['Indicação', 'Instagram', 'Busca no Google', 'Outros']),
 })
 
 type EditarPacienteFormInputs = z.infer<typeof EditarPacienteFormSchema>
@@ -68,7 +68,7 @@ export function EditarPacienteModal({
     }
   }, [pacienteId, pacientes, setValue])
 
-  async function handleEditTransacao(data: EditarPacienteFormInputs) {
+  async function handleEditPaciente(data: EditarPacienteFormInputs) {
     try {
       // Simula um atraso de 2 segundos
       await new Promise((resolve) => setTimeout(resolve, 2000))
@@ -128,10 +128,7 @@ export function EditarPacienteModal({
             <VisuallyHidden>Editar Paciente</VisuallyHidden>
           </Dialog.Description>
           <form
-            onSubmit={handleSubmit((data) => {
-              console.log('Form submitted with data:', data) // Log para depuração
-              handleEditTransacao(data)
-            })}
+            onSubmit={handleSubmit(handleEditPaciente)}
             className="space-y-6 p-6 bg-white rounded-lg"
           >
             <h3 className="font-medium text-azul text-xl mt-6">

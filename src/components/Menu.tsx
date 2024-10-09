@@ -38,11 +38,6 @@ export function Menu() {
           </li> */}
           <hr />
           <li className="hover:text-blue-300 cursor-pointer flex items-center space-x-2">
-            <CalendarBlank size={24} />
-            <NavLink to={'/pacientes2'}>Pacientes2</NavLink>
-          </li>
-          <hr />
-          <li className="hover:text-blue-300 cursor-pointer flex items-center space-x-2">
             <Money size={24} />
             <NavLink to={'/transacoes'}>Transações</NavLink>
           </li>
