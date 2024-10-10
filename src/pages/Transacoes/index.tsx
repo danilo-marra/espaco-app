@@ -24,6 +24,7 @@ import Pagination from '../../components/Pagination'
 import * as Dialog from '@radix-ui/react-dialog'
 import axios from 'axios'
 import { ExcluirModal } from '../../components/ExcluirModal'
+import { useModal } from '../../hooks/useModal'
 
 export function Transacoes() {
   const [isMenuOpen] = useState<boolean>(false)
@@ -35,15 +36,22 @@ export function Transacoes() {
   const transacoesPorPagina = 10
   const [transacoesVisiveis, setTransacoesVisiveis] = useState<Transacao[]>([])
   const [totalPages, settotalPages] = useState<number>(0)
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [modalMessage, setModalMessage] = useState('')
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const {
+    isModalOpen,
+    modalMessage,
+    isEditModalOpen,
+    openModal,
+    closeModal,
+    openEditModal,
+    closeEditModal,
+  } = useModal()
   const [transacaoEditando, setTransacaoEditando] = useState<Transacao | null>(
     null,
   )
   const [transacaoParaExcluir, setTransacaoParaExcluir] = useState<
     string | null
   >(null)
+  const [isSuccess, setIsSuccess] = useState(false)
 
   useEffect(() => {
     fetchTransacoes()
@@ -103,7 +111,7 @@ export function Transacoes() {
 
   function handleEditTransacao(transacao: Transacao) {
     setTransacaoEditando(transacao)
-    setIsEditModalOpen(true)
+    openEditModal()
   }
 
   async function handleDeleteTransacao() {
@@ -114,22 +122,21 @@ export function Transacoes() {
         `http://localhost:3000/transacoes/${transacaoParaExcluir}`,
       )
       fetchTransacoes()
-      setModalMessage('transacao excluída com sucesso!')
-      setIsModalOpen(false)
+      openModal('Transacao excluída com sucesso!')
+      setIsSuccess(true)
       console.log('transacao excluída:', transacaoParaExcluir)
     } catch (error) {
-      setModalMessage('Erro ao excluir transacao!')
-      setIsModalOpen(false)
+      openModal('Erro ao excluir transacao!')
       console.error('Erro ao excluir transacao:', error)
     } finally {
       setTransacaoParaExcluir(null)
     }
   }
 
-  const openModal = (message: string, transacaoId: string) => {
-    setModalMessage(message)
+  const openModalExcluir = (message: string, transacaoId: string) => {
+    openModal(message)
     setTransacaoParaExcluir(transacaoId)
-    setIsModalOpen(true)
+    setIsSuccess(false)
   }
 
   return (
@@ -286,7 +293,7 @@ export function Transacoes() {
                         className="text-red-500 hover:text-red-700"
                         type="button"
                         onClick={() =>
-                          openModal(
+                          openModalExcluir(
                             'Deseja realmente excluir esta transação?',
                             transacao.id,
                           )
@@ -309,16 +316,17 @@ export function Transacoes() {
       </main>
       <ExcluirModal
         isOpen={isModalOpen}
-        onOpenChange={setIsModalOpen}
+        onOpenChange={closeModal}
         title="Excluir Transacao"
         message={modalMessage}
         onConfirm={handleDeleteTransacao}
+        isSuccess={isSuccess}
       />
       {transacaoEditando && (
         <EditarTransacaoModal
           transacaoId={transacaoEditando.id}
           open={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
+          onClose={closeEditModal}
         />
       )}
     </div>

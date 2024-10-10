@@ -17,6 +17,7 @@ import { NovoTerapeutaModal } from '../../components/Terapeuta/NovoTerapeutaModa
 import type { Terapeuta } from '../../tipos'
 import { EditarTerapeutaModal } from '../../components/Terapeuta/EditarTerapeutaModal'
 import { ExcluirModal } from '../../components/ExcluirModal'
+import { useModal } from '../../hooks/useModal'
 
 export function Terapeutas() {
   const { terapeutas, fetchTerapeutas } = useContext(TerapeutasContext)
@@ -25,9 +26,15 @@ export function Terapeutas() {
   const [totalPages, setTotalPages] = useState<number>(0)
   const [currentPage, setCurrentPage] = useState(1)
   const terapeutasPerPage = 10
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [modalMessage, setModalMessage] = useState('')
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const {
+    isModalOpen,
+    modalMessage,
+    isEditModalOpen,
+    openModal,
+    closeModal,
+    openEditModal,
+    closeEditModal,
+  } = useModal()
   const [terapeutaEditando, setTerapeutaEditando] = useState<Terapeuta | null>(
     null,
   )
@@ -35,7 +42,7 @@ export function Terapeutas() {
   const [terapeutaParaExcluir, setTerapeutaParaExcluir] = useState<
     string | null
   >(null)
-
+  const [isSuccess, setIsSuccess] = useState(false)
   const handleTerapeutaChange = (
     event: React.ChangeEvent<HTMLSelectElement>,
   ) => {
@@ -69,7 +76,7 @@ export function Terapeutas() {
 
   function handleEditTerapeuta(terapeuta: Terapeuta) {
     setTerapeutaEditando(terapeuta)
-    setIsEditModalOpen(true)
+    openEditModal()
   }
 
   async function handleDeleteTerapeuta() {
@@ -80,22 +87,21 @@ export function Terapeutas() {
         `http://localhost:3000/terapeutas/${terapeutaParaExcluir}`,
       )
       fetchTerapeutas()
-      setModalMessage('Terapeuta excluído com sucesso!')
-      setIsModalOpen(false)
+      openModal('Terapeuta excluído com sucesso!')
+      setIsSuccess(true)
       console.log('Terapeuta excluído:', terapeutaParaExcluir)
     } catch (error) {
-      setModalMessage('Erro ao excluir terapeuta!')
-      setIsModalOpen(false)
+      openModal('Erro ao excluir terapeuta!')
       console.error('Erro ao excluir terapeuta:', error)
     } finally {
       setTerapeutaParaExcluir(null)
     }
   }
 
-  const openModal = (message: string, terapeutaId: string) => {
-    setModalMessage(message)
+  const openModalExcluir = (message: string, terapeutaId: string) => {
+    openModal(message)
     setTerapeutaParaExcluir(terapeutaId)
-    setIsModalOpen(true)
+    setIsSuccess(false)
   }
 
   return (
@@ -203,7 +209,7 @@ export function Terapeutas() {
                         title="Excluir Terapeuta"
                         className="text-red-500 hover:text-red-700"
                         onClick={() =>
-                          openModal(
+                          openModalExcluir(
                             'Deseja realmente excluir este terapeuta?',
                             terapeuta.id,
                           )
@@ -225,16 +231,17 @@ export function Terapeutas() {
       </main>
       <ExcluirModal
         isOpen={isModalOpen}
-        onOpenChange={setIsModalOpen}
+        onOpenChange={closeModal}
         title="Excluir Terapeuta"
         message={modalMessage}
         onConfirm={handleDeleteTerapeuta}
+        isSuccess={isSuccess}
       />
       {terapeutaEditando && (
         <EditarTerapeutaModal
           terapeutaId={terapeutaEditando.id}
           open={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
+          onClose={closeEditModal}
         />
       )}
     </div>

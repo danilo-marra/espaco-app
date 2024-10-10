@@ -36,20 +36,6 @@
       "dtCriacao": "2024-11-23T00:00:00.000Z"
     },
     {
-      "id": "1727349458220",
-      "descricao": "dsad",
-      "tipo": "entrada",
-      "valor": 44,
-      "dtCriacao": "2024-11-23T00:00:00.000Z"
-    },
-    {
-      "id": "1727349475597",
-      "descricao": "jhgjhg",
-      "tipo": "saida",
-      "valor": 44,
-      "dtCriacao": "2024-10-23T00:00:00.000Z"
-    },
-    {
       "id": "1727350974272",
       "descricao": "jhgjhg",
       "tipo": "entrada",
@@ -64,10 +50,10 @@
       "dtCriacao": "2024-08-06T03:00:00.000Z"
     },
     {
-      "id": "bb6030da-eaca-46ad-b0cf-2f464672f65c",
+      "id": "19139ab4-bdda-4e65-86ef-97879eb67330",
       "descricao": "dsad",
-      "tipo": "saida",
-      "valor": 44,
+      "tipo": "entrada",
+      "valor": 78,
       "dtCriacao": "2024-10-01T03:00:00.000Z"
     }
   ],
@@ -114,10 +100,10 @@
       "dtNascimento": "2024-02-12T03:00:00.000Z",
       "nomeTerapeuta": "Terapeuta 1",
       "nomeResponsavel": "Danilo Marra Rabelo",
-      "telefoneResponsavel": "6192095674",
+      "telefoneResponsavel": "61981593923",
       "emailResponsavel": "danilo2311@gmail.com",
       "cpfResponsavel": "024.818.181-54",
-      "enderecoResponsavel": "SHCES Quadra 301 Bloco C",
+      "enderecoResponsavel": "SHCES Quadra 301 Bloco C, 202",
       "origem": "Instagram"
     },
     {
@@ -167,18 +153,6 @@
       "cpfResponsavel": "876.876.876-87",
       "enderecoResponsavel": "SHCES 301 BLOCO C apt 202",
       "origem": "Indicação"
-    },
-    {
-      "id": "a023945d-75ae-4a6d-b8fd-6e87e6ae20c7",
-      "nomePaciente": "Thais Marra",
-      "dtNascimento": "2024-09-30T03:00:00.000Z",
-      "nomeTerapeuta": "Terapeuta 1",
-      "nomeResponsavel": "Danilo Marra Rabelo",
-      "telefoneResponsavel": "61981593923",
-      "emailResponsavel": "danilo2311@gmail.com",
-      "cpfResponsavel": "876.876.876-87",
-      "enderecoResponsavel": "SHCES 301 BLOCO C apt 202",
-      "origem": "Indicação"
     }
   ],
   "terapeutas": [
@@ -190,15 +164,6 @@
       "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
       "curriculo": "teste curriculo",
       "chavePix": "098098098098"
-    },
-    {
-      "id": "e8629115-8166-4521-9b93-a02b4c09b1f6",
-      "nomeTerapeuta": "Danilo Marra Rabelo",
-      "telefoneTerapeuta": "6192095674",
-      "emailTerapeuta": "thaismarra@gmail.com",
-      "enderecoTerapeuta": "SHCES Quadra 301 Bloco C",
-      "curriculo": "teste curriculo",
-      "chavePix": "44"
     },
     {
       "id": "5b306851-c6d3-45c3-8f95-8f2d713e6e83",

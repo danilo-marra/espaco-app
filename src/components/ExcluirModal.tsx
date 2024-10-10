@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
 
 interface ExcluirModalProps {
@@ -6,6 +7,7 @@ interface ExcluirModalProps {
   title: string
   message: string
   onConfirm: () => void
+  isSuccess: boolean
 }
 
 export function ExcluirModal({
@@ -14,7 +16,14 @@ export function ExcluirModal({
   title,
   message,
   onConfirm,
+  isSuccess,
 }: ExcluirModalProps) {
+  const [localIsSuccess, setLocalIsSuccess] = useState(isSuccess)
+
+  useEffect(() => {
+    setLocalIsSuccess(isSuccess)
+  }, [isSuccess])
+
   return (
     <Dialog.Root open={isOpen} onOpenChange={onOpenChange}>
       <Dialog.Overlay className="fixed inset-0 bg-black opacity-30" />
@@ -22,21 +31,33 @@ export function ExcluirModal({
         <Dialog.Title className="text-lg font-bold">{title}</Dialog.Title>
         <Dialog.Description className="mt-2">{message}</Dialog.Description>
         <div className="mt-4 flex justify-end space-x-4">
-          <Dialog.Close asChild>
+          {localIsSuccess ? (
             <button
               type="button"
               className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+              onClick={() => onOpenChange(false)}
             >
-              Não
+              Fechar
             </button>
-          </Dialog.Close>
-          <button
-            type="button"
-            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-            onClick={onConfirm}
-          >
-            Sim
-          </button>
+          ) : (
+            <>
+              <Dialog.Close asChild>
+                <button
+                  type="button"
+                  className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+                >
+                  Não
+                </button>
+              </Dialog.Close>
+              <button
+                type="button"
+                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                onClick={onConfirm}
+              >
+                Sim
+              </button>
+            </>
+          )}
         </div>
       </Dialog.Content>
     </Dialog.Root>

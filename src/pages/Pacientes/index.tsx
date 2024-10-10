@@ -16,8 +16,9 @@ import { NovoPacienteModal } from '../../components/Paciente/NovoPacienteModal'
 import axios from 'axios'
 import type { Paciente } from '../../tipos'
 import { EditarPacienteModal } from '../../components/Paciente/EditarPacienteModal'
-import { ExcluirModal } from '../../components/ExcluirModal'
 import { TerapeutasContext } from '../../contexts/TerapeutasContext'
+import { ExcluirModal } from '../../components/ExcluirModal'
+import { useModal } from '../../hooks/useModal'
 
 export function Pacientes() {
   const { pacientes, fetchPacientes } = useContext(PacientesContext)
@@ -26,15 +27,22 @@ export function Pacientes() {
   const [totalPages, setTotalPages] = useState<number>(0)
   const [currentPage, setCurrentPage] = useState(1)
   const pacientesPerPage = 10
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [modalMessage, setModalMessage] = useState('')
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const {
+    isModalOpen,
+    modalMessage,
+    isEditModalOpen,
+    openModal,
+    closeModal,
+    openEditModal,
+    closeEditModal,
+  } = useModal()
   const [pacienteEditando, setPacienteEditando] = useState<Paciente | null>(
     null,
   )
   const [pacienteParaExcluir, setPacienteParaExcluir] = useState<string | null>(
     null,
   )
+  const [isSuccess, setIsSuccess] = useState(false)
 
   useEffect(() => {
     fetchPacientes()
@@ -61,6 +69,11 @@ export function Pacientes() {
     indexOfLastPaciente,
   )
 
+  function handleEditPaciente(paciente: Paciente) {
+    setPacienteEditando(paciente)
+    openEditModal()
+  }
+
   async function handleDeletePaciente() {
     if (!pacienteParaExcluir) return
 
@@ -69,27 +82,21 @@ export function Pacientes() {
         `http://localhost:3000/pacientes/${pacienteParaExcluir}`,
       )
       fetchPacientes()
-      setModalMessage('Paciente excluído com sucesso!')
-      setIsModalOpen(false)
+      openModal('Paciente excluído com sucesso!')
+      setIsSuccess(true)
       console.log('Paciente excluído:', pacienteParaExcluir)
     } catch (error) {
-      setModalMessage('Erro ao excluir paciente!')
-      setIsModalOpen(false)
+      openModal('Erro ao excluir paciente!')
       console.error('Erro ao excluir paciente:', error)
     } finally {
       setPacienteParaExcluir(null)
     }
   }
 
-  function handleEditPaciente(paciente: Paciente) {
-    setPacienteEditando(paciente)
-    setIsEditModalOpen(true)
-  }
-
-  const openModal = (message: string, pacienteId: string) => {
-    setModalMessage(message)
+  const openModalExcluir = (message: string, pacienteId: string) => {
+    openModal(message)
     setPacienteParaExcluir(pacienteId)
-    setIsModalOpen(true)
+    setIsSuccess(false)
   }
 
   return (
@@ -180,7 +187,7 @@ export function Pacientes() {
                     title="Excluir Paciente"
                     className="text-red-500 hover:text-red-700"
                     onClick={() =>
-                      openModal(
+                      openModalExcluir(
                         'Deseja realmente excluir este paciente?',
                         paciente.id,
                       )
@@ -201,16 +208,17 @@ export function Pacientes() {
       </main>
       <ExcluirModal
         isOpen={isModalOpen}
-        onOpenChange={setIsModalOpen}
+        onOpenChange={closeModal}
         title="Excluir Paciente"
         message={modalMessage}
         onConfirm={handleDeletePaciente}
+        isSuccess={isSuccess}
       />
       {pacienteEditando && (
         <EditarPacienteModal
           pacienteId={pacienteEditando.id}
           open={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
+          onClose={closeEditModal}
         />
       )}
     </div>
