@@ -3,6 +3,7 @@ import { Router } from './Router'
 import { TransacaoProvider } from './contexts/TransacoesContext'
 import { PacienteProvider } from './contexts/PacientesContext'
 import { TerapeutaProvider } from './contexts/TerapeutasContext'
+import { SessaoProvider } from './contexts/SessoesContext'
 
 export function App() {
   return (
@@ -10,7 +11,9 @@ export function App() {
       <TransacaoProvider>
         <PacienteProvider>
           <TerapeutaProvider>
-            <Router />
+            <SessaoProvider>
+              <Router />
+            </SessaoProvider>
           </TerapeutaProvider>
         </PacienteProvider>
       </TransacaoProvider>

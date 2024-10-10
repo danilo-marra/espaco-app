@@ -145,20 +145,20 @@ export function Pacientes() {
         <table className="w-full bg-white rounded shadow">
           <thead className="bg-rosa text-white">
             <tr>
-              <th className="p-4 text-left">Paciente</th>
-              <th className="p-4 text-left">Data de Nascimento</th>
-              <th className="p-4 text-left">Idade</th>
-              <th className="p-4 text-left">Terapeuta</th>
-              <th className="p-4 text-left">Responsável</th>
-              <th className="p-4 text-left">Telefone Responsável</th>
-              <th className="p-4 text-left">Email Resoponsável</th>
-              <th className="p-4 text-left">CPF Responsável</th>
-              <th className="p-4 text-left">Endereço</th>
-              <th className="p-4 text-left">Origem</th>
-              <th className="p-4 text-left">Ações</th>
+              <th className="p-4">Paciente</th>
+              <th className="p-4">Data de Nascimento</th>
+              <th className="p-4">Idade</th>
+              <th className="p-4">Terapeuta</th>
+              <th className="p-4">Responsável</th>
+              <th className="p-4">Telefone Responsável</th>
+              <th className="p-4">Email Resoponsável</th>
+              <th className="p-4">CPF Responsável</th>
+              <th className="p-4">Endereço</th>
+              <th className="p-4">Origem</th>
+              <th className="p-4">Ações</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="text-center">
             {pacientesAtuais.map((paciente) => (
               <tr key={paciente.id}>
                 <td className="p-4">{paciente.nomePaciente}</td>
@@ -166,14 +166,14 @@ export function Pacientes() {
                   {dateFormatter.format(new Date(paciente.dtNascimento))}
                 </td>
                 <td className="p-4">{calcularIdade(paciente.dtNascimento)}</td>
-                <td className="p-4">Nome da Terapeuta</td>
+                <td className="p-4">{paciente.terapeutaInfo.nomeTerapeuta}</td>
                 <td className="p-4">{paciente.nomeResponsavel}</td>
                 <td className="p-4">{paciente.telefoneResponsavel}</td>
                 <td className="p-4">{paciente.emailResponsavel}</td>
                 <td className="p-4">{paciente.cpfResponsavel}</td>
                 <td className="p-4">{paciente.enderecoResponsavel}</td>
                 <td className="p-4">{paciente.origem}</td>
-                <td className="p-4 flex space-x-2">
+                <td className="p-2 space-x-2">
                   <button
                     type="button"
                     title="Editar Paciente"

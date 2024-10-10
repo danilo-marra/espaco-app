@@ -169,7 +169,7 @@ export function Terapeutas() {
                 <th className="p-4 text-left">Ações</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="text-center">
               {terapeutasAtuais
                 .filter(
                   (terapeuta) =>
@@ -195,7 +195,7 @@ export function Terapeutas() {
                       </button>
                     </td>
                     <td className="p-4">{terapeuta.chavePix}</td>
-                    <td className="p-4 space-x-2">
+                    <td className="p-2 space-x-2">
                       <button
                         type="button"
                         title="Editar Terapeuta"

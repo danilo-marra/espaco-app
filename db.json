@@ -62,7 +62,15 @@
       "id": "bf98c26f-ddd0-4871-94cd-bf83422cb7a0",
       "nomePaciente": "Nilo",
       "dtNascimento": "2024-09-30T03:00:00.000Z",
-      "nomeTerapeuta": "Terapeuta 1",
+      "terapeutaInfo": {
+        "id": "01604952-22ed-44bd-9dfa-2fd7f59f47b9",
+        "nomeTerapeuta": "Danilo Marra Rabelo",
+        "telefoneTerapeuta": "61981593923",
+        "emailTerapeuta": "danilo2311@gmail.com",
+        "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
+        "curriculo": "teste curriculo",
+        "chavePix": "098098098098"
+      },
       "nomeResponsavel": "Thais Marra",
       "telefoneResponsavel": "61981593923",
       "emailResponsavel": "thaismarra@gmail.com",
@@ -74,7 +82,15 @@
       "id": "f678f4d7-85a9-4ab0-94bb-cbad4d365708",
       "nomePaciente": "Danilo Marra Rabelo",
       "dtNascimento": "2023-04-03T03:00:00.000Z",
-      "nomeTerapeuta": "Terapeuta 2",
+      "terapeutaInfo": {
+        "id": "5b306851-c6d3-45c3-8f95-8f2d713e6e83",
+        "nomeTerapeuta": "Thais Marra",
+        "telefoneTerapeuta": "6192095674",
+        "emailTerapeuta": "thaismarra@gmail.com",
+        "enderecoTerapeuta": "SHCES Quadra 801 Bloco A",
+        "curriculo": "teste curriculo",
+        "chavePix": "098098098098"
+      },
       "nomeResponsavel": "Danilo Marra Rabelo",
       "telefoneResponsavel": "61981593923",
       "emailResponsavel": "danilo2311@gmail.com",
@@ -86,7 +102,15 @@
       "id": "14811370-b08d-4d3d-bc94-1f268a7047c6",
       "nomePaciente": "Danilo Marra Rabelo",
       "dtNascimento": "2024-09-03T03:00:00.000Z",
-      "nomeTerapeuta": "",
+      "terapeutaInfo": {
+        "id": "01604952-22ed-44bd-9dfa-2fd7f59f47b9",
+        "nomeTerapeuta": "Danilo Marra Rabelo",
+        "telefoneTerapeuta": "61981593923",
+        "emailTerapeuta": "danilo2311@gmail.com",
+        "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
+        "curriculo": "teste curriculo",
+        "chavePix": "098098098098"
+      },
       "nomeResponsavel": "Danilo Marra Rabelo",
       "telefoneResponsavel": "61981593923",
       "emailResponsavel": "danilo2311@gmail.com",
@@ -98,7 +122,15 @@
       "id": "c1ef7050-f572-48ff-8a9b-137a7917782f",
       "nomePaciente": "Danilo Marra Rabelo",
       "dtNascimento": "2024-02-12T03:00:00.000Z",
-      "nomeTerapeuta": "Terapeuta 1",
+      "terapeutaInfo": {
+        "id": "5b306851-c6d3-45c3-8f95-8f2d713e6e83",
+        "nomeTerapeuta": "Thais Marra",
+        "telefoneTerapeuta": "6192095674",
+        "emailTerapeuta": "thaismarra@gmail.com",
+        "enderecoTerapeuta": "SHCES Quadra 801 Bloco A",
+        "curriculo": "teste curriculo",
+        "chavePix": "098098098098"
+      },
       "nomeResponsavel": "Danilo Marra Rabelo",
       "telefoneResponsavel": "61981593923",
       "emailResponsavel": "danilo2311@gmail.com",
@@ -110,7 +142,15 @@
       "id": "e4cbbbe8-eb71-4c75-944a-6ab6514722bc",
       "nomePaciente": "Danilo Marra Rabelo",
       "dtNascimento": "2024-10-01T03:00:00.000Z",
-      "nomeTerapeuta": "Terapeuta 1",
+      "terapeutaInfo": {
+        "id": "5b306851-c6d3-45c3-8f95-8f2d713e6e83",
+        "nomeTerapeuta": "Thais Marra",
+        "telefoneTerapeuta": "6192095674",
+        "emailTerapeuta": "thaismarra@gmail.com",
+        "enderecoTerapeuta": "SHCES Quadra 801 Bloco A",
+        "curriculo": "teste curriculo",
+        "chavePix": "098098098098"
+      },
       "nomeResponsavel": "Danilo Marra Rabelo",
       "telefoneResponsavel": "61981593923",
       "emailResponsavel": "danilo2311@gmail.com",
@@ -119,38 +159,22 @@
       "origem": "Indicação"
     },
     {
-      "id": "66458832-650b-4ab9-916b-84903f125127",
+      "id": "42a7b529-66a9-4d30-b510-769fcf0be78c",
       "nomePaciente": "Danilo Marra Rabelo",
       "dtNascimento": "2024-09-30T03:00:00.000Z",
-      "nomeTerapeuta": "Terapeuta 1",
+      "terapeutaInfo": {
+        "id": "5b306851-c6d3-45c3-8f95-8f2d713e6e83",
+        "nomeTerapeuta": "Thais Marra",
+        "telefoneTerapeuta": "6192095674",
+        "emailTerapeuta": "thaismarra@gmail.com",
+        "enderecoTerapeuta": "SHCES Quadra 801 Bloco A",
+        "curriculo": "teste curriculo",
+        "chavePix": "098098098098"
+      },
       "nomeResponsavel": "Danilo Marra Rabelo",
       "telefoneResponsavel": "61981593923",
       "emailResponsavel": "danilo2311@gmail.com",
       "cpfResponsavel": "024.818.181-54",
-      "enderecoResponsavel": "SHCES 301 BLOCO C apt 202",
-      "origem": "Indicação"
-    },
-    {
-      "id": "b621f2d2-1596-4045-9908-22bcbc5a2d3a",
-      "nomePaciente": "Thais Marra",
-      "dtNascimento": "2024-10-01T03:00:00.000Z",
-      "nomeTerapeuta": "Terapeuta 1",
-      "nomeResponsavel": "Danilo Marra Rabelo",
-      "telefoneResponsavel": "61981593923",
-      "emailResponsavel": "danilo2311@gmail.com",
-      "cpfResponsavel": "024.818.181-54",
-      "enderecoResponsavel": "SHCES 301 BLOCO C apt 202",
-      "origem": "Indicação"
-    },
-    {
-      "id": "b6a546f9-23f4-47e8-b568-2d3dfe719e93",
-      "nomePaciente": "Danilo Marra Rabelo",
-      "dtNascimento": "2024-09-30T03:00:00.000Z",
-      "nomeTerapeuta": "Terapeuta 1",
-      "nomeResponsavel": "Danilo Marra Rabelo",
-      "telefoneResponsavel": "61981593923",
-      "emailResponsavel": "danilo2311@gmail.com",
-      "cpfResponsavel": "876.876.876-87",
       "enderecoResponsavel": "SHCES 301 BLOCO C apt 202",
       "origem": "Indicação"
     }
@@ -173,6 +197,40 @@
       "enderecoTerapeuta": "SHCES Quadra 801 Bloco A",
       "curriculo": "teste curriculo",
       "chavePix": "098098098098"
+    }
+  ],
+  "sessoes": [
+    {
+      "id": "1",
+      "terapeutaInfo": {
+        "id": "5b306851-c6d3-45c3-8f95-8f2d713e6e83",
+        "nomeTerapeuta": "Thais Marra",
+        "telefoneTerapeuta": "6192095674",
+        "emailTerapeuta": "thaismarra@gmail.com",
+        "enderecoTerapeuta": "SHCES Quadra 801 Bloco A",
+        "curriculo": "teste curriculo",
+        "chavePix": "098098098098"
+      },
+      "pacienteInfo": {
+        "id": "bf98c26f-ddd0-4871-94cd-bf83422cb7a0",
+        "nomePaciente": "Nilo",
+        "dtNascimento": "2024-09-30T03:00:00.000Z",
+        "nomeTerapeuta": "Terapeuta 1",
+        "nomeResponsavel": "Thais Marra",
+        "telefoneResponsavel": "61981593923",
+        "emailResponsavel": "thaismarra@gmail.com",
+        "cpfResponsavel": "024.818.181-54",
+        "enderecoResponsavel": "SHCES Quadra 801 Bloco A",
+        "origem": "Instagram"
+      },
+      "valorSessao": 350,
+      "notaFiscal": "Emitida",
+      "dtSessao1": "2024-07-21T09:15:42.625Z",
+      "dtSessao2": "2024-07-22T09:12:42.625Z",
+      "dtSessao3": "2024-07-23T09:15:42.625Z",
+      "dtSessao4": "2024-08-24T09:15:42.625Z",
+      "dtSessao5": "2024-09-25T09:15:42.625Z",
+      "dtSessao6": "2024-10-26T09:15:42.625Z"
     }
   ]
 }

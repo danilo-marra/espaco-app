@@ -279,7 +279,7 @@ export function Transacoes() {
                     <td className="p-4">
                       {dateFormatter.format(new Date(transacao.dtCriacao))}
                     </td>
-                    <td className="p-4 flex space-x-2">
+                    <td className="p-2 space-x-2">
                       <button
                         title="Editar Transação"
                         className="text-green-500 hover:text-green-700"

@@ -11,31 +11,36 @@ export interface Paciente {
   id: string
   nomePaciente: string
   dtNascimento: Date
+  terapeutaInfo: Terapeuta
   nomeResponsavel: string
   telefoneResponsavel: string
   emailResponsavel: string
   cpfResponsavel: string
   enderecoResponsavel: string
   origem: 'Indicação' | 'Instagram' | 'Busca no Google' | 'Outros' | undefined
-  nomeTerapeuta: string
 }
 
-export interface SessaoDt {
+// export interface SessaoDt {
+//   dtSessao1?: Date
+//   dtSessao2?: Date
+//   dtSessao3?: Date
+//   dtSessao4?: Date
+//   dtSessao5?: Date
+//   dtSessao6?: Date
+// }
+
+export interface Sessao {
+  id: string
+  terapeutaInfo: Terapeuta
+  pacienteInfo: Paciente
+  valorSessao: number
+  notaFiscal: 'Emitida' | 'Enviada' | undefined
   dtSessao1?: Date
   dtSessao2?: Date
   dtSessao3?: Date
   dtSessao4?: Date
   dtSessao5?: Date
   dtSessao6?: Date
-}
-
-export interface SessaoPaciente {
-  pacienteInfo: Paciente
-  valor: number
-  planoSaude: boolean
-  notaFiscalEmitida: boolean
-  notaFiscalEnviada: boolean
-  sessoesDt?: SessaoDt[]
 }
 
 // tipos.ts

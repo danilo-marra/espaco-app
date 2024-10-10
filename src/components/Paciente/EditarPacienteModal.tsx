@@ -10,6 +10,7 @@ import { PacientesContext } from '../../contexts/PacientesContext'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import { ptBR } from 'date-fns/locale'
+import { TerapeutasContext } from '../../contexts/TerapeutasContext'
 
 const EditarPacienteFormSchema = z.object({
   id: z.string(),
@@ -40,7 +41,7 @@ export function EditarPacienteModal({
   const { pacientes, editPaciente } = useContext(PacientesContext)
   const [mensagemSucesso, setMensagemSucesso] = useState('')
   const [mensagemErro, setMensagemErro] = useState('')
-
+  const { terapeutas } = useContext(TerapeutasContext)
   const {
     control,
     register,
@@ -58,7 +59,7 @@ export function EditarPacienteModal({
       setValue('id', paciente.id)
       setValue('nomePaciente', paciente.nomePaciente)
       setValue('dtNascimento', new Date(paciente.dtNascimento))
-      setValue('nomeTerapeuta', paciente.nomeTerapeuta)
+      setValue('nomeTerapeuta', paciente.terapeutaInfo.nomeTerapeuta)
       setValue('nomeResponsavel', paciente.nomeResponsavel)
       setValue('telefoneResponsavel', paciente.telefoneResponsavel)
       setValue('emailResponsavel', paciente.emailResponsavel)
@@ -73,11 +74,19 @@ export function EditarPacienteModal({
       // Simula um atraso de 2 segundos
       await new Promise((resolve) => setTimeout(resolve, 2000))
 
+      const terapeutaSelecionado = terapeutas.find(
+        (terapeuta) => terapeuta.nomeTerapeuta === data.nomeTerapeuta,
+      )
+
+      if (!terapeutaSelecionado) {
+        throw new Error('Terapeuta não encontrado')
+      }
+
       const pacienteEditado = {
         id: data.id,
         nomePaciente: data.nomePaciente,
         dtNascimento: data.dtNascimento,
-        nomeTerapeuta: data.nomeTerapeuta,
+        terapeutaInfo: terapeutaSelecionado,
         nomeResponsavel: data.nomeResponsavel,
         telefoneResponsavel: data.telefoneResponsavel,
         emailResponsavel: data.emailResponsavel,
@@ -163,14 +172,17 @@ export function EditarPacienteModal({
               />
               <select
                 className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
+                id="nomeTerapeuta"
+                required
                 {...register('nomeTerapeuta')}
-                defaultValue=""
+                onFocus={handleFocus}
               >
-                <option value="" disabled>
-                  Selecione a terapeuta
-                </option>
-                <option value="Terapeuta 1">Terapeuta 1</option>
-                <option value="Terapeuta 2">Terapeuta 2</option>
+                <option value="">Selecione o terapeuta</option>
+                {terapeutas.map((terapeuta) => (
+                  <option key={terapeuta.id} value={terapeuta.nomeTerapeuta}>
+                    {terapeuta.nomeTerapeuta}
+                  </option>
+                ))}
               </select>
             </div>
 
