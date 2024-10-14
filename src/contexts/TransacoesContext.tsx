@@ -23,7 +23,6 @@ export function TransacaoProvider({ children }: TransacaoProviderProps) {
       const response = await fetch('http://localhost:3000/transacoes')
       const data = await response.json()
       setTransacoes(data)
-      console.log('Transações:', data)
     } catch (error) {
       console.error('Erro ao buscar transações:', error)
     }

@@ -3,6 +3,7 @@ import type { Sessao } from '../tipos'
 
 interface SessaoContextType {
   sessoes: Sessao[]
+  fetchSessoes: () => Promise<void>
 }
 
 interface SessaoProviderProps {
@@ -19,7 +20,6 @@ export function SessaoProvider({ children }: SessaoProviderProps) {
       const response = await fetch('http://localhost:3000/sessoes')
       const data = await response.json()
       setSessoes(data)
-      console.log('Sessoes:', data)
     } catch (error) {
       console.error('Erro ao buscar sessoes:', error)
     }
@@ -30,7 +30,7 @@ export function SessaoProvider({ children }: SessaoProviderProps) {
   }, [fetchSessoes])
 
   return (
-    <SessoesContext.Provider value={{ sessoes }}>
+    <SessoesContext.Provider value={{ sessoes, fetchSessoes }}>
       {children}
     </SessoesContext.Provider>
   )

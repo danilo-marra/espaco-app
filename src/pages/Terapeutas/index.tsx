@@ -22,7 +22,6 @@ import { useModal } from '../../hooks/useModal'
 export function Terapeutas() {
   const { terapeutas, fetchTerapeutas } = useContext(TerapeutasContext)
   const { pacientes } = useContext(PacientesContext)
-  const [searchQuery] = useState('')
   const [totalPages, setTotalPages] = useState<number>(0)
   const [currentPage, setCurrentPage] = useState(1)
   const terapeutasPerPage = 10
@@ -49,19 +48,16 @@ export function Terapeutas() {
     setSelectedTerapeuta(event.target.value)
   }
 
-  useEffect(() => {
-    fetchTerapeutas()
-  }, [fetchTerapeutas])
-
   const [filteredTerapeutas, setFilteredTerapeutas] = useState<Terapeuta[]>([])
 
   useEffect(() => {
-    const filtered = terapeutas.filter((terapeuta) =>
-      terapeuta.nomeTerapeuta.toLowerCase().includes(searchQuery.toLowerCase()),
-    )
+    const filtered =
+      selectedTerapeuta === 'Todos'
+        ? terapeutas
+        : terapeutas.filter((terapeuta) => terapeuta.id === selectedTerapeuta)
     setFilteredTerapeutas(filtered)
     setTotalPages(Math.ceil(filtered.length / terapeutasPerPage))
-  }, [terapeutas, searchQuery])
+  }, [terapeutas, selectedTerapeuta])
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage)
@@ -137,8 +133,8 @@ export function Terapeutas() {
                 onChange={handleTerapeutaChange}
               >
                 <option value="Todos">Todos</option>
-                {terapeutasAtuais.map((terapeuta) => (
-                  <option key={terapeuta.id} value={terapeuta.nomeTerapeuta}>
+                {terapeutas.map((terapeuta) => (
+                  <option key={terapeuta.id} value={terapeuta.id}>
                     {terapeuta.nomeTerapeuta}
                   </option>
                 ))}
@@ -169,57 +165,51 @@ export function Terapeutas() {
                 <th className="p-4 text-left">Ações</th>
               </tr>
             </thead>
-            <tbody className="text-center">
-              {terapeutasAtuais
-                .filter(
-                  (terapeuta) =>
-                    selectedTerapeuta === 'Todos' ||
-                    terapeuta.nomeTerapeuta === selectedTerapeuta,
-                )
-                .map((terapeuta) => (
-                  <tr key={terapeuta.id}>
-                    <td className="p-4">{terapeuta.nomeTerapeuta}</td>
-                    <td className="p-4">{terapeuta.telefoneTerapeuta}</td>
-                    <td className="p-4">{terapeuta.emailTerapeuta}</td>
-                    <td className="p-4">{terapeuta.enderecoTerapeuta}</td>
-                    <td className="p-4">
-                      {' '}
-                      <button
-                        type="button"
-                        className="text-blue-500 hover:text-blue-700"
-                        onClick={() => {
-                          console.log('terapeuta.curriculo')
-                        }}
-                      >
-                        <Eye size={20} weight="bold" />
-                      </button>
-                    </td>
-                    <td className="p-4">{terapeuta.chavePix}</td>
-                    <td className="p-2 space-x-2">
-                      <button
-                        type="button"
-                        title="Editar Terapeuta"
-                        className="text-green-500 hover:text-green-700"
-                        onClick={() => handleEditTerapeuta(terapeuta)}
-                      >
-                        <PencilSimple size={20} weight="bold" />
-                      </button>
-                      <button
-                        type="button"
-                        title="Excluir Terapeuta"
-                        className="text-red-500 hover:text-red-700"
-                        onClick={() =>
-                          openModalExcluir(
-                            'Deseja realmente excluir este terapeuta?',
-                            terapeuta.id,
-                          )
-                        }
-                      >
-                        <TrashSimple size={20} weight="bold" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+            <tbody>
+              {terapeutasAtuais.map((terapeuta) => (
+                <tr key={terapeuta.id}>
+                  <td className="p-4">{terapeuta.nomeTerapeuta}</td>
+                  <td className="p-4">{terapeuta.telefoneTerapeuta}</td>
+                  <td className="p-4">{terapeuta.emailTerapeuta}</td>
+                  <td className="p-4">{terapeuta.enderecoTerapeuta}</td>
+                  <td className="p-4">
+                    {' '}
+                    <button
+                      type="button"
+                      className="text-blue-500 hover:text-blue-700"
+                      onClick={() => {
+                        console.log('terapeuta.curriculo')
+                      }}
+                    >
+                      <Eye size={20} weight="bold" />
+                    </button>
+                  </td>
+                  <td className="p-4">{terapeuta.chavePix}</td>
+                  <td className="p-2 space-x-2">
+                    <button
+                      type="button"
+                      title="Editar Terapeuta"
+                      className="text-green-500 hover:text-green-700"
+                      onClick={() => handleEditTerapeuta(terapeuta)}
+                    >
+                      <PencilSimple size={20} weight="bold" />
+                    </button>
+                    <button
+                      type="button"
+                      title="Excluir Terapeuta"
+                      className="text-red-500 hover:text-red-700"
+                      onClick={() =>
+                        openModalExcluir(
+                          'Deseja realmente excluir este terapeuta?',
+                          terapeuta.id,
+                        )
+                      }
+                    >
+                      <TrashSimple size={20} weight="bold" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
           <Pagination

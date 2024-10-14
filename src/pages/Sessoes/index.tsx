@@ -1,4 +1,5 @@
 import {
+  Calendar,
   CaretLeft,
   CaretRight,
   HandCoins,
@@ -7,18 +8,77 @@ import {
   TrashSimple,
   User,
 } from '@phosphor-icons/react'
-import { useContext } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { TerapeutasContext } from '../../contexts/TerapeutasContext'
 import { SessoesContext } from '../../contexts/SessoesContext'
-import { dateFormatter } from '../../utils/formatter'
+import { dateFormatter, priceFormatter } from '../../utils/formatter'
+import { format } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
+import DatePicker from 'react-datepicker'
+import 'react-datepicker/dist/react-datepicker.css'
+import type { Sessao } from '../../tipos'
+import Pagination from '../../components/Pagination'
 
 export function Sessoes() {
-  const { terapeutas } = useContext(TerapeutasContext)
-  const { sessoes } = useContext(SessoesContext)
+  const { terapeutas, fetchTerapeutas } = useContext(TerapeutasContext)
+  const { sessoes, fetchSessoes } = useContext(SessoesContext)
+  const [dataAtual, setDataAtual] = useState<Date>(new Date())
+  const [totalPages, setTotalPages] = useState<number>(0)
+  const [currentPage, setCurrentPage] = useState(1)
+  const sessoesPerPage = 10
+  const [selectedTerapeuta, setSelectedTerapeuta] = useState('Todos')
+  const handleTerapeutaChange = (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    setSelectedTerapeuta(event.target.value)
+  }
+  const [filteredSessoes, setFilteredSessoes] = useState<Sessao[]>([])
+  const indexOfLastSessoes = currentPage * sessoesPerPage
+  const indexOfFirstSessoes = indexOfLastSessoes - sessoesPerPage
+  const sessoesAtuais = filteredSessoes.slice(
+    indexOfFirstSessoes,
+    indexOfLastSessoes,
+  )
 
-  // sessoes.map((sessao) =>
-  //   console.log('Nome do Paciente:', sessao.pacienteInfo.nomePaciente),
-  // )
+  useEffect(() => {
+    fetchTerapeutas()
+    fetchSessoes()
+  }, [fetchTerapeutas, fetchSessoes])
+
+  useEffect(() => {
+    // Filter sessoes by selected terapeuta
+    const filteredByTerapeuta =
+      selectedTerapeuta === 'Todos'
+        ? sessoes
+        : sessoes.filter(
+            (sessao) => sessao.terapeutaInfo.id === selectedTerapeuta,
+          )
+
+    // Filter sessoes by date
+    const filteredByDate = filteredByTerapeuta.filter((sessao) => {
+      if (!sessao.dtSessao1) return false
+      const dataSessao = new Date(sessao.dtSessao1)
+      return (
+        dataSessao.getMonth() === dataAtual.getMonth() &&
+        dataSessao.getFullYear() === dataAtual.getFullYear()
+      )
+    })
+
+    setFilteredSessoes(filteredByDate)
+    setTotalPages(Math.ceil(filteredByDate.length / sessoesPerPage))
+  }, [sessoes, selectedTerapeuta, dataAtual])
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage)
+  }
+
+  function handleMonthPrev() {
+    setDataAtual(new Date(dataAtual.getFullYear(), dataAtual.getMonth() - 1, 1))
+  }
+
+  function handleMonthNext() {
+    setDataAtual(new Date(dataAtual.getFullYear(), dataAtual.getMonth() + 1, 1))
+  }
 
   return (
     <div className="flex min-h-screen">
@@ -33,31 +93,26 @@ export function Sessoes() {
             Nova Sessão
           </button>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
             <User size={24} />
             <label htmlFor="psicólogo" className="text-xl font-semibold">
               Terapeuta:
             </label>
-            <select className="text-xl" name="terapeutas" id="terapeutas">
+            <select
+              className="text-xl"
+              name="terapeutas"
+              id="terapeutas"
+              value={selectedTerapeuta}
+              onChange={handleTerapeutaChange}
+            >
               <option value="Todos">Todos</option>
               {terapeutas.map((terapeuta) => (
-                <option key={terapeuta.id} value={terapeuta.nomeTerapeuta}>
+                <option key={terapeuta.id} value={terapeuta.id}>
                   {terapeuta.nomeTerapeuta}
                 </option>
               ))}
             </select>
-          </div>
-          <div className="flex items-center justify-between p-4 bg-white rounded shadow order-last md:order-none">
-            <button type="button">
-              <CaretLeft size={24} weight="fill" />
-            </button>
-            <h2 className="text-xl font-semibold">
-              Mês: Fevereiro - Ano: 2024
-            </h2>
-            <button type="button">
-              <CaretRight size={24} weight="fill" />
-            </button>
           </div>
           <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
             <HandCoins size={24} />
@@ -68,12 +123,47 @@ export function Sessoes() {
             <span className="text-xl font-semibold">R$ PSI: 819,00 (45%)</span>
           </div>
         </div>
+        <div className="flex items-center justify-between p-4 bg-white rounded shadow">
+          <button type="button">
+            <CaretLeft onClick={handleMonthPrev} size={24} weight="fill" />
+          </button>
+          <div className="flex items-center space-x-2">
+            <div>
+              <h2 className="text-xl font-semibold">
+                {format(dataAtual, 'MMMM yyyy', { locale: ptBR })}
+              </h2>
+            </div>
+            <div>
+              <div>
+                <DatePicker
+                  locale={ptBR}
+                  selected={dataAtual}
+                  onChange={(date) => date && setDataAtual(date)}
+                  renderMonthContent={(_month, shortMonth, longMonth, day) => {
+                    const fullYear = new Date(day).getFullYear()
+                    const tooltipText = `${longMonth} de ${fullYear}`
+                    return <span title={tooltipText}>{shortMonth}</span>
+                  }}
+                  showMonthYearPicker
+                  dateFormat="MMMM yyyy"
+                  customInput={
+                    <Calendar size={28} className="text-gray-500 mt-2" />
+                  }
+                />
+              </div>
+            </div>
+          </div>
+
+          <button type="button">
+            <CaretRight onClick={handleMonthNext} size={24} weight="fill" />
+          </button>
+        </div>
         <table className="listaSessoes w-full bg-white rounded shadow">
           <thead className="bg-rosa text-white">
             <tr>
+              <th className="p-4">Terapeuta</th>
               <th className="p-4">Paciente</th>
               <th className="p-4">Responsável</th>
-              <th className="p-4">Terapeuta</th>
               <th className="p-4">Valor da Sessão</th>
               <th className="p-4">Nota Fiscal</th>
               <th className="p-4">Sessão 1</th>
@@ -87,11 +177,11 @@ export function Sessoes() {
             </tr>
           </thead>
           <tbody className="text-center">
-            {sessoes.map((sessao) => (
+            {sessoesAtuais.map((sessao) => (
               <tr key={sessao.id}>
+                <td className="p-4">{sessao.terapeutaInfo.nomeTerapeuta}</td>
                 <td className="p-4">{sessao.pacienteInfo.nomePaciente}</td>
                 <td className="p-4">{sessao.pacienteInfo.nomeResponsavel}</td>
-                <td className="p-4">{sessao.terapeutaInfo.nomeTerapeuta}</td>
                 <td className="p-4">R$ {sessao.valorSessao.toFixed(2)}</td>
                 <td className="p-4">{sessao.notaFiscal}</td>
                 <td className="p-4">
@@ -145,6 +235,11 @@ export function Sessoes() {
             ))}
           </tbody>
         </table>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
       </main>
     </div>
   )

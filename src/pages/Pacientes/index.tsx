@@ -19,6 +19,8 @@ import { EditarPacienteModal } from '../../components/Paciente/EditarPacienteMod
 import { TerapeutasContext } from '../../contexts/TerapeutasContext'
 import { ExcluirModal } from '../../components/ExcluirModal'
 import { useModal } from '../../hooks/useModal'
+import { useSelector } from 'react-redux'
+import type { RootState } from '../../store/store'
 
 export function Pacientes() {
   const { pacientes, fetchPacientes } = useContext(PacientesContext)
@@ -44,10 +46,6 @@ export function Pacientes() {
   )
   const [isSuccess, setIsSuccess] = useState(false)
 
-  useEffect(() => {
-    fetchPacientes()
-  }, [fetchPacientes])
-
   const [filteredPacientes, setFilteredPacientes] = useState<Paciente[]>([])
 
   useEffect(() => {
@@ -56,7 +54,7 @@ export function Pacientes() {
     )
     setFilteredPacientes(filtered)
     setTotalPages(Math.ceil(filtered.length / pacientesPerPage))
-  }, [pacientes, searchQuery])
+  }, [searchQuery, pacientes])
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage)
@@ -99,8 +97,24 @@ export function Pacientes() {
     setIsSuccess(false)
   }
 
+  // useEffect(() => {
+  //   fetchPacientes()
+  // }, [fetchPacientes])
+
+  const pacientesRedux = useSelector((state: RootState) => state.pacientes.data)
+
   return (
     <div className="flex min-h-screen">
+      <div>
+        <h1>Teste</h1>
+        <ul>
+          {pacientesRedux.map((paciente) => (
+            <li key={paciente.id}>
+              {paciente.nomePaciente} - {paciente.terapeutaInfo.nomeTerapeuta}
+            </li>
+          ))}
+        </ul>
+      </div>
       <main className="flex-1 bg-gray-100 p-8">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-2xl font-semibold">Pacientes</h1>
@@ -166,7 +180,9 @@ export function Pacientes() {
                   {dateFormatter.format(new Date(paciente.dtNascimento))}
                 </td>
                 <td className="p-4">{calcularIdade(paciente.dtNascimento)}</td>
-                <td className="p-4">{paciente.terapeutaInfo.nomeTerapeuta}</td>
+                <td className="p-4">
+                  {paciente.terapeutaInfo?.nomeTerapeuta || 'Sem Terapeuta'}
+                </td>
                 <td className="p-4">{paciente.nomeResponsavel}</td>
                 <td className="p-4">{paciente.telefoneResponsavel}</td>
                 <td className="p-4">{paciente.emailResponsavel}</td>

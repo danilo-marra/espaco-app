@@ -20,15 +20,6 @@ export interface Paciente {
   origem: 'Indicação' | 'Instagram' | 'Busca no Google' | 'Outros' | undefined
 }
 
-// export interface SessaoDt {
-//   dtSessao1?: Date
-//   dtSessao2?: Date
-//   dtSessao3?: Date
-//   dtSessao4?: Date
-//   dtSessao5?: Date
-//   dtSessao6?: Date
-// }
-
 export interface Sessao {
   id: string
   terapeutaInfo: Terapeuta
@@ -43,11 +34,15 @@ export interface Sessao {
   dtSessao6?: Date
 }
 
-// tipos.ts
 export interface Transacao {
   id: string
   descricao: string
   valor: number
   tipo: 'entrada' | 'saida'
   dtCriacao: Date
+}
+
+export interface Agenda {
+  id: string
+  terapeutaInfo: Terapeuta
 }

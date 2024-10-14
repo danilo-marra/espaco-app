@@ -54,14 +54,15 @@ export function Transacoes() {
   const [isSuccess, setIsSuccess] = useState(false)
 
   useEffect(() => {
+    // Fetch transacoes
     fetchTransacoes()
-  }, [fetchTransacoes])
 
-  useEffect(() => {
+    // Filter transacoes by search value
     const filteredBySearch = transacoes.filter((transacao) =>
       transacao.descricao.toLowerCase().includes(searchValue.toLowerCase()),
     )
 
+    // Filter transacoes by date
     const filteredByDate = filteredBySearch.filter((transacao) => {
       const dataTransacao = new Date(transacao.dtCriacao)
       return (
@@ -70,6 +71,7 @@ export function Transacoes() {
       )
     })
 
+    // Calculate summary
     const newSummary = filteredByDate.reduce(
       (acc, transacao) => {
         if (transacao.tipo === 'entrada') {
@@ -86,12 +88,13 @@ export function Transacoes() {
 
     setSummary(newSummary)
 
+    // Paginate transacoes
     const offset = (currentPage - 1) * transacoesPorPagina
     setTransacoesVisiveis(
       filteredByDate.slice(offset, offset + transacoesPorPagina),
     )
     settotalPages(Math.ceil(filteredByDate.length / transacoesPorPagina))
-  }, [dataAtual, transacoes, searchValue, currentPage])
+  }, [fetchTransacoes, transacoes, searchValue, dataAtual, currentPage])
 
   function handleMonthPrev() {
     setDataAtual(new Date(dataAtual.getFullYear(), dataAtual.getMonth() - 1, 1))
@@ -208,7 +211,7 @@ export function Transacoes() {
                 </h2>
               </div>
               <div>
-                <button type="button">
+                <div>
                   <DatePicker
                     locale={ptBR}
                     selected={dataAtual}
@@ -229,7 +232,7 @@ export function Transacoes() {
                       <Calendar size={28} className="text-gray-500 mt-2" />
                     }
                   />
-                </button>
+                </div>
               </div>
             </div>
 

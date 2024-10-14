@@ -4,19 +4,23 @@ import { TransacaoProvider } from './contexts/TransacoesContext'
 import { PacienteProvider } from './contexts/PacientesContext'
 import { TerapeutaProvider } from './contexts/TerapeutasContext'
 import { SessaoProvider } from './contexts/SessoesContext'
+import { Provider } from 'react-redux'
+import { store } from './store/store'
 
 export function App() {
   return (
-    <BrowserRouter>
-      <TransacaoProvider>
-        <PacienteProvider>
+    <Provider store={store}>
+      <BrowserRouter>
+        <TransacaoProvider>
           <TerapeutaProvider>
-            <SessaoProvider>
-              <Router />
-            </SessaoProvider>
+            <PacienteProvider>
+              <SessaoProvider>
+                <Router />
+              </SessaoProvider>
+            </PacienteProvider>
           </TerapeutaProvider>
-        </PacienteProvider>
-      </TransacaoProvider>
-    </BrowserRouter>
+        </TransacaoProvider>
+      </BrowserRouter>
+    </Provider>
   )
 }

@@ -22,7 +22,6 @@ export function TerapeutaProvider({ children }: TerapeutaProviderProps) {
       const response = await fetch('http://localhost:3000/terapeutas')
       const data = await response.json()
       setTerapeutas(data)
-      console.log('Terapeutas:', data)
     } catch (error) {
       console.error('Erro ao buscar terapeutas:', error)
     }

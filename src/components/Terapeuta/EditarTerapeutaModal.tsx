@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import { useContext, useEffect, useState } from 'react'
 import { TerapeutasContext } from '../../contexts/TerapeutasContext'
+import { PacientesContext } from '../../contexts/PacientesContext'
 import 'react-datepicker/dist/react-datepicker.css'
 
 const EditarTerapeutaFormSchema = z.object({
@@ -33,6 +34,8 @@ export function EditarTerapeutaModal({
   onClose,
 }: EditarTerapeutaModalProps) {
   const { terapeutas, editTerapeuta } = useContext(TerapeutasContext)
+  const { fetchPacientes, updatePacientesWithTerapeuta } =
+    useContext(PacientesContext)
   const [mensagemSucesso, setMensagemSucesso] = useState('')
   const [mensagemErro, setMensagemErro] = useState('')
 
@@ -61,7 +64,6 @@ export function EditarTerapeutaModal({
 
   async function handleEditTerapeuta(data: EditarTerapeutaFormInputs) {
     try {
-      // Simula um atraso de 2 segundos
       await new Promise((resolve) => setTimeout(resolve, 2000))
 
       const terapeutaEditado = {
@@ -74,28 +76,28 @@ export function EditarTerapeutaModal({
         chavePix: data.chavePix,
       }
 
-      // Faz a requisição PUT para a API
       await axios.put(
         `http://localhost:3000/terapeutas/${data.id}`,
         terapeutaEditado,
       )
 
-      // Edita o terapeuta no contexto
       editTerapeuta(terapeutaEditado)
 
-      // Limpa os dados do formulário
+      // Espera atualizar todos os pacientes antes de buscar do backend
+      await updatePacientesWithTerapeuta(terapeutaEditado)
+
+      // Agora busca os pacientes atualizados do backend
+      await fetchPacientes()
+
       reset()
-
-      // Define a mensagem de sucesso
       setMensagemSucesso('Terapeuta editado com sucesso!')
-      setMensagemErro('') // Limpa a mensagem de erro, se houver
+      setMensagemErro('')
 
-      console.log('Terapeuta editado:', data)
-      onClose() // Fecha o modal após a edição
+      onClose()
     } catch (error) {
       console.error('Erro ao editar terapeuta:', error)
       setMensagemErro('Erro ao editar terapeuta. Tente novamente.')
-      setMensagemSucesso('') // Limpa a mensagem de sucesso, se houver
+      setMensagemSucesso('')
     }
   }
 
@@ -181,13 +183,11 @@ export function EditarTerapeutaModal({
 
             <div className="mt-6 flex justify-end">
               <button
-                className={`bg-azul text-branco hover:bg-azul/75 focus:shadow-azul inline-flex h-[40px] items-center justify-center rounded-md px-6 font-medium leading-none focus:shadow-[0_0_0_2px] focus:outline-none ${
-                  isSubmitting ? 'cursor-not-allowed' : ''
-                }`}
                 type="submit"
+                className="bg-azul text-white px-4 py-2 rounded hover:bg-sky-600 duration-150"
                 disabled={isSubmitting}
               >
-                {isSubmitting ? 'Carregando...' : 'Confirmar'}
+                {isSubmitting ? 'Salvando...' : 'Salvar'}
               </button>
             </div>
           </form>
