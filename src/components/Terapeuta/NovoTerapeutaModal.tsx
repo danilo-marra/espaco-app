@@ -5,10 +5,12 @@ import { useForm } from 'react-hook-form'
 import * as z from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
-import { useContext, useState } from 'react'
-import { TerapeutasContext } from '../../contexts/TerapeutasContext'
+import { useState } from 'react'
 import 'react-datepicker/dist/react-datepicker.css'
 import { v4 as uuidv4 } from 'uuid'
+import { useDispatch } from 'react-redux'
+import { addTerapeuta } from '../../store/terapeutasSlice'
+import type { AppDispatch } from '../../store/store'
 
 const NovoTerapeutaFormSchema = z.object({
   nomeTerapeuta: z.string(),
@@ -22,7 +24,7 @@ const NovoTerapeutaFormSchema = z.object({
 type NovoTerapeutaFormInputs = z.infer<typeof NovoTerapeutaFormSchema>
 
 export function NovoTerapeutaModal() {
-  const { addTerapeuta } = useContext(TerapeutasContext)
+  const dispatch = useDispatch<AppDispatch>()
   const [mensagemSucesso, setMensagemSucesso] = useState('')
   const [mensagemErro, setMensagemErro] = useState('')
   const {
@@ -54,8 +56,8 @@ export function NovoTerapeutaModal() {
       // Faz a requisição POST para a API
       await axios.post('http://localhost:3000/terapeutas', novoTerapeuta)
 
-      // Adiciona o novo terapeuta ao contexto
-      addTerapeuta(novoTerapeuta)
+      // Adiciona o novo terapeuta ao estado do Redux
+      dispatch(addTerapeuta(novoTerapeuta))
 
       // Limpa os dados do formulário
       reset()

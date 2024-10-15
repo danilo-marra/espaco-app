@@ -5,17 +5,22 @@ import * as z from 'zod'
 import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
-import { useContext, useEffect, useState } from 'react'
-import { PacientesContext } from '../../contexts/PacientesContext'
+import { useEffect, useState } from 'react'
+
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import { ptBR } from 'date-fns/locale'
-import { TerapeutasContext } from '../../contexts/TerapeutasContext'
+
+import { useDispatch, useSelector } from 'react-redux'
+import type { AppDispatch, RootState } from '../../store/store'
+import { fetchPacientes, updatePaciente } from '../../store/pacientesSlice'
+import { fetchTerapeutas } from '../../store/terapeutasSlice'
+import type { Paciente } from '../../tipos'
 
 const EditarPacienteFormSchema = z.object({
   id: z.string(),
   nomePaciente: z.string(),
-  dtNascimento: z.date(),
+  dtNascimento: z.string(),
   nomeTerapeuta: z.string(),
   nomeResponsavel: z.string(),
   telefoneResponsavel: z.string(),
@@ -38,13 +43,15 @@ export function EditarPacienteModal({
   open,
   onClose,
 }: EditarPacienteModalProps) {
-  const { pacientes, editPaciente } = useContext(PacientesContext)
+  const dispatch = useDispatch<AppDispatch>()
+  const terapeutas = useSelector((state: RootState) => state.terapeutas.data)
+  const pacientes = useSelector((state: RootState) => state.pacientes.data)
+  // const { editPaciente } = useContext(PacientesContext)
   const [mensagemSucesso, setMensagemSucesso] = useState('')
   const [mensagemErro, setMensagemErro] = useState('')
-  const { terapeutas } = useContext(TerapeutasContext)
   const {
-    control,
     register,
+    control,
     handleSubmit,
     reset,
     setValue,
@@ -58,7 +65,7 @@ export function EditarPacienteModal({
     if (paciente) {
       setValue('id', paciente.id)
       setValue('nomePaciente', paciente.nomePaciente)
-      setValue('dtNascimento', new Date(paciente.dtNascimento))
+      setValue('dtNascimento', new Date(paciente.dtNascimento).toISOString())
       setValue('nomeTerapeuta', paciente.terapeutaInfo.nomeTerapeuta)
       setValue('nomeResponsavel', paciente.nomeResponsavel)
       setValue('telefoneResponsavel', paciente.telefoneResponsavel)
@@ -71,22 +78,21 @@ export function EditarPacienteModal({
 
   async function handleEditPaciente(data: EditarPacienteFormInputs) {
     try {
-      // Simula um atraso de 2 segundos
       await new Promise((resolve) => setTimeout(resolve, 2000))
 
-      const terapeutaSelecionado = terapeutas.find(
+      const terapeutaInfo = terapeutas.find(
         (terapeuta) => terapeuta.nomeTerapeuta === data.nomeTerapeuta,
       )
 
-      if (!terapeutaSelecionado) {
+      if (!terapeutaInfo) {
         throw new Error('Terapeuta não encontrado')
       }
 
-      const pacienteEditado = {
+      const pacienteEditado: Paciente = {
         id: data.id,
         nomePaciente: data.nomePaciente,
-        dtNascimento: data.dtNascimento,
-        terapeutaInfo: terapeutaSelecionado,
+        dtNascimento: new Date(data.dtNascimento).toISOString(),
+        terapeutaInfo,
         nomeResponsavel: data.nomeResponsavel,
         telefoneResponsavel: data.telefoneResponsavel,
         emailResponsavel: data.emailResponsavel,
@@ -101,8 +107,12 @@ export function EditarPacienteModal({
         pacienteEditado,
       )
 
-      // Edita o paciente no contexto
-      editPaciente(pacienteEditado)
+      // Atualiza paciente no estado do Redux
+      dispatch(updatePaciente(pacienteEditado))
+
+      // Recarrega os terapeutas e pacientes
+      dispatch(fetchTerapeutas())
+      dispatch(fetchPacientes())
 
       // Limpa os dados do formulário
       reset()
@@ -111,7 +121,6 @@ export function EditarPacienteModal({
       setMensagemSucesso('Paciente editado com sucesso!')
       setMensagemErro('') // Limpa a mensagem de erro, se houver
 
-      console.log('Paciente editado:', data)
       onClose() // Fecha o modal após a edição
     } catch (error) {
       console.error('Erro ao editar paciente:', error)
@@ -161,12 +170,17 @@ export function EditarPacienteModal({
                     className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
                     id="dtNascimento"
                     placeholderText="Data de nascimento"
-                    selected={field.value}
-                    onChange={(date) => field.onChange(date)}
+                    selected={field.value ? new Date(field.value) : null} // Converte a data para o formato Date
+                    onChange={(date) =>
+                      field.onChange(date ? date.toISOString() : '')
+                    } // Converte a data para o formato ISOString
                     dateFormat="dd/MM/yyyy"
                     locale={ptBR}
                     onFocus={handleFocus}
                     autoComplete="off"
+                    showMonthDropdown
+                    showYearDropdown
+                    dropdownMode="select"
                   />
                 )}
               />

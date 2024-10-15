@@ -5,17 +5,19 @@ import { Controller, useForm } from 'react-hook-form'
 import * as z from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
-import { useContext, useState } from 'react'
-import { PacientesContext } from '../../contexts/PacientesContext'
+import { useState, useContext } from 'react'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import { ptBR } from 'date-fns/locale'
 import { v4 as uuidv4 } from 'uuid'
+import { useDispatch } from 'react-redux'
+import { addPaciente } from '../../store/pacientesSlice'
+import type { AppDispatch } from '../../store/store'
 import { TerapeutasContext } from '../../contexts/TerapeutasContext'
 
 const NovoPacienteFormSchema = z.object({
   nomePaciente: z.string(),
-  dtNascimento: z.date(),
+  dtNascimento: z.string(), // Alterado para string
   nomeTerapeuta: z.string(),
   nomeResponsavel: z.string(),
   telefoneResponsavel: z.string(),
@@ -28,7 +30,7 @@ const NovoPacienteFormSchema = z.object({
 type NovoPacienteFormInputs = z.infer<typeof NovoPacienteFormSchema>
 
 export function NovoPacienteModal() {
-  const { addPaciente } = useContext(PacientesContext)
+  const dispatch = useDispatch<AppDispatch>()
   const [mensagemSucesso, setMensagemSucesso] = useState('')
   const [mensagemErro, setMensagemErro] = useState('')
   const { terapeutas } = useContext(TerapeutasContext)
@@ -60,7 +62,7 @@ export function NovoPacienteModal() {
       const novoPaciente = {
         id: uuidv4(),
         nomePaciente: data.nomePaciente,
-        dtNascimento: data.dtNascimento,
+        dtNascimento: new Date(data.dtNascimento).toISOString(), // Converte a string para Date e depois para string ISO
         terapeutaInfo: terapeutaSelecionado,
         nomeResponsavel: data.nomeResponsavel,
         telefoneResponsavel: data.telefoneResponsavel,
@@ -73,8 +75,8 @@ export function NovoPacienteModal() {
       // Faz a requisição POST para a API
       await axios.post('http://localhost:3000/pacientes', novoPaciente)
 
-      // Adiciona o novo paciente ao contexto
-      addPaciente(novoPaciente)
+      // Adiciona o novo paciente ao estado do Redux
+      dispatch(addPaciente(novoPaciente))
 
       // Limpa os dados do formulário
       reset()
@@ -130,12 +132,17 @@ export function NovoPacienteModal() {
                   className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
                   id="dtNascimento"
                   placeholderText="Data de nascimento"
-                  selected={field.value}
-                  onChange={(date) => field.onChange(date)}
+                  selected={field.value ? new Date(field.value) : null} // Converte a string para Date
+                  onChange={(date) =>
+                    field.onChange(date ? date.toISOString() : '')
+                  } // Converte a Date para string ISO
                   dateFormat="dd/MM/yyyy"
                   locale={ptBR}
                   onFocus={handleFocus}
                   autoComplete="off"
+                  showMonthDropdown
+                  showYearDropdown
+                  dropdownMode="select"
                 />
               )}
             />

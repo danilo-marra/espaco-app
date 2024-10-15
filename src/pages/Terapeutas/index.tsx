@@ -1,5 +1,4 @@
 import {
-  Eye,
   PencilSimple,
   Person,
   Plus,
@@ -7,21 +6,24 @@ import {
   User,
   UsersThree,
 } from '@phosphor-icons/react'
-import { useContext, useEffect, useState } from 'react'
-import { TerapeutasContext } from '../../contexts/TerapeutasContext'
-import { PacientesContext } from '../../contexts/PacientesContext'
+import { useEffect, useState } from 'react'
 import Pagination from '../../components/Pagination'
-import axios from 'axios'
 import * as Dialog from '@radix-ui/react-dialog'
 import { NovoTerapeutaModal } from '../../components/Terapeuta/NovoTerapeutaModal'
+import axios from 'axios'
 import type { Terapeuta } from '../../tipos'
 import { EditarTerapeutaModal } from '../../components/Terapeuta/EditarTerapeutaModal'
 import { ExcluirModal } from '../../components/ExcluirModal'
 import { useModal } from '../../hooks/useModal'
+import { useSelector, useDispatch } from 'react-redux'
+import type { RootState, AppDispatch } from '../../store/store'
+import { fetchTerapeutas } from '../../store/terapeutasSlice'
+import { fetchPacientes } from '../../store/pacientesSlice'
 
 export function Terapeutas() {
-  const { terapeutas, fetchTerapeutas } = useContext(TerapeutasContext)
-  const { pacientes } = useContext(PacientesContext)
+  const dispatch = useDispatch<AppDispatch>()
+  const terapeutas = useSelector((state: RootState) => state.terapeutas.data)
+  const pacientes = useSelector((state: RootState) => state.pacientes.data)
   const [totalPages, setTotalPages] = useState<number>(0)
   const [currentPage, setCurrentPage] = useState(1)
   const terapeutasPerPage = 10
@@ -49,6 +51,11 @@ export function Terapeutas() {
   }
 
   const [filteredTerapeutas, setFilteredTerapeutas] = useState<Terapeuta[]>([])
+
+  useEffect(() => {
+    dispatch(fetchTerapeutas())
+    dispatch(fetchPacientes())
+  }, [dispatch])
 
   useEffect(() => {
     const filtered =
@@ -82,7 +89,7 @@ export function Terapeutas() {
       await axios.delete(
         `http://localhost:3000/terapeutas/${terapeutaParaExcluir}`,
       )
-      fetchTerapeutas()
+      dispatch(fetchTerapeutas())
       openModal('Terapeuta excluído com sucesso!')
       setIsSuccess(true)
       console.log('Terapeuta excluído:', terapeutaParaExcluir)
@@ -172,18 +179,7 @@ export function Terapeutas() {
                   <td className="p-4">{terapeuta.telefoneTerapeuta}</td>
                   <td className="p-4">{terapeuta.emailTerapeuta}</td>
                   <td className="p-4">{terapeuta.enderecoTerapeuta}</td>
-                  <td className="p-4">
-                    {' '}
-                    <button
-                      type="button"
-                      className="text-blue-500 hover:text-blue-700"
-                      onClick={() => {
-                        console.log('terapeuta.curriculo')
-                      }}
-                    >
-                      <Eye size={20} weight="bold" />
-                    </button>
-                  </td>
+                  <td className="p-4">{terapeuta.curriculo}</td>
                   <td className="p-4">{terapeuta.chavePix}</td>
                   <td className="p-2 space-x-2">
                     <button

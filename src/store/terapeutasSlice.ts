@@ -39,6 +39,9 @@ const terapeutasSlice = createSlice({
         state.data[index] = action.payload
       }
     },
+    addTerapeuta: (state, action: PayloadAction<Terapeuta>) => {
+      state.data.push(action.payload)
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -56,5 +59,5 @@ const terapeutasSlice = createSlice({
   },
 })
 
-export const { updateTerapeuta } = terapeutasSlice.actions
+export const { updateTerapeuta, addTerapeuta } = terapeutasSlice.actions
 export default terapeutasSlice.reducer

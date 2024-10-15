@@ -10,7 +10,7 @@ export interface Terapeuta {
 export interface Paciente {
   id: string
   nomePaciente: string
-  dtNascimento: Date
+  dtNascimento: string
   terapeutaInfo: Terapeuta
   nomeResponsavel: string
   telefoneResponsavel: string

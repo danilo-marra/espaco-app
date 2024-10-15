@@ -5,10 +5,13 @@ import { useForm } from 'react-hook-form'
 import * as z from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
-import { useContext, useEffect, useState } from 'react'
-import { TerapeutasContext } from '../../contexts/TerapeutasContext'
-import { PacientesContext } from '../../contexts/PacientesContext'
+import { useEffect, useState } from 'react'
 import 'react-datepicker/dist/react-datepicker.css'
+import { useDispatch, useSelector } from 'react-redux'
+import { updatePaciente, fetchPacientes } from '../../store/pacientesSlice'
+import { updateTerapeuta, fetchTerapeutas } from '../../store/terapeutasSlice'
+import type { Paciente } from '../../tipos'
+import type { AppDispatch, RootState } from '../../store/store'
 
 const EditarTerapeutaFormSchema = z.object({
   id: z.string(),
@@ -33,9 +36,8 @@ export function EditarTerapeutaModal({
   open,
   onClose,
 }: EditarTerapeutaModalProps) {
-  const { terapeutas, editTerapeuta } = useContext(TerapeutasContext)
-  const { fetchPacientes, updatePacientesWithTerapeuta } =
-    useContext(PacientesContext)
+  const dispatch = useDispatch<AppDispatch>()
+  const terapeutas = useSelector((state: RootState) => state.terapeutas.data)
   const [mensagemSucesso, setMensagemSucesso] = useState('')
   const [mensagemErro, setMensagemErro] = useState('')
 
@@ -76,18 +78,55 @@ export function EditarTerapeutaModal({
         chavePix: data.chavePix,
       }
 
+      // Atualiza terapeuta no backend
       await axios.put(
         `http://localhost:3000/terapeutas/${data.id}`,
         terapeutaEditado,
       )
 
-      editTerapeuta(terapeutaEditado)
+      // Atualiza terapeuta no estado do Redux
+      dispatch(updateTerapeuta(terapeutaEditado))
 
-      // Espera atualizar todos os pacientes antes de buscar do backend
-      await updatePacientesWithTerapeuta(terapeutaEditado)
+      // Atualiza pacientes associados no backend
+      const pacientesResponse = await fetch('http://localhost:3000/pacientes')
+      const pacientes: Paciente[] = await pacientesResponse.json()
 
-      // Agora busca os pacientes atualizados do backend
-      await fetchPacientes()
+      const pacientesParaAtualizar = pacientes.filter(
+        (paciente: Paciente) =>
+          paciente.terapeutaInfo.id === terapeutaEditado.id,
+      )
+
+      await Promise.all(
+        pacientesParaAtualizar.map((paciente: Paciente) =>
+          fetch(`http://localhost:3000/pacientes/${paciente.id}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              ...paciente,
+              terapeutaInfo: {
+                ...paciente.terapeutaInfo,
+                nomeTerapeuta: terapeutaEditado.nomeTerapeuta,
+              },
+            }),
+          }),
+        ),
+      )
+
+      // Atualiza pacientes no estado do Redux
+      for (const paciente of pacientesParaAtualizar) {
+        dispatch(
+          updatePaciente({
+            ...paciente,
+            terapeutaInfo: terapeutaEditado,
+          }),
+        )
+      }
+
+      // Recarrega os terapeutas e pacientes
+      dispatch(fetchTerapeutas())
+      dispatch(fetchPacientes())
 
       reset()
       setMensagemSucesso('Terapeuta editado com sucesso!')

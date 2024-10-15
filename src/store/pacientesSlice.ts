@@ -39,6 +39,9 @@ const pacientesSlice = createSlice({
         state.data[index] = action.payload
       }
     },
+    addPaciente: (state, action: PayloadAction<Paciente>) => {
+      state.data.push(action.payload)
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -56,5 +59,5 @@ const pacientesSlice = createSlice({
   },
 })
 
-export const { updatePaciente } = pacientesSlice.actions
+export const { updatePaciente, addPaciente } = pacientesSlice.actions
 export default pacientesSlice.reducer

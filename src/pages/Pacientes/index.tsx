@@ -1,4 +1,5 @@
 import {
+  Cake,
   PencilSimple,
   Person,
   Plus,
@@ -6,8 +7,7 @@ import {
   User,
   UsersThree,
 } from '@phosphor-icons/react'
-import { useContext, useEffect, useState } from 'react'
-import { PacientesContext } from '../../contexts/PacientesContext'
+import { useEffect, useState } from 'react'
 import { dateFormatter } from '../../utils/formatter'
 import { calcularIdade } from '../../utils/caculateAge'
 import Pagination from '../../components/Pagination'
@@ -16,15 +16,18 @@ import { NovoPacienteModal } from '../../components/Paciente/NovoPacienteModal'
 import axios from 'axios'
 import type { Paciente } from '../../tipos'
 import { EditarPacienteModal } from '../../components/Paciente/EditarPacienteModal'
-import { TerapeutasContext } from '../../contexts/TerapeutasContext'
 import { ExcluirModal } from '../../components/ExcluirModal'
 import { useModal } from '../../hooks/useModal'
-import { useSelector } from 'react-redux'
-import type { RootState } from '../../store/store'
+import { useSelector, useDispatch } from 'react-redux'
+import type { RootState, AppDispatch } from '../../store/store'
+import { fetchPacientes } from '../../store/pacientesSlice'
+import { fetchTerapeutas } from '../../store/terapeutasSlice'
+import { isBirthday } from '../../utils/dateUtils'
 
 export function Pacientes() {
-  const { pacientes, fetchPacientes } = useContext(PacientesContext)
-  const { terapeutas } = useContext(TerapeutasContext)
+  const dispatch = useDispatch<AppDispatch>()
+  const pacientes = useSelector((state: RootState) => state.pacientes.data)
+  const terapeutas = useSelector((state: RootState) => state.terapeutas.data)
   const [searchQuery, setSearchQuery] = useState('')
   const [totalPages, setTotalPages] = useState<number>(0)
   const [currentPage, setCurrentPage] = useState(1)
@@ -47,6 +50,11 @@ export function Pacientes() {
   const [isSuccess, setIsSuccess] = useState(false)
 
   const [filteredPacientes, setFilteredPacientes] = useState<Paciente[]>([])
+
+  useEffect(() => {
+    dispatch(fetchPacientes())
+    dispatch(fetchTerapeutas())
+  }, [dispatch])
 
   useEffect(() => {
     const filtered = pacientes.filter((paciente) =>
@@ -79,7 +87,7 @@ export function Pacientes() {
       await axios.delete(
         `http://localhost:3000/pacientes/${pacienteParaExcluir}`,
       )
-      fetchPacientes()
+      dispatch(fetchPacientes())
       openModal('Paciente excluído com sucesso!')
       setIsSuccess(true)
       console.log('Paciente excluído:', pacienteParaExcluir)
@@ -97,24 +105,8 @@ export function Pacientes() {
     setIsSuccess(false)
   }
 
-  // useEffect(() => {
-  //   fetchPacientes()
-  // }, [fetchPacientes])
-
-  const pacientesRedux = useSelector((state: RootState) => state.pacientes.data)
-
   return (
     <div className="flex min-h-screen">
-      <div>
-        <h1>Teste</h1>
-        <ul>
-          {pacientesRedux.map((paciente) => (
-            <li key={paciente.id}>
-              {paciente.nomePaciente} - {paciente.terapeutaInfo.nomeTerapeuta}
-            </li>
-          ))}
-        </ul>
-      </div>
       <main className="flex-1 bg-gray-100 p-8">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-2xl font-semibold">Pacientes</h1>
@@ -173,47 +165,63 @@ export function Pacientes() {
             </tr>
           </thead>
           <tbody className="text-center">
-            {pacientesAtuais.map((paciente) => (
-              <tr key={paciente.id}>
-                <td className="p-4">{paciente.nomePaciente}</td>
-                <td className="p-4">
-                  {dateFormatter.format(new Date(paciente.dtNascimento))}
-                </td>
-                <td className="p-4">{calcularIdade(paciente.dtNascimento)}</td>
-                <td className="p-4">
-                  {paciente.terapeutaInfo?.nomeTerapeuta || 'Sem Terapeuta'}
-                </td>
-                <td className="p-4">{paciente.nomeResponsavel}</td>
-                <td className="p-4">{paciente.telefoneResponsavel}</td>
-                <td className="p-4">{paciente.emailResponsavel}</td>
-                <td className="p-4">{paciente.cpfResponsavel}</td>
-                <td className="p-4">{paciente.enderecoResponsavel}</td>
-                <td className="p-4">{paciente.origem}</td>
-                <td className="p-2 space-x-2">
-                  <button
-                    type="button"
-                    title="Editar Paciente"
-                    className="text-green-500 hover:text-green-700"
-                    onClick={() => handleEditPaciente(paciente)}
-                  >
-                    <PencilSimple size={20} weight="bold" />
-                  </button>
-                  <button
-                    type="button"
-                    title="Excluir Paciente"
-                    className="text-red-500 hover:text-red-700"
-                    onClick={() =>
-                      openModalExcluir(
-                        'Deseja realmente excluir este paciente?',
-                        paciente.id,
-                      )
-                    }
-                  >
-                    <TrashSimple size={20} weight="bold" />
-                  </button>
-                </td>
-              </tr>
-            ))}
+            {pacientesAtuais.map((paciente) => {
+              const today = new Date()
+              const birthDate = new Date(paciente.dtNascimento)
+              const birthdayToday = isBirthday(today, birthDate)
+
+              return (
+                <tr key={paciente.id}>
+                  <td className="p-4">{paciente.nomePaciente}</td>
+                  <td className="p-4">
+                    {birthdayToday && (
+                      <span
+                        title="Aniversário hoje!"
+                        className="flex justify-center items-center"
+                      >
+                        <Cake size={28} color="#C3586A" />
+                      </span>
+                    )}
+                    {dateFormatter.format(birthDate)}
+                  </td>
+                  <td className="p-4">
+                    {calcularIdade(new Date(paciente.dtNascimento))}
+                  </td>
+                  <td className="p-4">
+                    {paciente.terapeutaInfo?.nomeTerapeuta || 'Sem Terapeuta'}
+                  </td>
+                  <td className="p-4">{paciente.nomeResponsavel}</td>
+                  <td className="p-4">{paciente.telefoneResponsavel}</td>
+                  <td className="p-4">{paciente.emailResponsavel}</td>
+                  <td className="p-4">{paciente.cpfResponsavel}</td>
+                  <td className="p-4">{paciente.enderecoResponsavel}</td>
+                  <td className="p-4">{paciente.origem}</td>
+                  <td className="p-2 space-x-2">
+                    <button
+                      type="button"
+                      title="Editar Paciente"
+                      className="text-green-500 hover:text-green-700"
+                      onClick={() => handleEditPaciente(paciente)}
+                    >
+                      <PencilSimple size={20} weight="bold" />
+                    </button>
+                    <button
+                      type="button"
+                      title="Excluir Paciente"
+                      className="text-red-500 hover:text-red-700"
+                      onClick={() =>
+                        openModalExcluir(
+                          'Deseja realmente excluir este paciente?',
+                          paciente.id,
+                        )
+                      }
+                    >
+                      <TrashSimple size={20} weight="bold" />
+                    </button>
+                  </td>
+                </tr>
+              )
+            })}
           </tbody>
         </table>
         <Pagination
