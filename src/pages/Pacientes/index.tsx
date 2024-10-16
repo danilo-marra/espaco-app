@@ -48,6 +48,7 @@ export function Pacientes() {
     null,
   )
   const [isSuccess, setIsSuccess] = useState(false)
+  const [isNovoPacienteModalOpen, setIsNovoPacienteModalOpen] = useState(false)
 
   const [filteredPacientes, setFilteredPacientes] = useState<Paciente[]>([])
 
@@ -110,7 +111,10 @@ export function Pacientes() {
       <main className="flex-1 bg-gray-100 p-8">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-2xl font-semibold">Pacientes</h1>
-          <Dialog.Root>
+          <Dialog.Root
+            open={isNovoPacienteModalOpen}
+            onOpenChange={setIsNovoPacienteModalOpen}
+          >
             <Dialog.Trigger asChild>
               <button
                 type="button"
@@ -120,7 +124,10 @@ export function Pacientes() {
                 Novo Paciente
               </button>
             </Dialog.Trigger>
-            <NovoPacienteModal />
+            <NovoPacienteModal
+              open={isNovoPacienteModalOpen}
+              onClose={setIsNovoPacienteModalOpen}
+            />
           </Dialog.Root>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">

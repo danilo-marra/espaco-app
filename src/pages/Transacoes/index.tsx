@@ -1,15 +1,3 @@
-import {
-  ArrowCircleDown,
-  ArrowCircleUp,
-  Calendar,
-  CaretLeft,
-  CaretRight,
-  CashRegister,
-  CurrencyDollar,
-  PencilSimple,
-  Plus,
-  TrashSimple,
-} from '@phosphor-icons/react'
 import { useContext, useEffect, useState } from 'react'
 import { TransacoesContext } from '../../contexts/TransacoesContext'
 import { NovaTransacaoModal } from '../../components/Transacao/NovaTransacaoModal'
@@ -25,6 +13,18 @@ import * as Dialog from '@radix-ui/react-dialog'
 import axios from 'axios'
 import { ExcluirModal } from '../../components/ExcluirModal'
 import { useModal } from '../../hooks/useModal'
+import {
+  ArrowCircleDown,
+  ArrowCircleUp,
+  Calendar,
+  CaretLeft,
+  CaretRight,
+  CashRegister,
+  CurrencyDollar,
+  PencilSimple,
+  Plus,
+  TrashSimple,
+} from '@phosphor-icons/react'
 
 export function Transacoes() {
   const [isMenuOpen] = useState<boolean>(false)
@@ -54,9 +54,11 @@ export function Transacoes() {
   const [isSuccess, setIsSuccess] = useState(false)
 
   useEffect(() => {
-    // Fetch transacoes
+    // Fetch transacoes only once when the component mounts
     fetchTransacoes()
+  }, [fetchTransacoes])
 
+  useEffect(() => {
     // Filter transacoes by search value
     const filteredBySearch = transacoes.filter((transacao) =>
       transacao.descricao.toLowerCase().includes(searchValue.toLowerCase()),
@@ -94,7 +96,7 @@ export function Transacoes() {
       filteredByDate.slice(offset, offset + transacoesPorPagina),
     )
     settotalPages(Math.ceil(filteredByDate.length / transacoesPorPagina))
-  }, [fetchTransacoes, transacoes, searchValue, dataAtual, currentPage])
+  }, [transacoes, searchValue, dataAtual, currentPage])
 
   function handleMonthPrev() {
     setDataAtual(new Date(dataAtual.getFullYear(), dataAtual.getMonth() - 1, 1))

@@ -19,8 +19,8 @@ export const EditarTerapeutaFormSchema = z.object({
   chavePix: z.string(),
 })
 
+export type NovoTerapeutaFormInputs = z.infer<typeof NovoTerapeutaFormSchema>
+
 export type EditarTerapeutaFormInputs = z.infer<
   typeof EditarTerapeutaFormSchema
 >
-
-export type NovoTerapeutaFormInputs = z.infer<typeof NovoTerapeutaFormSchema>

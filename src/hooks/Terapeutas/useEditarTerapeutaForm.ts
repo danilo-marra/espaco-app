@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import axios from 'axios'
 import type { AppDispatch, RootState } from '../../store/store'
-import { fetchTerapeutas, updateTerapeuta } from '../../store/terapeutasSlice'
 import type { Paciente, Terapeuta } from '../../tipos'
+import { fetchTerapeutas, updateTerapeuta } from '../../store/terapeutasSlice'
 import { fetchPacientes, updatePaciente } from '../../store/pacientesSlice'
 import {
   EditarTerapeutaFormSchema,

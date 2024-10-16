@@ -9,7 +9,6 @@ import {
   User,
 } from '@phosphor-icons/react'
 import { useContext, useEffect, useState } from 'react'
-import { TerapeutasContext } from '../../contexts/TerapeutasContext'
 import { SessoesContext } from '../../contexts/SessoesContext'
 import { dateFormatter, priceFormatter } from '../../utils/formatter'
 import { format } from 'date-fns'
@@ -20,7 +19,6 @@ import type { Sessao } from '../../tipos'
 import Pagination from '../../components/Pagination'
 
 export function Sessoes() {
-  const { terapeutas, fetchTerapeutas } = useContext(TerapeutasContext)
   const { sessoes, fetchSessoes } = useContext(SessoesContext)
   const [dataAtual, setDataAtual] = useState<Date>(new Date())
   const [totalPages, setTotalPages] = useState<number>(0)
@@ -40,10 +38,10 @@ export function Sessoes() {
     indexOfLastSessoes,
   )
 
-  useEffect(() => {
-    fetchTerapeutas()
-    fetchSessoes()
-  }, [fetchTerapeutas, fetchSessoes])
+  // useEffect(() => {
+  //   fetchTerapeutas()
+  //   fetchSessoes()
+  // }, [fetchTerapeutas, fetchSessoes])
 
   useEffect(() => {
     // Filter sessoes by selected terapeuta
@@ -99,7 +97,7 @@ export function Sessoes() {
             <label htmlFor="psicólogo" className="text-xl font-semibold">
               Terapeuta:
             </label>
-            <select
+            {/* <select
               className="text-xl"
               name="terapeutas"
               id="terapeutas"
@@ -112,7 +110,7 @@ export function Sessoes() {
                   {terapeuta.nomeTerapeuta}
                 </option>
               ))}
-            </select>
+            </select> */}
           </div>
           <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
             <HandCoins size={24} />

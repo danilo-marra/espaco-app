@@ -1,16 +1,19 @@
-import { useState, useContext } from 'react'
+import { useState } from 'react'
 import axios from 'axios'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { v4 as uuidv4 } from 'uuid'
-import { TerapeutasContext } from '../../contexts/TerapeutasContext'
 import {
   NovoTerapeutaFormSchema,
   type NovoTerapeutaFormInputs,
 } from './validationSchemasTerapeutas'
+import { useDispatch } from 'react-redux'
+import type { AppDispatch } from '../../store/store'
+import { addTerapeuta } from '../../store/terapeutasSlice'
 
 export function useNovoTerapeutaForm() {
-  const { addTerapeuta } = useContext(TerapeutasContext)
+  const dispatch = useDispatch<AppDispatch>()
+
   const [mensagemSucesso, setMensagemSucesso] = useState('')
   const [mensagemErro, setMensagemErro] = useState('')
 
@@ -39,7 +42,7 @@ export function useNovoTerapeutaForm() {
 
       await axios.post('http://localhost:3000/terapeutas', novoTerapeuta)
 
-      addTerapeuta(novoTerapeuta)
+      dispatch(addTerapeuta(novoTerapeuta))
 
       reset()
       setMensagemSucesso('Terapeuta cadastrado com sucesso!')
