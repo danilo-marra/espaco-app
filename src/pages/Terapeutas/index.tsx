@@ -44,6 +44,9 @@ export function Terapeutas() {
     string | null
   >(null)
   const [isSuccess, setIsSuccess] = useState(false)
+  const [isNovoTerapeutaModalOpen, setIsNovoTerapeutaModalOpen] =
+    useState(false) // Estado para o modal de novo terapeuta
+
   const handleTerapeutaChange = (
     event: React.ChangeEvent<HTMLSelectElement>,
   ) => {
@@ -113,7 +116,10 @@ export function Terapeutas() {
         <div>
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-2xl font-bold">Terapeutas</h1>
-            <Dialog.Root>
+            <Dialog.Root
+              open={isNovoTerapeutaModalOpen}
+              onOpenChange={setIsNovoTerapeutaModalOpen}
+            >
               <Dialog.Trigger asChild>
                 <button
                   type="button"
@@ -123,7 +129,10 @@ export function Terapeutas() {
                   Novo Terapeuta
                 </button>
               </Dialog.Trigger>
-              <NovoTerapeutaModal />
+              <NovoTerapeutaModal
+                open={isNovoTerapeutaModalOpen}
+                onClose={setIsNovoTerapeutaModalOpen}
+              />
             </Dialog.Root>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">

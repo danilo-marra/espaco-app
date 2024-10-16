@@ -1,29 +1,8 @@
 import { X } from '@phosphor-icons/react'
-import axios from 'axios'
 import * as Dialog from '@radix-ui/react-dialog'
-import { useForm } from 'react-hook-form'
-import * as z from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
-import { useEffect, useState } from 'react'
-import 'react-datepicker/dist/react-datepicker.css'
-import { useDispatch, useSelector } from 'react-redux'
-import { updatePaciente, fetchPacientes } from '../../store/pacientesSlice'
-import { updateTerapeuta, fetchTerapeutas } from '../../store/terapeutasSlice'
-import type { Paciente } from '../../tipos'
-import type { AppDispatch, RootState } from '../../store/store'
-
-const EditarTerapeutaFormSchema = z.object({
-  id: z.string(),
-  nomeTerapeuta: z.string(),
-  telefoneTerapeuta: z.string(),
-  emailTerapeuta: z.string(),
-  enderecoTerapeuta: z.string(),
-  curriculo: z.string(),
-  chavePix: z.string(),
-})
-
-type EditarTerapeutaFormInputs = z.infer<typeof EditarTerapeutaFormSchema>
+import { useEditarTerapeutaForm } from '../../hooks/Terapeutas/useEditarTerapeutaForm'
+import type { EditarTerapeutaFormInputs } from '../../hooks/Terapeutas/validationSchemasTerapeutas'
 
 interface EditarTerapeutaModalProps {
   terapeutaId: string
@@ -36,113 +15,33 @@ export function EditarTerapeutaModal({
   open,
   onClose,
 }: EditarTerapeutaModalProps) {
-  const dispatch = useDispatch<AppDispatch>()
-  const terapeutas = useSelector((state: RootState) => state.terapeutas.data)
-  const [mensagemSucesso, setMensagemSucesso] = useState('')
-  const [mensagemErro, setMensagemErro] = useState('')
-
   const {
     register,
+    errors,
     handleSubmit,
-    reset,
-    setValue,
-    formState: { isSubmitting },
-  } = useForm<EditarTerapeutaFormInputs>({
-    resolver: zodResolver(EditarTerapeutaFormSchema),
-  })
+    handleEditTerapeuta,
+    isSubmitting,
+    mensagemSucesso,
+    mensagemErro,
+    setMensagemSucesso,
+    setMensagemErro,
+    handleFocus,
+  } = useEditarTerapeutaForm(terapeutaId)
 
-  useEffect(() => {
-    const terapeuta = terapeutas.find((t) => t.id === terapeutaId)
-    if (terapeuta) {
-      setValue('id', terapeuta.id)
-      setValue('nomeTerapeuta', terapeuta.nomeTerapeuta)
-      setValue('telefoneTerapeuta', terapeuta.telefoneTerapeuta)
-      setValue('emailTerapeuta', terapeuta.emailTerapeuta)
-      setValue('enderecoTerapeuta', terapeuta.enderecoTerapeuta)
-      setValue('curriculo', terapeuta.curriculo)
-      setValue('chavePix', terapeuta.chavePix)
-    }
-  }, [terapeutaId, terapeutas, setValue])
-
-  async function handleEditTerapeuta(data: EditarTerapeutaFormInputs) {
+  async function onSubmit(data: EditarTerapeutaFormInputs) {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-
-      const terapeutaEditado = {
-        id: data.id,
-        nomeTerapeuta: data.nomeTerapeuta,
-        telefoneTerapeuta: data.telefoneTerapeuta,
-        emailTerapeuta: data.emailTerapeuta,
-        enderecoTerapeuta: data.enderecoTerapeuta,
-        curriculo: data.curriculo,
-        chavePix: data.chavePix,
-      }
-
-      // Atualiza terapeuta no backend
-      await axios.put(
-        `http://localhost:3000/terapeutas/${data.id}`,
-        terapeutaEditado,
-      )
-
-      // Atualiza terapeuta no estado do Redux
-      dispatch(updateTerapeuta(terapeutaEditado))
-
-      // Atualiza pacientes associados no backend
-      const pacientesResponse = await fetch('http://localhost:3000/pacientes')
-      const pacientes: Paciente[] = await pacientesResponse.json()
-
-      const pacientesParaAtualizar = pacientes.filter(
-        (paciente: Paciente) =>
-          paciente.terapeutaInfo.id === terapeutaEditado.id,
-      )
-
-      await Promise.all(
-        pacientesParaAtualizar.map((paciente: Paciente) =>
-          fetch(`http://localhost:3000/pacientes/${paciente.id}`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              ...paciente,
-              terapeutaInfo: {
-                ...paciente.terapeutaInfo,
-                nomeTerapeuta: terapeutaEditado.nomeTerapeuta,
-              },
-            }),
-          }),
-        ),
-      )
-
-      // Atualiza pacientes no estado do Redux
-      for (const paciente of pacientesParaAtualizar) {
-        dispatch(
-          updatePaciente({
-            ...paciente,
-            terapeutaInfo: terapeutaEditado,
-          }),
-        )
-      }
-
-      // Recarrega os terapeutas e pacientes
-      dispatch(fetchTerapeutas())
-      dispatch(fetchPacientes())
-
-      reset()
-      setMensagemSucesso('Terapeuta editado com sucesso!')
+      const mensagem = await handleEditTerapeuta(data)
+      setMensagemSucesso(mensagem)
       setMensagemErro('')
-
       onClose()
     } catch (error) {
-      console.error('Erro ao editar terapeuta:', error)
-      setMensagemErro('Erro ao editar terapeuta. Tente novamente.')
+      if (error instanceof Error) {
+        setMensagemErro(error.message)
+      } else {
+        setMensagemErro('An unknown error occurred')
+      }
       setMensagemSucesso('')
     }
-  }
-
-  function handleFocus() {
-    setMensagemSucesso('')
-    setMensagemErro('')
   }
 
   return (
@@ -157,7 +56,7 @@ export function EditarTerapeutaModal({
             <VisuallyHidden>Editar Terapeuta</VisuallyHidden>
           </Dialog.Description>
           <form
-            onSubmit={handleSubmit(handleEditTerapeuta)}
+            onSubmit={handleSubmit(onSubmit)}
             className="space-y-6 p-6 bg-white rounded-lg"
           >
             <h3 className="font-medium text-azul text-xl mt-6">
@@ -169,34 +68,35 @@ export function EditarTerapeutaModal({
                 className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
                 id="nomeTerapeuta"
                 placeholder="Nome do terapeuta"
-                required
                 {...register('nomeTerapeuta')}
                 onFocus={handleFocus}
               />
+              {errors.nomeTerapeuta && (
+                <p className="text-red-500">{errors.nomeTerapeuta.message}</p>
+              )}
               <input
                 type="text"
                 className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
                 id="telefoneTerapeuta"
                 placeholder="Telefone do terapeuta"
-                required
                 {...register('telefoneTerapeuta')}
                 onFocus={handleFocus}
               />
               <input
-                type="email"
                 className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
                 id="emailTerapeuta"
                 placeholder="Email do terapeuta"
-                required
                 {...register('emailTerapeuta')}
                 onFocus={handleFocus}
               />
+              {errors.emailTerapeuta && (
+                <p className="text-red-500">{errors.emailTerapeuta.message}</p>
+              )}
               <input
                 type="text"
                 className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
                 id="enderecoTerapeuta"
                 placeholder="Endereço do terapeuta"
-                required
                 {...register('enderecoTerapeuta')}
                 onFocus={handleFocus}
               />
@@ -205,7 +105,6 @@ export function EditarTerapeutaModal({
                 className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
                 id="curriculo"
                 placeholder="Curriculo"
-                required
                 {...register('curriculo')}
                 onFocus={handleFocus}
               />
@@ -214,12 +113,10 @@ export function EditarTerapeutaModal({
                 className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
                 id="chavePix"
                 placeholder="Chave PIX"
-                required
                 {...register('chavePix')}
                 onFocus={handleFocus}
               />
             </div>
-
             <div className="mt-6 flex justify-end">
               <button
                 type="submit"

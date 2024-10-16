@@ -64,7 +64,7 @@
       "dtNascimento": "2023-10-15T03:00:00.000Z",
       "terapeutaInfo": {
         "id": "01604952-22ed-44bd-9dfa-2fd7f59f47b9",
-        "nomeTerapeuta": "Ananda",
+        "nomeTerapeuta": "Clara Educadora",
         "telefoneTerapeuta": "61981593923",
         "emailTerapeuta": "danilo2311@gmail.com",
         "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
@@ -84,7 +84,7 @@
       "dtNascimento": "2024-09-03T03:00:00.000Z",
       "terapeutaInfo": {
         "id": "01604952-22ed-44bd-9dfa-2fd7f59f47b9",
-        "nomeTerapeuta": "Ananda",
+        "nomeTerapeuta": "Clara Educadora",
         "telefoneTerapeuta": "61981593923",
         "emailTerapeuta": "danilo2311@gmail.com",
         "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
@@ -184,7 +184,7 @@
       "dtNascimento": "2024-10-01T03:00:00.000Z",
       "terapeutaInfo": {
         "id": "01604952-22ed-44bd-9dfa-2fd7f59f47b9",
-        "nomeTerapeuta": "Ananda",
+        "nomeTerapeuta": "Clara Educadora",
         "telefoneTerapeuta": "61981593923",
         "emailTerapeuta": "danilo2311@gmail.com",
         "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
@@ -224,7 +224,7 @@
       "dtNascimento": "2024-09-29T03:00:00.000Z",
       "terapeutaInfo": {
         "id": "01604952-22ed-44bd-9dfa-2fd7f59f47b9",
-        "nomeTerapeuta": "Ananda",
+        "nomeTerapeuta": "Clara Educadora",
         "telefoneTerapeuta": "61981593923",
         "emailTerapeuta": "danilo2311@gmail.com",
         "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
@@ -264,7 +264,7 @@
       "dtNascimento": "1997-10-15T02:00:00.000Z",
       "terapeutaInfo": {
         "id": "01604952-22ed-44bd-9dfa-2fd7f59f47b9",
-        "nomeTerapeuta": "Ananda",
+        "nomeTerapeuta": "Clara Educadora",
         "telefoneTerapeuta": "61981593923",
         "emailTerapeuta": "danilo2311@gmail.com",
         "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
@@ -282,12 +282,12 @@
   "terapeutas": [
     {
       "id": "01604952-22ed-44bd-9dfa-2fd7f59f47b9",
-      "nomeTerapeuta": "Ananda",
+      "nomeTerapeuta": "Clara Educadora",
       "telefoneTerapeuta": "61981593923",
       "emailTerapeuta": "danilo2311@gmail.com",
       "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
-      "curriculo": "teste curriculo",
-      "chavePix": "098098098098"
+      "curriculo": "",
+      "chavePix": ""
     },
     {
       "id": "5b306851-c6d3-45c3-8f95-8f2d713e6e83",
@@ -324,6 +324,15 @@
       "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
       "curriculo": "Cogntiva Comportamental",
       "chavePix": "098098098098"
+    },
+    {
+      "id": "e298b981-8fde-499a-b6eb-b12d17639a7f",
+      "nomeTerapeuta": "zuzu",
+      "telefoneTerapeuta": "61981593923",
+      "emailTerapeuta": "danilo2311@gmail.com",
+      "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
+      "curriculo": "",
+      "chavePix": ""
     }
   ],
   "sessoes": [
