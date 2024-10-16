@@ -1,81 +1,18 @@
 {
   "transacoes": [
     {
-      "id": "4",
-      "descricao": "aluguel sala",
+      "id": "4e111e8b-e69c-47dd-8062-e4e8faec4d35",
+      "descricao": "transacao 1",
       "tipo": "entrada",
-      "valor": 1800,
-      "dtCriacao": "2024-07-21T09:15:42.625Z"
-    },
-    {
-      "id": "1727347892369",
-      "descricao": "jhgjhg",
-      "tipo": "entrada",
-      "valor": 44,
-      "dtCriacao": "2023-11-15T00:00:00.000Z"
-    },
-    {
-      "id": "1727347945326",
-      "descricao": "dsad",
-      "tipo": "entrada",
-      "valor": 1,
-      "dtCriacao": "2023-11-15T00:00:00.000Z"
-    },
-    {
-      "id": "1727349155210",
-      "descricao": "dsad",
-      "tipo": "entrada",
-      "valor": 44,
-      "dtCriacao": "2024-11-23T00:00:00.000Z"
-    },
-    {
-      "id": "1727349344392",
-      "descricao": "dsad",
-      "tipo": "entrada",
-      "valor": 44,
-      "dtCriacao": "2024-11-23T00:00:00.000Z"
-    },
-    {
-      "id": "1727350974272",
-      "descricao": "jhgjhg",
-      "tipo": "entrada",
-      "valor": 44,
-      "dtCriacao": "2024-09-04T03:00:00.000Z"
-    },
-    {
-      "id": "72effc94-11fa-4517-8208-b3de0fad97ac",
-      "descricao": "Aluguel",
-      "tipo": "entrada",
-      "valor": 78,
-      "dtCriacao": "2024-08-06T03:00:00.000Z"
-    },
-    {
-      "id": "2bb2a7f6-3124-4383-a4de-98310205c12b",
-      "descricao": "45454",
-      "tipo": "entrada",
-      "valor": 44,
+      "valor": 5,
       "dtCriacao": "2024-10-15T03:00:00.000Z"
     },
     {
-      "id": "5b1231e3-1efd-46bb-afc7-c3765ffd1740",
-      "descricao": "45454",
-      "tipo": "entrada",
-      "valor": 78,
-      "dtCriacao": "2024-10-15T03:00:00.000Z"
-    },
-    {
-      "id": "43f954f4-1653-464c-910c-3d98bf0f8f81",
-      "descricao": "dsad",
-      "tipo": "saida",
-      "valor": 78,
-      "dtCriacao": "2024-10-08T03:00:00.000Z"
-    },
-    {
-      "id": "0f10f72d-3028-4b1c-9907-7871a7e9bbb5",
-      "descricao": "555",
+      "id": "a3e759a9-a83b-44ec-b547-b314d3e02016",
+      "descricao": "transacao 2",
       "tipo": "saida",
       "valor": 44,
-      "dtCriacao": "2024-10-09T03:00:00.000Z"
+      "dtCriacao": "2024-10-07T03:00:00.000Z"
     }
   ],
   "pacientes": [
