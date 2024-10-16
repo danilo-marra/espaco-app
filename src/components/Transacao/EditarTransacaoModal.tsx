@@ -1,16 +1,17 @@
 import { X } from '@phosphor-icons/react'
-import axios from 'axios'
 import * as Dialog from '@radix-ui/react-dialog'
 import * as RadioGroup from '@radix-ui/react-radio-group'
 import { Controller, useForm } from 'react-hook-form'
 import * as z from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useContext, useEffect, useState } from 'react'
-import { TransacoesContext } from '../../contexts/TransacoesContext'
+import { useEffect, useState } from 'react'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import { ptBR } from 'date-fns/locale'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
+import { useDispatch, useSelector } from 'react-redux'
+import { updateTransacao } from '../../store/transacoesSlice'
+import type { AppDispatch, RootState } from '../../store/store'
 
 const EditarTransacaoFormSchema = z.object({
   id: z.string(),
@@ -33,7 +34,8 @@ export function EditarTransacaoModal({
   open,
   onClose,
 }: EditarTransacaoModalProps) {
-  const { transacoes, editTransacao } = useContext(TransacoesContext)
+  const dispatch = useDispatch<AppDispatch>()
+  const transacoes = useSelector((state: RootState) => state.transacoes.data)
   const [mensagemSucesso, setMensagemSucesso] = useState('')
   const [mensagemErro, setMensagemErro] = useState('')
 
@@ -42,7 +44,6 @@ export function EditarTransacaoModal({
     register,
     handleSubmit,
     reset,
-    setValue,
     formState: { isSubmitting },
   } = useForm<EditarTransacaoFormInputs>({
     resolver: zodResolver(EditarTransacaoFormSchema),
@@ -51,13 +52,15 @@ export function EditarTransacaoModal({
   useEffect(() => {
     const transacao = transacoes.find((t) => t.id === transacaoId)
     if (transacao) {
-      setValue('id', transacao.id)
-      setValue('descricao', transacao.descricao)
-      setValue('valor', transacao.valor)
-      setValue('tipo', transacao.tipo)
-      setValue('data', new Date(transacao.dtCriacao))
+      reset({
+        id: transacao.id,
+        descricao: transacao.descricao,
+        valor: transacao.valor,
+        tipo: transacao.tipo,
+        data: new Date(transacao.dtCriacao),
+      })
     }
-  }, [transacaoId, transacoes, setValue])
+  }, [transacaoId, transacoes, reset])
 
   async function handleEditTransacao(data: EditarTransacaoFormInputs) {
     try {
@@ -72,14 +75,8 @@ export function EditarTransacaoModal({
         dtCriacao: data.data,
       }
 
-      // Faz a requisição PUT para a API
-      await axios.put(
-        `http://localhost:3000/transacoes/${data.id}`,
-        transacaoEditada,
-      )
-
-      // Edita a transação no contexto
-      editTransacao(transacaoEditada)
+      // Faz o dispatch do thunk updateTransacao
+      await dispatch(updateTransacao(transacaoEditada)).unwrap()
 
       // Limpa os dados do formulário
       reset()

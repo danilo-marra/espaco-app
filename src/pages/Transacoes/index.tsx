@@ -1,5 +1,4 @@
-import { useContext, useEffect, useState } from 'react'
-import { TransacoesContext } from '../../contexts/TransacoesContext'
+import { useEffect, useState } from 'react'
 import { NovaTransacaoModal } from '../../components/Transacao/NovaTransacaoModal'
 import { EditarTransacaoModal } from '../../components/Transacao/EditarTransacaoModal'
 import type { Transacao } from '../../tipos'
@@ -10,7 +9,6 @@ import 'react-datepicker/dist/react-datepicker.css'
 import { dateFormatter, priceFormatter } from '../../utils/formatter'
 import Pagination from '../../components/Pagination'
 import * as Dialog from '@radix-ui/react-dialog'
-import axios from 'axios'
 import { ExcluirModal } from '../../components/ExcluirModal'
 import { useModal } from '../../hooks/useModal'
 import {
@@ -25,10 +23,18 @@ import {
   Plus,
   TrashSimple,
 } from '@phosphor-icons/react'
+import { useDispatch, useSelector } from 'react-redux'
+import type { AppDispatch, RootState } from '../../store/store'
+import { deleteTransacao, fetchTransacoes } from '../../store/transacoesSlice'
 
 export function Transacoes() {
+  const dispatch = useDispatch<AppDispatch>()
+  const {
+    data: transacoes,
+    loading,
+    error,
+  } = useSelector((state: RootState) => state.transacoes)
   const [isMenuOpen] = useState<boolean>(false)
-  const { transacoes, fetchTransacoes } = useContext(TransacoesContext)
   const [dataAtual, setDataAtual] = useState<Date>(new Date())
   const [summary, setSummary] = useState({ entrada: 0, saida: 0, total: 0 })
   const [searchValue, setSearchValue] = useState<string>('')
@@ -54,17 +60,16 @@ export function Transacoes() {
   const [isSuccess, setIsSuccess] = useState(false)
 
   useEffect(() => {
-    // Fetch transacoes only once when the component mounts
-    fetchTransacoes()
-  }, [fetchTransacoes])
+    dispatch(fetchTransacoes()) // Chamar a ação de buscar transações no Redux
+  }, [dispatch])
 
   useEffect(() => {
-    // Filter transacoes by search value
+    if (loading || error) return // Evitar atualização se estiver carregando ou com erro
+
     const filteredBySearch = transacoes.filter((transacao) =>
       transacao.descricao.toLowerCase().includes(searchValue.toLowerCase()),
     )
 
-    // Filter transacoes by date
     const filteredByDate = filteredBySearch.filter((transacao) => {
       const dataTransacao = new Date(transacao.dtCriacao)
       return (
@@ -73,7 +78,6 @@ export function Transacoes() {
       )
     })
 
-    // Calculate summary
     const newSummary = filteredByDate.reduce(
       (acc, transacao) => {
         if (transacao.tipo === 'entrada') {
@@ -90,13 +94,12 @@ export function Transacoes() {
 
     setSummary(newSummary)
 
-    // Paginate transacoes
     const offset = (currentPage - 1) * transacoesPorPagina
     setTransacoesVisiveis(
       filteredByDate.slice(offset, offset + transacoesPorPagina),
     )
     settotalPages(Math.ceil(filteredByDate.length / transacoesPorPagina))
-  }, [transacoes, searchValue, dataAtual, currentPage])
+  }, [transacoes, searchValue, dataAtual, currentPage, loading, error])
 
   function handleMonthPrev() {
     setDataAtual(new Date(dataAtual.getFullYear(), dataAtual.getMonth() - 1, 1))
@@ -123,10 +126,7 @@ export function Transacoes() {
     if (!transacaoParaExcluir) return
 
     try {
-      await axios.delete(
-        `http://localhost:3000/transacoes/${transacaoParaExcluir}`,
-      )
-      fetchTransacoes()
+      await dispatch(deleteTransacao(transacaoParaExcluir)).unwrap()
       openModal('Transacao excluída com sucesso!')
       setIsSuccess(true)
       console.log('transacao excluída:', transacaoParaExcluir)

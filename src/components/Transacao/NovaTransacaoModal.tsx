@@ -1,17 +1,18 @@
 import { X } from '@phosphor-icons/react'
-import axios from 'axios'
 import * as Dialog from '@radix-ui/react-dialog'
 import * as RadioGroup from '@radix-ui/react-radio-group'
 import { Controller, useForm } from 'react-hook-form'
 import * as z from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
-import { useContext, useState } from 'react'
-import { TransacoesContext } from '../../contexts/TransacoesContext'
+import { useState } from 'react'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import { ptBR } from 'date-fns/locale'
 import { v4 as uuidv4 } from 'uuid'
+import { useDispatch } from 'react-redux'
+import { addTransacao } from '../../store/transacoesSlice'
+import type { AppDispatch } from '../../store/store'
 
 const NovaTransacaoFormSchema = z.object({
   descricao: z.string(),
@@ -23,7 +24,7 @@ const NovaTransacaoFormSchema = z.object({
 type NovaTransacaoFormInputs = z.infer<typeof NovaTransacaoFormSchema>
 
 export function NovaTransacaoModal() {
-  const { addTransacao } = useContext(TransacoesContext)
+  const dispatch = useDispatch<AppDispatch>()
   const [mensagemSucesso, setMensagemSucesso] = useState('')
   const [mensagemErro, setMensagemErro] = useState('')
   const {
@@ -50,11 +51,8 @@ export function NovaTransacaoModal() {
         dtCriacao: data.data,
       }
 
-      // Faz a requisição POST para a API
-      await axios.post('http://localhost:3000/transacoes', novaTransacao)
-
-      // Adiciona a nova transação ao contexto
-      addTransacao(novaTransacao)
+      // Faz o dispatch do thunk addTransacao
+      await dispatch(addTransacao(novaTransacao)).unwrap()
 
       // Limpa os dados do formulário
       reset()

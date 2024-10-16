@@ -50,41 +50,35 @@
       "dtCriacao": "2024-08-06T03:00:00.000Z"
     },
     {
-      "id": "19139ab4-bdda-4e65-86ef-97879eb67330",
-      "descricao": "dsad",
+      "id": "2bb2a7f6-3124-4383-a4de-98310205c12b",
+      "descricao": "45454",
       "tipo": "entrada",
-      "valor": 78,
-      "dtCriacao": "2024-10-01T03:00:00.000Z"
+      "valor": 44,
+      "dtCriacao": "2024-10-15T03:00:00.000Z"
     },
     {
-      "id": "fe80cc5e-1c28-4073-8c5b-4a87c9a2e153",
-      "descricao": "jhgjhg",
+      "id": "5b1231e3-1efd-46bb-afc7-c3765ffd1740",
+      "descricao": "45454",
       "tipo": "entrada",
       "valor": 78,
-      "dtCriacao": "2024-10-01T03:00:00.000Z"
+      "dtCriacao": "2024-10-15T03:00:00.000Z"
+    },
+    {
+      "id": "43f954f4-1653-464c-910c-3d98bf0f8f81",
+      "descricao": "dsad",
+      "tipo": "saida",
+      "valor": 78,
+      "dtCriacao": "2024-10-08T03:00:00.000Z"
+    },
+    {
+      "id": "0f10f72d-3028-4b1c-9907-7871a7e9bbb5",
+      "descricao": "555",
+      "tipo": "saida",
+      "valor": 44,
+      "dtCriacao": "2024-10-09T03:00:00.000Z"
     }
   ],
   "pacientes": [
-    {
-      "id": "bf98c26f-ddd0-4871-94cd-bf83422cb7a0",
-      "nomePaciente": "Nilo",
-      "dtNascimento": "2023-10-15T03:00:00.000Z",
-      "terapeutaInfo": {
-        "id": "01604952-22ed-44bd-9dfa-2fd7f59f47b9",
-        "nomeTerapeuta": "Clara Educadora",
-        "telefoneTerapeuta": "61981593923",
-        "emailTerapeuta": "danilo2311@gmail.com",
-        "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
-        "curriculo": "teste curriculo",
-        "chavePix": ""
-      },
-      "nomeResponsavel": "Thais Marra",
-      "telefoneResponsavel": "61981593923",
-      "emailResponsavel": "thaismarra@gmail.com",
-      "cpfResponsavel": "024.818.181-54",
-      "enderecoResponsavel": "SHCES Quadra 801 Bloco A",
-      "origem": "Instagram"
-    },
     {
       "id": "14811370-b08d-4d3d-bc94-1f268a7047c6",
       "nomePaciente": "Danilo Marra Rabelo",
@@ -637,15 +631,6 @@
       "emailTerapeuta": "danilo2311@gmail.com",
       "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
       "curriculo": "Cogntiva Comportamental",
-      "chavePix": "098098098098"
-    },
-    {
-      "id": "692b4485-b3d7-4a1f-bdd4-62ad0747b5f1",
-      "nomeTerapeuta": "testeteste",
-      "telefoneTerapeuta": "kjhkjhkjh",
-      "emailTerapeuta": "danilo2311@gmail.com",
-      "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
-      "curriculo": "teste curriculo",
       "chavePix": "098098098098"
     }
   ],
