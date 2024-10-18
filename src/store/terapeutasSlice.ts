@@ -28,21 +28,55 @@ export const fetchTerapeutas = createAsyncThunk(
   },
 )
 
+// Thunk para adicionar terapeuta
+export const addTerapeuta = createAsyncThunk(
+  'terapeutas/addTerapeuta',
+  async (terapeuta: Terapeuta) => {
+    const response = await fetch('http://localhost:3000/terapeutas', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(terapeuta),
+    })
+    return await response.json()
+  },
+)
+
+// Thunk para editar terapeuta
+export const updateTerapeuta = createAsyncThunk(
+  'terapeutas/updateTerapeuta',
+  async (terapeuta: Terapeuta) => {
+    const response = await fetch(
+      `http://localhost:3000/terapeutas/${terapeuta.id}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(terapeuta),
+      },
+    )
+    return await response.json()
+  },
+)
+
+// Thunk para excluir terapeuta
+export const deleteTerapeuta = createAsyncThunk(
+  'terapeutas/deleteTerapeuta',
+  async (id: string) => {
+    await fetch(`http://localhost:3000/terapeutas/${id}`, {
+      method: 'DELETE',
+    })
+    return id
+  },
+)
+
 // Slice de Terapeutas
 const terapeutasSlice = createSlice({
   name: 'terapeutas',
   initialState,
-  reducers: {
-    updateTerapeuta: (state, action: PayloadAction<Terapeuta>) => {
-      const index = state.data.findIndex((t) => t.id === action.payload.id)
-      if (index !== -1) {
-        state.data[index] = action.payload
-      }
-    },
-    addTerapeuta: (state, action: PayloadAction<Terapeuta>) => {
-      state.data.push(action.payload)
-    },
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(fetchTerapeutas.pending, (state) => {
@@ -56,8 +90,29 @@ const terapeutasSlice = createSlice({
         state.loading = false
         state.error = 'Erro ao buscar terapeutas'
       })
+      .addCase(
+        addTerapeuta.fulfilled,
+        (state, action: PayloadAction<Terapeuta>) => {
+          state.data.push(action.payload)
+        },
+      )
+      .addCase(
+        updateTerapeuta.fulfilled,
+        (state, action: PayloadAction<Terapeuta>) => {
+          state.data = state.data.map((terapeuta) =>
+            terapeuta.id === action.payload.id ? action.payload : terapeuta,
+          )
+        },
+      )
+      .addCase(
+        deleteTerapeuta.fulfilled,
+        (state, action: PayloadAction<string>) => {
+          state.data = state.data.filter(
+            (terapeuta) => terapeuta.id !== action.payload,
+          )
+        },
+      )
   },
 })
 
-export const { updateTerapeuta, addTerapeuta } = terapeutasSlice.actions
 export default terapeutasSlice.reducer

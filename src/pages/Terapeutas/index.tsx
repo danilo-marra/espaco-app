@@ -7,17 +7,16 @@ import {
   UsersThree,
 } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
-import Pagination from '../../components/Pagination'
-import * as Dialog from '@radix-ui/react-dialog'
-import { NovoTerapeutaModal } from '../../components/Terapeuta/NovoTerapeutaModal'
-import axios from 'axios'
-import type { Terapeuta } from '../../tipos'
-import { EditarTerapeutaModal } from '../../components/Terapeuta/EditarTerapeutaModal'
-import { ExcluirModal } from '../../components/ExcluirModal'
 import { useModal } from '../../hooks/useModal'
 import { useSelector, useDispatch } from 'react-redux'
+import { NovoTerapeutaModal } from '../../components/Terapeuta/NovoTerapeutaModal'
+import { EditarTerapeutaModal } from '../../components/Terapeuta/EditarTerapeutaModal'
+import { ExcluirModal } from '../../components/ExcluirModal'
+import Pagination from '../../components/Pagination'
+import type { Terapeuta } from '../../tipos'
+import * as Dialog from '@radix-ui/react-dialog'
 import type { RootState, AppDispatch } from '../../store/store'
-import { fetchTerapeutas } from '../../store/terapeutasSlice'
+import { deleteTerapeuta, fetchTerapeutas } from '../../store/terapeutasSlice'
 import { fetchPacientes } from '../../store/pacientesSlice'
 
 export function Terapeutas() {
@@ -44,8 +43,6 @@ export function Terapeutas() {
     string | null
   >(null)
   const [isSuccess, setIsSuccess] = useState(false)
-  const [isNovoTerapeutaModalOpen, setIsNovoTerapeutaModalOpen] =
-    useState(false) // Estado para o modal de novo terapeuta
 
   const handleTerapeutaChange = (
     event: React.ChangeEvent<HTMLSelectElement>,
@@ -89,10 +86,7 @@ export function Terapeutas() {
     if (!terapeutaParaExcluir) return
 
     try {
-      await axios.delete(
-        `http://localhost:3000/terapeutas/${terapeutaParaExcluir}`,
-      )
-      dispatch(fetchTerapeutas())
+      await dispatch(deleteTerapeuta(terapeutaParaExcluir)).unwrap()
       openModal('Terapeuta excluído com sucesso!')
       setIsSuccess(true)
       console.log('Terapeuta excluído:', terapeutaParaExcluir)
@@ -116,10 +110,7 @@ export function Terapeutas() {
         <div>
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-2xl font-bold">Terapeutas</h1>
-            <Dialog.Root
-              open={isNovoTerapeutaModalOpen}
-              onOpenChange={setIsNovoTerapeutaModalOpen}
-            >
+            <Dialog.Root>
               <Dialog.Trigger asChild>
                 <button
                   type="button"
@@ -129,10 +120,7 @@ export function Terapeutas() {
                   Novo Terapeuta
                 </button>
               </Dialog.Trigger>
-              <NovoTerapeutaModal
-                open={isNovoTerapeutaModalOpen}
-                onClose={setIsNovoTerapeutaModalOpen}
-              />
+              <NovoTerapeutaModal />
             </Dialog.Root>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
@@ -159,7 +147,7 @@ export function Terapeutas() {
             <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
               <UsersThree size={24} />
               <span className="text-xl font-semibold">
-                Total de Terapeutas: {filteredTerapeutas.length}
+                Total de Terapeutas: {terapeutas.length}
               </span>
             </div>
             <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">

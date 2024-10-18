@@ -6,13 +6,6 @@
       "tipo": "entrada",
       "valor": 5,
       "dtCriacao": "2024-10-15T03:00:00.000Z"
-    },
-    {
-      "id": "a3e759a9-a83b-44ec-b547-b314d3e02016",
-      "descricao": "transacao 2",
-      "tipo": "saida",
-      "valor": 44,
-      "dtCriacao": "2024-10-07T03:00:00.000Z"
     }
   ],
   "pacientes": [
@@ -481,13 +474,13 @@
       "nomePaciente": "Danilo Marra Rabelo",
       "dtNascimento": "2024-09-15T03:00:00.000Z",
       "terapeutaInfo": {
-        "id": "5b306851-c6d3-45c3-8f95-8f2d713e6e83",
-        "nomeTerapeuta": "Beatriz Azevedo",
-        "telefoneTerapeuta": "6192095674",
-        "emailTerapeuta": "thaismarra@gmail.com",
-        "enderecoTerapeuta": "SHCES Quadra 801 Bloco A",
+        "id": "934e1d9d-1342-444a-9eba-48ebbbbcc12b",
+        "nomeTerapeuta": "Clara Fagundes",
+        "telefoneTerapeuta": "61981593923",
+        "emailTerapeuta": "danilo2311@gmail.com",
+        "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
         "curriculo": "teste curriculo",
-        "chavePix": "098098098098"
+        "chavePix": "44"
       },
       "nomeResponsavel": "",
       "telefoneResponsavel": "",
@@ -498,15 +491,6 @@
     }
   ],
   "terapeutas": [
-    {
-      "id": "01604952-22ed-44bd-9dfa-2fd7f59f47b9",
-      "nomeTerapeuta": "Clara Educadora",
-      "telefoneTerapeuta": "61981593923",
-      "emailTerapeuta": "danilo2311@gmail.com",
-      "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
-      "curriculo": "teste curriculo",
-      "chavePix": ""
-    },
     {
       "id": "5b306851-c6d3-45c3-8f95-8f2d713e6e83",
       "nomeTerapeuta": "Beatriz Azevedo",
@@ -535,40 +519,13 @@
       "chavePix": "44"
     },
     {
-      "id": "dd816ac5-ef35-418d-a18e-8f7c41a619de",
-      "nomeTerapeuta": "Gabi",
-      "telefoneTerapeuta": "61981593923",
-      "emailTerapeuta": "danilo2311@gmail.com",
-      "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
-      "curriculo": "Cogntiva Comportamental",
-      "chavePix": "098098098098"
-    },
-    {
-      "id": "e298b981-8fde-499a-b6eb-b12d17639a7f",
-      "nomeTerapeuta": "zuzu",
+      "id": "2b6f8404-38dc-4b1e-9c12-8a470f220253",
+      "nomeTerapeuta": "Danilo Marra Rabelo",
       "telefoneTerapeuta": "61981593923",
       "emailTerapeuta": "danilo2311@gmail.com",
       "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
       "curriculo": "",
       "chavePix": ""
-    },
-    {
-      "id": "dfe2e8c9-c9d7-4dc1-b45b-e3c60d3d3850",
-      "nomeTerapeuta": "Danilo Marra Rabelo",
-      "telefoneTerapeuta": "61981593923",
-      "emailTerapeuta": "danilo2311@gmail.com",
-      "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
-      "curriculo": "teste curriculo",
-      "chavePix": "098098098098"
-    },
-    {
-      "id": "4b67dd93-5f4c-4f75-8d4a-7c940d9b1a6e",
-      "nomeTerapeuta": "teste",
-      "telefoneTerapeuta": "61981593923",
-      "emailTerapeuta": "danilo2311@gmail.com",
-      "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
-      "curriculo": "Cogntiva Comportamental",
-      "chavePix": "098098098098"
     }
   ],
   "sessoes": [

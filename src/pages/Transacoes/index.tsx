@@ -1,16 +1,3 @@
-import { useEffect, useState } from 'react'
-import { NovaTransacaoModal } from '../../components/Transacao/NovaTransacaoModal'
-import { EditarTransacaoModal } from '../../components/Transacao/EditarTransacaoModal'
-import type { Transacao } from '../../tipos'
-import { format } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
-import DatePicker from 'react-datepicker'
-import 'react-datepicker/dist/react-datepicker.css'
-import { dateFormatter, priceFormatter } from '../../utils/formatter'
-import Pagination from '../../components/Pagination'
-import * as Dialog from '@radix-ui/react-dialog'
-import { ExcluirModal } from '../../components/ExcluirModal'
-import { useModal } from '../../hooks/useModal'
 import {
   ArrowCircleDown,
   ArrowCircleUp,
@@ -23,7 +10,20 @@ import {
   Plus,
   TrashSimple,
 } from '@phosphor-icons/react'
+import { useEffect, useState } from 'react'
+import { useModal } from '../../hooks/useModal'
 import { useDispatch, useSelector } from 'react-redux'
+import { NovaTransacaoModal } from '../../components/Transacao/NovaTransacaoModal'
+import { EditarTransacaoModal } from '../../components/Transacao/EditarTransacaoModal'
+import { ExcluirModal } from '../../components/ExcluirModal'
+import type { Transacao } from '../../tipos'
+import { format } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
+import DatePicker from 'react-datepicker'
+import 'react-datepicker/dist/react-datepicker.css'
+import { dateFormatter, priceFormatter } from '../../utils/formatter'
+import Pagination from '../../components/Pagination'
+import * as Dialog from '@radix-ui/react-dialog'
 import type { AppDispatch, RootState } from '../../store/store'
 import { deleteTransacao, fetchTransacoes } from '../../store/transacoesSlice'
 
@@ -34,7 +34,6 @@ export function Transacoes() {
     loading,
     error,
   } = useSelector((state: RootState) => state.transacoes)
-  const [isMenuOpen] = useState<boolean>(false)
   const [dataAtual, setDataAtual] = useState<Date>(new Date())
   const [summary, setSummary] = useState({ entrada: 0, saida: 0, total: 0 })
   const [searchValue, setSearchValue] = useState<string>('')
@@ -146,9 +145,7 @@ export function Transacoes() {
 
   return (
     <div className="flex min-h-screen">
-      <main
-        className={`flex-1 bg-gray-100 p-8 transition-all duration-300 ease-in-out ${isMenuOpen ? 'md:ml-64' : 'ml-0'}`}
-      >
+      <main className="flex-1 bg-gray-100 p-8">
         <div>
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-2xl font-bold">Transacoes</h1>

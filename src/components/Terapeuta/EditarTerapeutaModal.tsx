@@ -1,8 +1,25 @@
 import { X } from '@phosphor-icons/react'
 import * as Dialog from '@radix-ui/react-dialog'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
-import { useEditarTerapeutaForm } from '../../hooks/Terapeutas/useEditarTerapeutaForm'
-import type { EditarTerapeutaFormInputs } from '../../hooks/Terapeutas/validationSchemasTerapeutas'
+import { z } from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useDispatch, useSelector } from 'react-redux'
+import type { AppDispatch, RootState } from '../../store/store'
+import { useEffect, useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { updateTerapeuta } from '../../store/terapeutasSlice'
+
+const EditarTerapeutaFormSchema = z.object({
+  id: z.string().uuid(),
+  nomeTerapeuta: z.string().min(1, 'Nome do terapeuta é obrigatório'),
+  telefoneTerapeuta: z.string(),
+  emailTerapeuta: z.string().email('Email inválido'),
+  enderecoTerapeuta: z.string(),
+  curriculo: z.string(),
+  chavePix: z.string(),
+})
+
+type EditarTerapeutaFormInputs = z.infer<typeof EditarTerapeutaFormSchema>
 
 interface EditarTerapeutaModalProps {
   terapeutaId: string
@@ -15,33 +32,67 @@ export function EditarTerapeutaModal({
   open,
   onClose,
 }: EditarTerapeutaModalProps) {
+  const dispatch = useDispatch<AppDispatch>()
+  const terapeutas = useSelector((state: RootState) => state.terapeutas.data)
+  const [mensagemSucesso, setMensagemSucesso] = useState('')
+  const [mensagemErro, setMensagemErro] = useState('')
+
   const {
     register,
-    errors,
     handleSubmit,
-    handleEditTerapeuta,
-    isSubmitting,
-    mensagemSucesso,
-    mensagemErro,
-    setMensagemSucesso,
-    setMensagemErro,
-    handleFocus,
-  } = useEditarTerapeutaForm(terapeutaId)
+    reset,
+    formState: { isSubmitting, errors },
+  } = useForm<EditarTerapeutaFormInputs>({
+    resolver: zodResolver(EditarTerapeutaFormSchema),
+  })
 
-  async function onSubmit(data: EditarTerapeutaFormInputs) {
+  useEffect(() => {
+    const terapeuta = terapeutas.find((t) => t.id === terapeutaId)
+    if (terapeuta) {
+      reset({
+        id: terapeuta.id,
+        nomeTerapeuta: terapeuta.nomeTerapeuta,
+        telefoneTerapeuta: terapeuta.telefoneTerapeuta,
+        emailTerapeuta: terapeuta.emailTerapeuta,
+        enderecoTerapeuta: terapeuta.enderecoTerapeuta,
+        curriculo: terapeuta.curriculo,
+        chavePix: terapeuta.chavePix,
+      })
+    }
+  }, [terapeutaId, terapeutas, reset])
+
+  async function handleEditTerapeuta(data: EditarTerapeutaFormInputs) {
     try {
-      const mensagem = await handleEditTerapeuta(data)
-      setMensagemSucesso(mensagem)
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+
+      const terapeutaEditado = {
+        id: data.id,
+        nomeTerapeuta: data.nomeTerapeuta,
+        telefoneTerapeuta: data.telefoneTerapeuta,
+        emailTerapeuta: data.emailTerapeuta,
+        enderecoTerapeuta: data.enderecoTerapeuta,
+        curriculo: data.curriculo,
+        chavePix: data.chavePix,
+      }
+
+      await dispatch(updateTerapeuta(terapeutaEditado)).unwrap()
+
+      reset()
+
+      setMensagemSucesso('Terapeuta atualizado com sucesso!')
       setMensagemErro('')
+      console.log('Terapeuta atualizado:', data)
       onClose()
     } catch (error) {
-      if (error instanceof Error) {
-        setMensagemErro(error.message)
-      } else {
-        setMensagemErro('An unknown error occurred')
-      }
+      console.error('Erro ao atualizar Terapeuta:', error)
+      setMensagemErro('Erro ao atualizar Terapeuta. Tente novamente.')
       setMensagemSucesso('')
     }
+  }
+
+  function handleFocus() {
+    setMensagemSucesso('')
+    setMensagemErro('')
   }
 
   return (
@@ -54,7 +105,7 @@ export function EditarTerapeutaModal({
             <VisuallyHidden>Editar Terapeuta</VisuallyHidden>
           </Dialog.Description>
           <form
-            onSubmit={handleSubmit(onSubmit)}
+            onSubmit={handleSubmit(handleEditTerapeuta)}
             className="space-y-6 p-6 bg-white rounded-lg"
           >
             <h3 className="font-medium text-azul text-xl mt-6">
