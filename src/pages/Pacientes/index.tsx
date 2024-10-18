@@ -13,14 +13,13 @@ import { calcularIdade } from '../../utils/caculateAge'
 import Pagination from '../../components/Pagination'
 import * as Dialog from '@radix-ui/react-dialog'
 import { NovoPacienteModal } from '../../components/Paciente/NovoPacienteModal'
-import axios from 'axios'
 import type { Paciente } from '../../tipos'
 import { EditarPacienteModal } from '../../components/Paciente/EditarPacienteModal'
 import { ExcluirModal } from '../../components/ExcluirModal'
 import { useModal } from '../../hooks/useModal'
 import { useSelector, useDispatch } from 'react-redux'
 import type { RootState, AppDispatch } from '../../store/store'
-import { fetchPacientes } from '../../store/pacientesSlice'
+import { deletePaciente, fetchPacientes } from '../../store/pacientesSlice'
 import { fetchTerapeutas } from '../../store/terapeutasSlice'
 import { isBirthday } from '../../utils/dateUtils'
 
@@ -84,10 +83,7 @@ export function Pacientes() {
     if (!pacienteParaExcluir) return
 
     try {
-      await axios.delete(
-        `http://localhost:3000/pacientes/${pacienteParaExcluir}`,
-      )
-      dispatch(fetchPacientes())
+      await dispatch(deletePaciente(pacienteParaExcluir)).unwrap()
       openModal('Paciente excluído com sucesso!')
       setIsSuccess(true)
       console.log('Paciente excluído:', pacienteParaExcluir)

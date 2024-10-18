@@ -1,24 +1,89 @@
 import { X } from '@phosphor-icons/react'
 import * as Dialog from '@radix-ui/react-dialog'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
-import { useNovoPacienteForm } from '../../hooks/Pacientes/useNovoPacienteForm'
-import { Controller } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import DatePicker from 'react-datepicker'
 import { ptBR } from 'date-fns/locale'
+import { z } from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useDispatch, useSelector } from 'react-redux'
+import type { AppDispatch, RootState } from '../../store/store'
+import { useState } from 'react'
+import { v4 as uuidv4 } from 'uuid'
+import { addPaciente } from '../../store/pacientesSlice'
+
+const NovoPacienteFormSchema = z.object({
+  nomePaciente: z.string().min(1, 'Nome do paciente é obrigatório'),
+  dtNascimento: z.string().min(1, 'Data de nascimento é obrigatória'),
+  nomeTerapeuta: z.string().min(1, 'Selecione um(a) terapeuta'),
+  nomeResponsavel: z.string(),
+  telefoneResponsavel: z.string(),
+  emailResponsavel: z.string(),
+  cpfResponsavel: z.string(),
+  enderecoResponsavel: z.string(),
+  origem: z.enum(['Indicação', 'Instagram', 'Busca no Google', 'Outros']),
+})
+
+type NovoPacienteFormInputs = z.infer<typeof NovoPacienteFormSchema>
 
 export function NovoPacienteModal() {
+  const dispatch = useDispatch<AppDispatch>()
+  const terapeutas = useSelector((state: RootState) => state.terapeutas.data)
+  const [mensagemSucesso, setMensagemSucesso] = useState('')
+  const [mensagemErro, setMensagemErro] = useState('')
+
   const {
     register,
-    errors,
     handleSubmit,
-    handleCreateNewPaciente,
-    isSubmitting,
-    mensagemSucesso,
-    mensagemErro,
-    handleFocus,
-    terapeutas,
+    reset,
     control,
-  } = useNovoPacienteForm()
+    formState: { isSubmitting, errors },
+  } = useForm<NovoPacienteFormInputs>({
+    resolver: zodResolver(NovoPacienteFormSchema),
+  })
+
+  async function handleCreateNewPaciente(data: NovoPacienteFormInputs) {
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+
+      const terapeutaSelecionado = terapeutas.find(
+        (terapeuta) => terapeuta.nomeTerapeuta === data.nomeTerapeuta,
+      )
+
+      if (!terapeutaSelecionado) {
+        throw new Error('Terapeuta não encontrado')
+      }
+
+      const novoPaciente = {
+        id: uuidv4(),
+        nomePaciente: data.nomePaciente,
+        dtNascimento: new Date(data.dtNascimento).toISOString(),
+        terapeutaInfo: terapeutaSelecionado,
+        nomeResponsavel: data.nomeResponsavel,
+        telefoneResponsavel: data.telefoneResponsavel,
+        emailResponsavel: data.emailResponsavel,
+        cpfResponsavel: data.cpfResponsavel,
+        enderecoResponsavel: data.enderecoResponsavel,
+        origem: data.origem,
+      }
+
+      // Faz o dispatch do thunk addPaciente
+      dispatch(addPaciente(novoPaciente)).unwrap()
+
+      reset()
+      setMensagemSucesso('Paciente cadastrado com sucesso!')
+      setMensagemErro('')
+    } catch (error) {
+      console.error('Erro ao cadastrar Paciente:', error)
+      setMensagemErro('Erro ao cadastrar Paciente. Tente novamente.')
+      setMensagemSucesso('')
+    }
+  }
+
+  function handleFocus() {
+    setMensagemSucesso('')
+    setMensagemErro('')
+  }
 
   return (
     <Dialog.Portal>
@@ -147,9 +212,7 @@ export function NovoPacienteModal() {
               {...register('origem')}
               onFocus={handleFocus}
             >
-              <option disabled value="">
-                Selecione a origem
-              </option>
+              <option value="">Selecione a origem</option>
               <option value="Indicação">Indicação</option>
               <option value="Instagram">Instagram</option>
               <option value="Busca no Google">Busca no Google</option>

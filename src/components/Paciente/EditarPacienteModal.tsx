@@ -1,11 +1,31 @@
 import { X } from '@phosphor-icons/react'
 import * as Dialog from '@radix-ui/react-dialog'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
-import { useEditarPacienteForm } from '../../hooks/Pacientes/useEditarPacienteForm'
-import type { EditarPacienteFormInputs } from '../../hooks/Pacientes/validationSchemasPaciente'
-import { Controller } from 'react-hook-form'
+import { z } from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { Controller, useForm } from 'react-hook-form'
 import DatePicker from 'react-datepicker'
 import { ptBR } from 'date-fns/locale'
+import { useDispatch, useSelector } from 'react-redux'
+import type { AppDispatch, RootState } from '../../store/store'
+import { useEffect, useState } from 'react'
+import { fetchPacientes, updatePaciente } from '../../store/pacientesSlice'
+import { fetchTerapeutas } from '../../store/terapeutasSlice'
+
+const EditarPacienteFormSchema = z.object({
+  id: z.string(),
+  nomePaciente: z.string().min(1, 'Nome do paciente é obrigatório'),
+  dtNascimento: z.string().min(1, 'Data de nascimento é obrigatória'),
+  nomeTerapeuta: z.string().min(1, 'Selecione um(a) terapeuta'),
+  nomeResponsavel: z.string(),
+  telefoneResponsavel: z.string(),
+  emailResponsavel: z.string(),
+  cpfResponsavel: z.string(),
+  enderecoResponsavel: z.string(),
+  origem: z.enum(['Indicação', 'Instagram', 'Busca no Google', 'Outros']),
+})
+
+type EditarPacienteFormInputs = z.infer<typeof EditarPacienteFormSchema>
 
 interface EditarPacienteModalProps {
   pacienteId: string
@@ -18,35 +38,87 @@ export function EditarPacienteModal({
   open,
   onClose,
 }: EditarPacienteModalProps) {
+  const dispatch = useDispatch<AppDispatch>()
+  const terapeutas = useSelector((state: RootState) => state.terapeutas.data)
+  const pacientes = useSelector((state: RootState) => state.pacientes.data)
+  const [mensagemSucesso, setMensagemSucesso] = useState('')
+  const [mensagemErro, setMensagemErro] = useState('')
   const {
     register,
-    errors,
-    handleSubmit,
-    handleEditPaciente,
-    isSubmitting,
-    mensagemSucesso,
-    mensagemErro,
-    handleFocus,
-    terapeutas,
-    setMensagemSucesso,
-    setMensagemErro,
     control,
-  } = useEditarPacienteForm(pacienteId)
+    handleSubmit,
+    reset,
+    formState: { isSubmitting, errors },
+  } = useForm<EditarPacienteFormInputs>({
+    resolver: zodResolver(EditarPacienteFormSchema),
+  })
 
-  async function onSubmit(data: EditarPacienteFormInputs) {
+  useEffect(() => {
+    const paciente = pacientes.find((p) => p.id === pacienteId)
+    if (paciente) {
+      reset({
+        id: paciente.id,
+        nomePaciente: paciente.nomePaciente,
+        dtNascimento: new Date(paciente.dtNascimento).toISOString(),
+        nomeTerapeuta: paciente.terapeutaInfo.nomeTerapeuta,
+        nomeResponsavel: paciente.nomeResponsavel,
+        telefoneResponsavel: paciente.telefoneResponsavel,
+        emailResponsavel: paciente.emailResponsavel,
+        cpfResponsavel: paciente.cpfResponsavel,
+        enderecoResponsavel: paciente.enderecoResponsavel,
+        origem: paciente.origem ?? 'Indicação',
+      })
+    }
+  }, [pacienteId, pacientes, reset])
+
+  async function handleEditPaciente(data: EditarPacienteFormInputs) {
     try {
-      const mensagem = await handleEditPaciente(data)
-      setMensagemSucesso(mensagem)
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+
+      const terapeutaInfo = terapeutas.find(
+        (terapeuta) => terapeuta.nomeTerapeuta === data.nomeTerapeuta,
+      )
+
+      if (!terapeutaInfo) {
+        throw new Error('Terapeuta não encontrado')
+      }
+
+      const pacienteEditado = {
+        id: data.id,
+        nomePaciente: data.nomePaciente,
+        dtNascimento: new Date(data.dtNascimento).toISOString(),
+        terapeutaInfo,
+        nomeResponsavel: data.nomeResponsavel,
+        telefoneResponsavel: data.telefoneResponsavel,
+        emailResponsavel: data.emailResponsavel,
+        cpfResponsavel: data.cpfResponsavel,
+        enderecoResponsavel: data.enderecoResponsavel,
+        origem: data.origem,
+      }
+
+      await dispatch(updatePaciente(pacienteEditado)).unwrap()
+
+      // Recarrega os terapeutas e pacientes
+      dispatch(fetchTerapeutas())
+      dispatch(fetchPacientes())
+
+      // Limpa os dados do formulário
+      reset()
+
+      setMensagemSucesso('Paciente atualizado com sucesso!')
       setMensagemErro('')
+      console.log('Paciente atualizado:', data)
       onClose()
     } catch (error) {
-      if (error instanceof Error) {
-        setMensagemErro(error.message)
-      } else {
-        setMensagemErro('An unknown error occurred')
-      }
+      setMensagemErro('Erro ao editar paciente')
       setMensagemSucesso('')
+      console.error('Erro ao editar paciente:', error)
     }
+  }
+
+  function handleFocus() {
+    setMensagemSucesso('')
+    setMensagemErro('')
   }
 
   return (
@@ -59,7 +131,7 @@ export function EditarPacienteModal({
             <VisuallyHidden>Editar Paciente</VisuallyHidden>
           </Dialog.Description>
           <form
-            onSubmit={handleSubmit(onSubmit)}
+            onSubmit={handleSubmit(handleEditPaciente)}
             className="space-y-6 p-6 bg-white rounded-lg"
           >
             <h3 className="font-medium text-azul text-xl mt-6">

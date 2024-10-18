@@ -4,7 +4,7 @@ import {
   createAsyncThunk,
   type PayloadAction,
 } from '@reduxjs/toolkit'
-import type { Terapeuta } from '../tipos'
+import type { Paciente, Terapeuta } from '../tipos'
 
 interface TerapeutasState {
   data: Terapeuta[]
@@ -46,7 +46,7 @@ export const addTerapeuta = createAsyncThunk(
 // Thunk para editar terapeuta
 export const updateTerapeuta = createAsyncThunk(
   'terapeutas/updateTerapeuta',
-  async (terapeuta: Terapeuta) => {
+  async (terapeuta: Terapeuta, { dispatch }) => {
     const response = await fetch(
       `http://localhost:3000/terapeutas/${terapeuta.id}`,
       {
@@ -57,7 +57,42 @@ export const updateTerapeuta = createAsyncThunk(
         body: JSON.stringify(terapeuta),
       },
     )
-    return await response.json()
+    const updatedTerapeuta = await response.json()
+
+    await dispatch(updatePacientesByTerapeuta(updatedTerapeuta))
+
+    return updatedTerapeuta
+  },
+)
+
+export const updatePacientesByTerapeuta = createAsyncThunk(
+  'pacientes/updatePacientesByTerapeuta',
+  async (terapeuta: Terapeuta) => {
+    const response = await fetch('http://localhost:3000/pacientes')
+    const pacientes: Paciente[] = await response.json()
+
+    const pacientesAtualizados = pacientes
+      .filter((paciente) => paciente.terapeutaInfo.id === terapeuta.id)
+      .map((paciente) => ({
+        ...paciente,
+        terapeutaInfo: {
+          ...paciente.terapeutaInfo,
+          nomeTerapeuta: terapeuta.nomeTerapeuta,
+        },
+      }))
+
+    // Atualizar pacientes no backend
+    for (const paciente of pacientesAtualizados) {
+      await fetch(`http://localhost:3000/pacientes/${paciente.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(paciente),
+      })
+    }
+
+    return pacientesAtualizados
   },
 )
 

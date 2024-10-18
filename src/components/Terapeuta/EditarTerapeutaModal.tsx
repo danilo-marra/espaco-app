@@ -34,6 +34,7 @@ export function EditarTerapeutaModal({
 }: EditarTerapeutaModalProps) {
   const dispatch = useDispatch<AppDispatch>()
   const terapeutas = useSelector((state: RootState) => state.terapeutas.data)
+  const pacientes = useSelector((state: RootState) => state.pacientes.data)
   const [mensagemSucesso, setMensagemSucesso] = useState('')
   const [mensagemErro, setMensagemErro] = useState('')
 
@@ -82,11 +83,20 @@ export function EditarTerapeutaModal({
       setMensagemSucesso('Terapeuta atualizado com sucesso!')
       setMensagemErro('')
       console.log('Terapeuta atualizado:', data)
+
+      const pacientesAfetados = pacientes.filter(
+        (paciente) => paciente.terapeutaInfo.id === data.id,
+      )
+
+      console.log(
+        'Pacientes que foram afetados pela atualização: ',
+        pacientesAfetados,
+      )
       onClose()
     } catch (error) {
-      console.error('Erro ao atualizar Terapeuta:', error)
-      setMensagemErro('Erro ao atualizar Terapeuta. Tente novamente.')
+      setMensagemErro('Erro ao atualizar Terapeuta')
       setMensagemSucesso('')
+      console.error('Erro ao atualizar Terapeuta:', error)
     }
   }
 
