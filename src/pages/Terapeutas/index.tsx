@@ -38,12 +38,11 @@ export function Terapeutas() {
   const [terapeutaEditando, setTerapeutaEditando] = useState<Terapeuta | null>(
     null,
   )
-  const [selectedTerapeuta, setSelectedTerapeuta] = useState('Todos')
   const [terapeutaParaExcluir, setTerapeutaParaExcluir] = useState<
     string | null
   >(null)
   const [isSuccess, setIsSuccess] = useState(false)
-
+  const [selectedTerapeuta, setSelectedTerapeuta] = useState('Todos')
   const handleTerapeutaChange = (
     event: React.ChangeEvent<HTMLSelectElement>,
   ) => {

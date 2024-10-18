@@ -63,6 +63,26 @@ export function Pacientes() {
     setTotalPages(Math.ceil(filtered.length / pacientesPerPage))
   }, [searchQuery, pacientes])
 
+  const [selectedTerapeuta, setSelectedTerapeuta] = useState('Todos')
+  const handleTerapeutaChange = (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    const terapeutaId = event.target.value
+    setSelectedTerapeuta(terapeutaId)
+
+    if (terapeutaId === 'Todos') {
+      setFilteredPacientes(pacientes)
+    } else {
+      const filtered = pacientes.filter(
+        (paciente) => paciente.terapeutaInfo?.id === terapeutaId,
+      )
+      setFilteredPacientes(filtered)
+    }
+
+    setCurrentPage(1) // Resetar para a primeira página
+    setTotalPages(Math.ceil(filteredPacientes.length / pacientesPerPage))
+  }
+
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage)
   }
@@ -119,7 +139,7 @@ export function Pacientes() {
             <NovoPacienteModal />
           </Dialog.Root>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <div className="flex items-center space-x-4 p-4 bg-white rounded shadow ">
             <User size={24} />
             <input
@@ -129,6 +149,26 @@ export function Pacientes() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
+          </div>
+          <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
+            <User size={24} />
+            <label htmlFor="terapeutas" className="text-xl font-semibold">
+              Terapeuta:
+            </label>
+            <select
+              className="text-xl"
+              name="terapeutas"
+              id="terapeutas"
+              value={selectedTerapeuta}
+              onChange={handleTerapeutaChange}
+            >
+              <option value="Todos">Todos</option>
+              {terapeutas.map((terapeuta) => (
+                <option key={terapeuta.id} value={terapeuta.id}>
+                  {terapeuta.nomeTerapeuta}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">

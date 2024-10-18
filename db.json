@@ -195,7 +195,7 @@
       "dtNascimento": "2024-10-07T00:00:00.000Z",
       "terapeutaInfo": {
         "id": "2b6f8404-38dc-4b1e-9c12-8a470f220253",
-        "nomeTerapeuta": "Danilo Marra ",
+        "nomeTerapeuta": "Gabi",
         "telefoneTerapeuta": "61981593923",
         "emailTerapeuta": "danilo2311@gmail.com",
         "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
@@ -540,7 +540,7 @@
     },
     {
       "id": "2b6f8404-38dc-4b1e-9c12-8a470f220253",
-      "nomeTerapeuta": "Danilo Marra ",
+      "nomeTerapeuta": "Gabi",
       "telefoneTerapeuta": "61981593923",
       "emailTerapeuta": "danilo2311@gmail.com",
       "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
