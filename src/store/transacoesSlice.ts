@@ -1,16 +1,10 @@
-// transacoesSlice.ts
 import {
   createSlice,
   createAsyncThunk,
   type PayloadAction,
 } from '@reduxjs/toolkit'
 import type { Transacao } from '../tipos'
-
-interface TransacoesState {
-  data: Transacao[]
-  loading: boolean
-  error: string | null
-}
+import type { TransacoesState } from './store'
 
 // Estado inicial
 const initialState: TransacoesState = {

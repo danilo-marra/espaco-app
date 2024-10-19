@@ -1,16 +1,10 @@
-// terapeutasSlice.ts
 import {
   createSlice,
   createAsyncThunk,
   type PayloadAction,
 } from '@reduxjs/toolkit'
 import type { Paciente, Terapeuta } from '../tipos'
-
-interface TerapeutasState {
-  data: Terapeuta[]
-  loading: boolean
-  error: string | null
-}
+import type { TerapeutasState } from './store'
 
 // Estado inicial
 const initialState: TerapeutasState = {

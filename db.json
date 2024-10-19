@@ -546,6 +546,15 @@
       "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
       "curriculo": "",
       "chavePix": ""
+    },
+    {
+      "id": "6185f8d8-1857-4467-b047-dca952f360f2",
+      "nomeTerapeuta": "Danilo Marra Rabelo",
+      "telefoneTerapeuta": "61981593923",
+      "emailTerapeuta": "danilo2311@gmail.com",
+      "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
+      "curriculo": "teste curriculo",
+      "chavePix": "098098098098"
     }
   ],
   "sessoes": [

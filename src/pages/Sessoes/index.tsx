@@ -8,28 +8,27 @@ import {
   TrashSimple,
   User,
 } from '@phosphor-icons/react'
-import { useContext, useEffect, useState } from 'react'
-import { SessoesContext } from '../../contexts/SessoesContext'
-import { dateFormatter, priceFormatter } from '../../utils/formatter'
+import { useEffect, useState } from 'react'
+import { dateFormatter } from '../../utils/formatter'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import type { Sessao } from '../../tipos'
 import Pagination from '../../components/Pagination'
+import { useSelector, useDispatch } from 'react-redux'
+import type { RootState, AppDispatch } from '../../store/store'
+import { fetchSessoes } from '../../store/sessoesSlice'
+import { fetchTerapeutas } from '../../store/terapeutasSlice'
 
 export function Sessoes() {
-  const { sessoes, fetchSessoes } = useContext(SessoesContext)
+  const dispatch = useDispatch<AppDispatch>()
+  const terapeutas = useSelector((state: RootState) => state.terapeutas.data)
+  const sessoes = useSelector((state: RootState) => state.sessoes.data)
   const [dataAtual, setDataAtual] = useState<Date>(new Date())
   const [totalPages, setTotalPages] = useState<number>(0)
   const [currentPage, setCurrentPage] = useState(1)
   const sessoesPerPage = 10
-  const [selectedTerapeuta, setSelectedTerapeuta] = useState('Todos')
-  const handleTerapeutaChange = (
-    event: React.ChangeEvent<HTMLSelectElement>,
-  ) => {
-    setSelectedTerapeuta(event.target.value)
-  }
   const [filteredSessoes, setFilteredSessoes] = useState<Sessao[]>([])
   const indexOfLastSessoes = currentPage * sessoesPerPage
   const indexOfFirstSessoes = indexOfLastSessoes - sessoesPerPage
@@ -37,38 +36,19 @@ export function Sessoes() {
     indexOfFirstSessoes,
     indexOfLastSessoes,
   )
-
-  // useEffect(() => {
-  //   fetchTerapeutas()
-  //   fetchSessoes()
-  // }, [fetchTerapeutas, fetchSessoes])
-
-  useEffect(() => {
-    // Filter sessoes by selected terapeuta
-    const filteredByTerapeuta =
-      selectedTerapeuta === 'Todos'
-        ? sessoes
-        : sessoes.filter(
-            (sessao) => sessao.terapeutaInfo.id === selectedTerapeuta,
-          )
-
-    // Filter sessoes by date
-    const filteredByDate = filteredByTerapeuta.filter((sessao) => {
-      if (!sessao.dtSessao1) return false
-      const dataSessao = new Date(sessao.dtSessao1)
-      return (
-        dataSessao.getMonth() === dataAtual.getMonth() &&
-        dataSessao.getFullYear() === dataAtual.getFullYear()
-      )
-    })
-
-    setFilteredSessoes(filteredByDate)
-    setTotalPages(Math.ceil(filteredByDate.length / sessoesPerPage))
-  }, [sessoes, selectedTerapeuta, dataAtual])
-
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage)
   }
+
+  useEffect(() => {
+    dispatch(fetchSessoes())
+    dispatch(fetchTerapeutas())
+  }, [dispatch])
+
+  useEffect(() => {
+    setFilteredSessoes(sessoes)
+    setTotalPages(Math.ceil(sessoes.length / sessoesPerPage))
+  }, [sessoes])
 
   function handleMonthPrev() {
     setDataAtual(new Date(dataAtual.getFullYear(), dataAtual.getMonth() - 1, 1))
@@ -94,23 +74,17 @@ export function Sessoes() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
             <User size={24} />
-            <label htmlFor="psicólogo" className="text-xl font-semibold">
+            <label htmlFor="terapeutas" className="text-xl font-semibold">
               Terapeuta:
             </label>
-            {/* <select
-              className="text-xl"
-              name="terapeutas"
-              id="terapeutas"
-              value={selectedTerapeuta}
-              onChange={handleTerapeutaChange}
-            >
+            <select className="text-xl" name="terapeutas" id="terapeutas">
               <option value="Todos">Todos</option>
               {terapeutas.map((terapeuta) => (
                 <option key={terapeuta.id} value={terapeuta.id}>
                   {terapeuta.nomeTerapeuta}
                 </option>
               ))}
-            </select> */}
+            </select>
           </div>
           <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
             <HandCoins size={24} />
