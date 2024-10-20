@@ -1,9 +1,9 @@
 import {
   PencilSimple,
-  Person,
   Plus,
   TrashSimple,
   User,
+  Users,
   UsersThree,
 } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
@@ -150,7 +150,7 @@ export function Terapeutas() {
               </span>
             </div>
             <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
-              <Person size={24} />
+              <Users size={24} />
               <span className="text-xl font-semibold">
                 Total de Pacientes: {pacientes.length}
               </span>

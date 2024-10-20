@@ -6,6 +6,13 @@
       "tipo": "entrada",
       "valor": 5,
       "dtCriacao": "2024-10-15T03:00:00.000Z"
+    },
+    {
+      "id": "d3670131-29a8-4f43-b13f-c60d35daddd5",
+      "descricao": "Papel Higiênico",
+      "tipo": "saida",
+      "valor": 69,
+      "dtCriacao": "2024-09-12T03:00:00.000Z"
     }
   ],
   "pacientes": [
@@ -559,10 +566,10 @@
   ],
   "sessoes": [
     {
-      "id": "1",
+      "id": "1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p",
       "terapeutaInfo": {
         "id": "5b306851-c6d3-45c3-8f95-8f2d713e6e83",
-        "nomeTerapeuta": "Thais Marra",
+        "nomeTerapeuta": "Beatriz",
         "telefoneTerapeuta": "6192095674",
         "emailTerapeuta": "thaismarra@gmail.com",
         "enderecoTerapeuta": "SHCES Quadra 801 Bloco A",
@@ -570,95 +577,25 @@
         "chavePix": "098098098098"
       },
       "pacienteInfo": {
-        "id": "bf98c26f-ddd0-4871-94cd-bf83422cb7a0",
-        "nomePaciente": "Nilo",
-        "dtNascimento": "2024-09-30T03:00:00.000Z",
-        "nomeTerapeuta": "Terapeuta 1",
-        "nomeResponsavel": "Thais Marra",
-        "telefoneResponsavel": "61981593923",
-        "emailResponsavel": "thaismarra@gmail.com",
-        "cpfResponsavel": "024.818.181-54",
-        "enderecoResponsavel": "SHCES Quadra 801 Bloco A",
-        "origem": "Instagram"
-      },
-      "valorSessao": 350,
-      "notaFiscal": "Emitida",
-      "dtSessao1": "2024-07-21T09:15:42.625Z",
-      "dtSessao2": "2024-07-22T09:12:42.625Z",
-      "dtSessao3": "2024-07-23T09:15:42.625Z",
-      "dtSessao4": "2024-07-24T09:15:42.625Z",
-      "dtSessao5": "2024-07-25T09:15:42.625Z",
-      "dtSessao6": "2024-07-26T09:15:42.625Z"
-    },
-    {
-      "id": "2",
-      "terapeutaInfo": {
-        "id": "01604952-22ed-44bd-9dfa-2fd7f59f47b9",
-        "nomeTerapeuta": "Danilo Marra Rabelo",
-        "telefoneTerapeuta": "61981593923",
-        "emailTerapeuta": "danilo2311@gmail.com",
-        "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
-        "curriculo": "teste curriculo",
-        "chavePix": "098098098098"
-      },
-      "pacienteInfo": {
-        "id": "f678f4d7-85a9-4ab0-94bb-cbad4d365708",
+        "id": "14811370-b08d-4d3d-bc94-1f268a7047c6",
         "nomePaciente": "Danilo Marra Rabelo",
-        "dtNascimento": "2023-04-03T03:00:00.000Z",
-        "nomeTerapeuta": "Terapeuta 2",
+        "dtNascimento": "2024-09-04T00:00:00.000Z",
         "nomeResponsavel": "Danilo Marra Rabelo",
         "telefoneResponsavel": "61981593923",
         "emailResponsavel": "danilo2311@gmail.com",
         "cpfResponsavel": "876.876.876-87",
         "enderecoResponsavel": "SHCES 301 BLOCO C apt 202",
-        "origem": "Instagram"
-      },
-      "valorSessao": 300,
-      "notaFiscal": "Emitida",
-      "dtSessao1": "2024-08-01T09:15:42.625Z",
-      "dtSessao2": "2024-08-02T09:15:42.625Z",
-      "dtSessao3": "2024-08-03T09:15:42.625Z",
-      "dtSessao4": "2024-08-04T09:15:42.625Z",
-      "dtSessao5": "2024-08-05T09:15:42.625Z",
-      "dtSessao6": "2024-08-06T09:15:42.625Z"
-    },
-    {
-      "id": "3",
-      "terapeutaInfo": {
-        "id": "01604952-22ed-44bd-9dfa-2fd7f59f47b9",
-        "nomeTerapeuta": "Danilo Marra Rabelo",
-        "telefoneTerapeuta": "61981593923",
-        "emailTerapeuta": "danilo2311@gmail.com",
-        "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
-        "curriculo": "teste curriculo",
-        "chavePix": "098098098098"
-      },
-      "pacienteInfo": {
-        "id": "e4cbbbe8-eb71-4c75-944a-6ab6514722bc",
-        "nomePaciente": "Danilo Marra Rabelo",
-        "dtNascimento": "2024-10-01T03:00:00.000Z",
-        "nomeTerapeuta": "Terapeuta 4",
-        "nomeResponsavel": "Danilo Marra Rabelo",
-        "telefoneResponsavel": "61981593923",
-        "emailResponsavel": "danilo2311@gmail.com",
-        "cpfResponsavel": "024.818.181-54",
-        "enderecoResponsavel": "SHCES 301 BLOCO C apt 202",
         "origem": "Indicação"
       },
-      "valorSessao": 340,
-      "notaFiscal": "Enviada",
-      "dtSessao1": "2024-10-01T09:15:42.625Z",
-      "dtSessao2": "2024-10-02T09:15:42.625Z",
-      "dtSessao3": "2024-10-03T09:15:42.625Z",
-      "dtSessao4": "2024-10-04T09:15:42.625Z",
-      "dtSessao5": "2024-10-05T09:15:42.625Z",
-      "dtSessao6": "2024-10-06T09:15:42.625Z"
+      "valorSessao": 100,
+      "notaFiscal": "Emitida",
+      "dtSessao1": "2024-10-01T00:00:00.000Z"
     },
     {
-      "id": "4",
+      "id": "2b3c4d5e-6f7g-8h9i-0j1k-2l3m4n5o6p7q",
       "terapeutaInfo": {
         "id": "07437780-1856-4223-a74a-881d4622dfe9",
-        "nomeTerapeuta": "Ju",
+        "nomeTerapeuta": "Juliana",
         "telefoneTerapeuta": "61992095676",
         "emailTerapeuta": "julianabarbosa.psi@gmail.com",
         "enderecoTerapeuta": "SHC AOS Entrequadras 2/8 Lote 5, Octogonal, Terraço Shopping",
@@ -666,25 +603,47 @@
         "chavePix": "02492927180"
       },
       "pacienteInfo": {
-        "id": "42a7b529-66a9-4d30-b510-769fcf0be78c",
+        "id": "99675364-e435-47e3-9780-a109419e55e3",
         "nomePaciente": "Danilo Marra Rabelo",
-        "dtNascimento": "2024-09-30T03:00:00.000Z",
-        "nomeTerapeuta": "Juliana Barbosa",
+        "dtNascimento": "2024-09-29T03:00:00.000Z",
+        "nomeResponsavel": "Thais Marra",
+        "telefoneResponsavel": "61981593923",
+        "emailResponsavel": "thaismarra@gmail.com",
+        "cpfResponsavel": "024.818.181-54",
+        "enderecoResponsavel": "SHCES Quadra 801 Bloco A",
+        "origem": "Indicação"
+      },
+      "valorSessao": 120,
+      "notaFiscal": "Enviada",
+      "dtSessao1": "2024-10-10T00:00:00.000Z",
+      "dtSessao2": "2024-10-17T00:00:00.000Z"
+    },
+    {
+      "id": "3c4d5e6f-7g8h-9i0j-1k2l-3m4n5o6p7q8r",
+      "terapeutaInfo": {
+        "id": "934e1d9d-1342-444a-9eba-48ebbbbcc12b",
+        "nomeTerapeuta": "Clara",
+        "telefoneTerapeuta": "61981593923",
+        "emailTerapeuta": "danilo2311@gmail.com",
+        "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
+        "curriculo": "teste curriculo",
+        "chavePix": "44"
+      },
+      "pacienteInfo": {
+        "id": "8541b835-d0d0-467b-a95b-a27e4297e451",
+        "nomePaciente": "Thais Marra",
+        "dtNascimento": "2024-10-15T03:00:00.000Z",
         "nomeResponsavel": "Danilo Marra Rabelo",
         "telefoneResponsavel": "61981593923",
         "emailResponsavel": "danilo2311@gmail.com",
-        "cpfResponsavel": "024.818.181-54",
+        "cpfResponsavel": "876.876.876-87",
         "enderecoResponsavel": "SHCES 301 BLOCO C apt 202",
         "origem": "Indicação"
       },
-      "valorSessao": 320,
+      "valorSessao": 150,
       "notaFiscal": "Emitida",
-      "dtSessao1": "2024-10-10T09:15:42.625Z",
-      "dtSessao2": "2024-10-11T09:15:42.625Z",
-      "dtSessao3": "2024-10-12T09:15:42.625Z",
-      "dtSessao4": "2024-10-13T09:15:42.625Z",
-      "dtSessao5": "2024-10-14T09:15:42.625Z",
-      "dtSessao6": "2024-10-15T09:15:42.625Z"
+      "dtSessao1": "2024-10-20T00:00:00.000Z",
+      "dtSessao2": "2024-10-27T00:00:00.000Z"
     }
   ]
 }

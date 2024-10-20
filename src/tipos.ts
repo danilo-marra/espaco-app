@@ -26,7 +26,7 @@ export interface Sessao {
   pacienteInfo: Paciente
   valorSessao: number
   notaFiscal: 'Emitida' | 'Enviada' | undefined
-  dtSessao1?: Date
+  dtSessao1: Date
   dtSessao2?: Date
   dtSessao3?: Date
   dtSessao4?: Date

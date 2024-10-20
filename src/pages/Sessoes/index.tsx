@@ -7,9 +7,10 @@ import {
   Plus,
   TrashSimple,
   User,
+  Users,
 } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
-import { dateFormatter } from '../../utils/formatter'
+import { dateFormatter, priceFormatter } from '../../utils/formatter'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import DatePicker from 'react-datepicker'
@@ -30,6 +31,8 @@ export function Sessoes() {
   const [currentPage, setCurrentPage] = useState(1)
   const sessoesPerPage = 10
   const [filteredSessoes, setFilteredSessoes] = useState<Sessao[]>([])
+  const [valorTotalSessoes, setValorTotalSessoes] = useState<number>(0)
+  const [valorRepasse, setValorRepasse] = useState<number>(0)
   const indexOfLastSessoes = currentPage * sessoesPerPage
   const indexOfFirstSessoes = indexOfLastSessoes - sessoesPerPage
   const sessoesAtuais = filteredSessoes.slice(
@@ -39,6 +42,15 @@ export function Sessoes() {
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage)
   }
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedTerapeuta, setSelectedTerapeuta] = useState('Todos')
+  const handleTerapeutaChange = (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    const terapeutaId = event.target.value
+    setSelectedTerapeuta(terapeutaId)
+    setCurrentPage(1) // Resetar para a primeira página
+  }
 
   useEffect(() => {
     dispatch(fetchSessoes())
@@ -46,9 +58,45 @@ export function Sessoes() {
   }, [dispatch])
 
   useEffect(() => {
-    setFilteredSessoes(sessoes)
-    setTotalPages(Math.ceil(sessoes.length / sessoesPerPage))
-  }, [sessoes])
+    let filtered = sessoes
+
+    // Filtro por terapeuta
+    if (selectedTerapeuta !== 'Todos') {
+      filtered = filtered.filter(
+        (sessao) => sessao.terapeutaInfo?.id === selectedTerapeuta,
+      )
+    }
+
+    // Filtro por data
+    filtered = filtered.filter((sessao) => {
+      const dataSessao = new Date(sessao.dtSessao1)
+      return (
+        dataSessao.getMonth() === dataAtual.getMonth() &&
+        dataSessao.getFullYear() === dataAtual.getFullYear()
+      )
+    })
+
+    // Filtro por busca
+    filtered = filtered.filter((sessao) =>
+      sessao.pacienteInfo.nomePaciente
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()),
+    )
+
+    setFilteredSessoes(filtered)
+    setTotalPages(Math.ceil(filtered.length / sessoesPerPage))
+
+    // Calcular o valor total das sessões filtradas
+    const valorTotalCalculado = filtered.reduce((total, sessao) => {
+      const datasValidas = contarDatasValidas(sessao)
+      return total + sessao.valorSessao * datasValidas
+    }, 0)
+    setValorTotalSessoes(valorTotalCalculado)
+
+    // Calcular o valor do repasse
+    const valorRepasseCalculado = valorTotalCalculado * 0.5
+    setValorRepasse(valorRepasseCalculado)
+  }, [sessoes, selectedTerapeuta, dataAtual, searchQuery])
 
   function handleMonthPrev() {
     setDataAtual(new Date(dataAtual.getFullYear(), dataAtual.getMonth() - 1, 1))
@@ -56,6 +104,18 @@ export function Sessoes() {
 
   function handleMonthNext() {
     setDataAtual(new Date(dataAtual.getFullYear(), dataAtual.getMonth() + 1, 1))
+  }
+
+  function contarDatasValidas(sessao: Sessao): number {
+    const datas = [
+      sessao.dtSessao1,
+      sessao.dtSessao2,
+      sessao.dtSessao3,
+      sessao.dtSessao4,
+      sessao.dtSessao5,
+      sessao.dtSessao6,
+    ]
+    return datas.filter((data) => data !== undefined && data !== null).length
   }
 
   return (
@@ -71,13 +131,29 @@ export function Sessoes() {
             Nova Sessão
           </button>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <div className="flex items-center space-x-4 p-4 bg-white rounded shadow ">
+            <Users size={24} />
+            <input
+              className="text-xl w-full  text-gray-800 focus:outline-none"
+              type="text"
+              placeholder="Buscar paciente"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
           <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
             <User size={24} />
             <label htmlFor="terapeutas" className="text-xl font-semibold">
               Terapeuta:
             </label>
-            <select className="text-xl" name="terapeutas" id="terapeutas">
+            <select
+              className="text-xl"
+              name="terapeutas"
+              id="terapeutas"
+              value={selectedTerapeuta}
+              onChange={handleTerapeutaChange}
+            >
               <option value="Todos">Todos</option>
               {terapeutas.map((terapeuta) => (
                 <option key={terapeuta.id} value={terapeuta.id}>
@@ -88,11 +164,15 @@ export function Sessoes() {
           </div>
           <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
             <HandCoins size={24} />
-            <span className="text-xl font-semibold">R$ Paciente: 1820,00</span>
+            <span className="text-xl font-semibold">
+              Paciente: {priceFormatter.format(valorTotalSessoes)}
+            </span>
           </div>
           <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
             <HandCoins size={24} />
-            <span className="text-xl font-semibold">R$ PSI: 819,00 (45%)</span>
+            <span className="text-xl font-semibold">
+              PSI: {priceFormatter.format(valorRepasse)}
+            </span>
           </div>
         </div>
         <div className="flex items-center justify-between p-4 bg-white rounded shadow">
@@ -154,7 +234,9 @@ export function Sessoes() {
                 <td className="p-4">{sessao.terapeutaInfo.nomeTerapeuta}</td>
                 <td className="p-4">{sessao.pacienteInfo.nomePaciente}</td>
                 <td className="p-4">{sessao.pacienteInfo.nomeResponsavel}</td>
-                <td className="p-4">R$ {sessao.valorSessao.toFixed(2)}</td>
+                <td className="p-4">
+                  {priceFormatter.format(sessao.valorSessao)}
+                </td>
                 <td className="p-4">{sessao.notaFiscal}</td>
                 <td className="p-4">
                   {sessao.dtSessao1
@@ -187,7 +269,9 @@ export function Sessoes() {
                     : 'N/A'}
                 </td>
                 <td className="p-4">
-                  R$ {(sessao.valorSessao * 6).toFixed(2)}
+                  {priceFormatter.format(
+                    sessao.valorSessao * contarDatasValidas(sessao),
+                  )}
                 </td>
                 <td className="p-2 space-x-2">
                   <button

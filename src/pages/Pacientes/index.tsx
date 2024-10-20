@@ -1,10 +1,10 @@
 import {
   Cake,
   PencilSimple,
-  Person,
   Plus,
   TrashSimple,
   User,
+  Users,
   UsersThree,
 } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
@@ -141,7 +141,7 @@ export function Pacientes() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <div className="flex items-center space-x-4 p-4 bg-white rounded shadow ">
-            <User size={24} />
+            <Users size={24} />
             <input
               className="text-xl w-full  text-gray-800 focus:outline-none"
               type="text"
@@ -172,7 +172,7 @@ export function Pacientes() {
           </div>
 
           <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
-            <Person size={24} />
+            <Users size={24} />
             <span className="text-xl font-semibold">
               Total de Pacientes: {filteredPacientes.length}
             </span>
