@@ -144,6 +144,9 @@ export function EditarTransacaoModal({
                     locale={ptBR}
                     onFocus={handleFocus}
                     autoComplete="off"
+                    showMonthDropdown
+                    showYearDropdown
+                    dropdownMode="select"
                   />
                 )}
               />

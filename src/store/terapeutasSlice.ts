@@ -33,6 +33,9 @@ export const addTerapeuta = createAsyncThunk(
       },
       body: JSON.stringify(terapeuta),
     })
+
+    // Terapeuta adicionado
+    console.log('Terapeuta adicionado:', terapeuta)
     return await response.json()
   },
 )

@@ -524,7 +524,7 @@
       "telefoneTerapeuta": "6192095674",
       "emailTerapeuta": "thaismarra@gmail.com",
       "enderecoTerapeuta": "SHCES Quadra 801 Bloco A",
-      "curriculo": "teste curriculo",
+      "dtEntrada": "2024-09-04T00:00:00.000Z",
       "chavePix": "098098098098"
     },
     {
@@ -533,7 +533,7 @@
       "telefoneTerapeuta": "61992095676",
       "emailTerapeuta": "julianabarbosa.psi@gmail.com",
       "enderecoTerapeuta": "SHC AOS Entrequadras 2/8 Lote 5, Octogonal, Terraço Shopping",
-      "curriculo": "Mestrado UnB",
+      "dtEntrada": "2017-09-10T00:00:00.000Z",
       "chavePix": "02492927180"
     },
     {
@@ -542,7 +542,7 @@
       "telefoneTerapeuta": "61981593923",
       "emailTerapeuta": "danilo2311@gmail.com",
       "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
-      "curriculo": "teste curriculo",
+      "dtEntrada": "2024-09-15T00:00:00.000Z",
       "chavePix": "44"
     },
     {
@@ -551,7 +551,7 @@
       "telefoneTerapeuta": "61981593923",
       "emailTerapeuta": "danilo2311@gmail.com",
       "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
-      "curriculo": "",
+      "dtEntrada": "2024-09-20T00:00:00.000Z",
       "chavePix": ""
     },
     {
@@ -560,8 +560,17 @@
       "telefoneTerapeuta": "61981593923",
       "emailTerapeuta": "danilo2311@gmail.com",
       "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
-      "curriculo": "teste curriculo",
+      "dtEntrada": "2024-09-25T00:00:00.000Z",
       "chavePix": "098098098098"
+    },
+    {
+      "id": "cc27e9b5-e5b7-488e-8fbf-1af2345eec9b",
+      "nomeTerapeuta": "testeteste",
+      "telefoneTerapeuta": "61981593923",
+      "emailTerapeuta": "danilo2311@gmail.com",
+      "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
+      "dtEntrada": "2024-10-06T03:00:00.000Z",
+      "chavePix": "44"
     }
   ],
   "sessoes": [

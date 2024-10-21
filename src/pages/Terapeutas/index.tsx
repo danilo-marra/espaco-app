@@ -18,6 +18,7 @@ import * as Dialog from '@radix-ui/react-dialog'
 import type { RootState, AppDispatch } from '../../store/store'
 import { deleteTerapeuta, fetchTerapeutas } from '../../store/terapeutasSlice'
 import { fetchPacientes } from '../../store/pacientesSlice'
+import { dateFormatter } from '../../utils/formatter'
 
 export function Terapeutas() {
   const dispatch = useDispatch<AppDispatch>()
@@ -163,7 +164,7 @@ export function Terapeutas() {
                 <th className="p-4 text-left">Telefone</th>
                 <th className="p-4 text-left">Email</th>
                 <th className="p-4 text-left">Endereço</th>
-                <th className="p-4 text-left">Currículo</th>
+                <th className="p-4 text-left">Data de Entrada</th>
                 <th className="p-4 text-left">Chave PIX</th>
                 <th className="p-4 text-left">Ações</th>
               </tr>
@@ -175,7 +176,9 @@ export function Terapeutas() {
                   <td className="p-4">{terapeuta.telefoneTerapeuta}</td>
                   <td className="p-4">{terapeuta.emailTerapeuta}</td>
                   <td className="p-4">{terapeuta.enderecoTerapeuta}</td>
-                  <td className="p-4">{terapeuta.curriculo}</td>
+                  <td className="p-4">
+                    {dateFormatter.format(new Date(terapeuta.dtEntrada))}
+                  </td>
                   <td className="p-4">{terapeuta.chavePix}</td>
                   <td className="p-2 space-x-2">
                     <button

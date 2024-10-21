@@ -38,7 +38,6 @@ export function NovaTransacaoModal() {
   })
 
   async function handleCreateNewTransacao(data: NovaTransacaoFormInputs) {
-    console.log('handleCreateNewTransacao called with data:', data)
     try {
       // Simula um atraso de 2 segundos
       await new Promise((resolve) => setTimeout(resolve, 2000))
@@ -118,6 +117,9 @@ export function NovaTransacaoModal() {
                   locale={ptBR}
                   onFocus={handleFocus}
                   autoComplete="off"
+                  showMonthDropdown
+                  showYearDropdown
+                  dropdownMode="select"
                 />
               )}
             />

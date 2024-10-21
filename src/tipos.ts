@@ -4,7 +4,7 @@ export interface Terapeuta {
   telefoneTerapeuta: string
   emailTerapeuta: string
   enderecoTerapeuta: string
-  curriculo: string
+  dtEntrada: Date
   chavePix: string
 }
 export interface Paciente {

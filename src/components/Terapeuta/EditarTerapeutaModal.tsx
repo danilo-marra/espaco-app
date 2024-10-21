@@ -6,8 +6,10 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useDispatch, useSelector } from 'react-redux'
 import type { AppDispatch, RootState } from '../../store/store'
 import { useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import { updateTerapeuta } from '../../store/terapeutasSlice'
+import DatePicker from 'react-datepicker'
+import { ptBR } from 'date-fns/locale'
 
 const EditarTerapeutaFormSchema = z.object({
   id: z.string().uuid(),
@@ -15,7 +17,9 @@ const EditarTerapeutaFormSchema = z.object({
   telefoneTerapeuta: z.string(),
   emailTerapeuta: z.string().email('Email inválido'),
   enderecoTerapeuta: z.string(),
-  curriculo: z.string(),
+  dtEntrada: z.date().refine((data) => data <= new Date(), {
+    message: 'Data de entrada não pode ser maior que a data atual',
+  }),
   chavePix: z.string(),
 })
 
@@ -40,6 +44,7 @@ export function EditarTerapeutaModal({
 
   const {
     register,
+    control,
     handleSubmit,
     reset,
     formState: { isSubmitting, errors },
@@ -56,7 +61,7 @@ export function EditarTerapeutaModal({
         telefoneTerapeuta: terapeuta.telefoneTerapeuta,
         emailTerapeuta: terapeuta.emailTerapeuta,
         enderecoTerapeuta: terapeuta.enderecoTerapeuta,
-        curriculo: terapeuta.curriculo,
+        dtEntrada: terapeuta.dtEntrada,
         chavePix: terapeuta.chavePix,
       })
     }
@@ -72,7 +77,7 @@ export function EditarTerapeutaModal({
         telefoneTerapeuta: data.telefoneTerapeuta,
         emailTerapeuta: data.emailTerapeuta,
         enderecoTerapeuta: data.enderecoTerapeuta,
-        curriculo: data.curriculo,
+        dtEntrada: data.dtEntrada,
         chavePix: data.chavePix,
       }
 
@@ -159,14 +164,30 @@ export function EditarTerapeutaModal({
                 {...register('enderecoTerapeuta')}
                 onFocus={handleFocus}
               />
-              <input
-                type="text"
-                className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
-                id="curriculo"
-                placeholder="Curriculo"
-                {...register('curriculo')}
-                onFocus={handleFocus}
+              <Controller
+                control={control}
+                name="dtEntrada"
+                render={({ field }) => (
+                  <DatePicker
+                    className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
+                    id="dtEntrada"
+                    placeholderText="Data de entrada"
+                    selected={field.value}
+                    onChange={(date) => field.onChange(date)}
+                    dateFormat={'dd/MM/yyyy'}
+                    locale={ptBR}
+                    onFocus={handleFocus}
+                    autoComplete="off"
+                    showMonthDropdown
+                    showYearDropdown
+                    dropdownMode="select"
+                  />
+                )}
               />
+
+              {errors.dtEntrada && (
+                <p className="text-red-500">{errors.dtEntrada.message}</p>
+              )}
               <input
                 type="text"
                 className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
