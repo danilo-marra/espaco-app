@@ -3,8 +3,10 @@ import {
   createAsyncThunk,
   type PayloadAction,
 } from '@reduxjs/toolkit'
-import type { Paciente, Terapeuta } from '../tipos'
+import axios from 'axios'
+import type { Sessao, Paciente, Terapeuta } from '../tipos'
 import type { TerapeutasState } from './store'
+import httpRequest, { API_URL } from '../utils/api'
 
 // Estado inicial
 const initialState: TerapeutasState = {
@@ -14,92 +16,146 @@ const initialState: TerapeutasState = {
 }
 
 // Thunk para buscar terapeutas
-export const fetchTerapeutas = createAsyncThunk(
-  'terapeutas/fetchTerapeutas',
-  async () => {
-    const response = await fetch('http://localhost:3000/terapeutas')
-    return await response.json()
-  },
+export const fetchTerapeutas = createAsyncThunk<Terapeuta[]>(
+  'terapeutas/fetchTerapeuta',
+  async () => httpRequest<Terapeuta[]>(`${API_URL}/terapeutas`, 'GET'),
 )
 
 // Thunk para adicionar terapeuta
-export const addTerapeuta = createAsyncThunk(
+export const addTerapeuta = createAsyncThunk<Terapeuta, Terapeuta>(
   'terapeutas/addTerapeuta',
-  async (terapeuta: Terapeuta) => {
-    const response = await fetch('http://localhost:3000/terapeutas', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(terapeuta),
-    })
-
-    // Terapeuta adicionado
+  async (terapeuta) => {
+    const response = await httpRequest<Terapeuta>(
+      `${API_URL}/terapeutas`,
+      'POST',
+      terapeuta,
+    )
     console.log('Terapeuta adicionado:', terapeuta)
-    return await response.json()
+    return response
   },
 )
 
 // Thunk para editar terapeuta
-export const updateTerapeuta = createAsyncThunk(
+export const updateTerapeuta = createAsyncThunk<
+  Terapeuta,
+  Terapeuta,
+  { rejectValue: string }
+>(
   'terapeutas/updateTerapeuta',
-  async (terapeuta: Terapeuta, { dispatch }) => {
-    const response = await fetch(
-      `http://localhost:3000/terapeutas/${terapeuta.id}`,
-      {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(terapeuta),
-      },
-    )
-    const updatedTerapeuta = await response.json()
+  async (terapeuta, { dispatch, rejectWithValue }) => {
+    try {
+      const updatedTerapeuta = await httpRequest<Terapeuta>(
+        `${API_URL}/terapeutas/${terapeuta.id}`,
+        'PUT',
+        terapeuta,
+      )
+      await dispatch(updatePacientesByTerapeuta(updatedTerapeuta))
+      await dispatch(updateSessoesByTerapeuta(updatedTerapeuta))
 
-    await dispatch(updatePacientesByTerapeuta(updatedTerapeuta))
-
-    return updatedTerapeuta
+      return updatedTerapeuta
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error('Erro ao atualizar terapeuta:', error.message)
+        return rejectWithValue(error.message)
+      }
+      return rejectWithValue('Erro desconhecido')
+    }
   },
 )
 
-export const updatePacientesByTerapeuta = createAsyncThunk(
+// Thunk para atualizar pacientes relacionados
+export const updatePacientesByTerapeuta = createAsyncThunk<
+  Paciente[],
+  Terapeuta,
+  { rejectValue: string }
+>(
   'pacientes/updatePacientesByTerapeuta',
-  async (terapeuta: Terapeuta) => {
-    const response = await fetch('http://localhost:3000/pacientes')
-    const pacientes: Paciente[] = await response.json()
+  async (terapeuta, { rejectWithValue }) => {
+    try {
+      const pacientes = await httpRequest<Paciente[]>(
+        `${API_URL}/pacientes`,
+        'GET',
+      )
 
-    const pacientesAtualizados = pacientes
-      .filter((paciente) => paciente.terapeutaInfo.id === terapeuta.id)
-      .map((paciente) => ({
-        ...paciente,
-        terapeutaInfo: {
-          ...paciente.terapeutaInfo,
-          nomeTerapeuta: terapeuta.nomeTerapeuta,
-        },
-      }))
+      const pacientesAtualizados = pacientes
+        .filter((p) => p.terapeutaInfo.id === terapeuta.id)
+        .map((p) => ({
+          ...p,
+          terapeutaInfo: {
+            ...p.terapeutaInfo,
+            nomeTerapeuta: terapeuta.nomeTerapeuta,
+          },
+        }))
 
-    // Atualizar pacientes no backend
-    for (const paciente of pacientesAtualizados) {
-      await fetch(`http://localhost:3000/pacientes/${paciente.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(paciente),
-      })
+      await Promise.all(
+        pacientesAtualizados.map((p) =>
+          httpRequest<Paciente>(`${API_URL}/pacientes/${p.id}`, 'PUT', p),
+        ),
+      )
+
+      console.log(
+        'Pacientes que foram afetados pela atualização',
+        pacientesAtualizados,
+      )
+      return pacientesAtualizados
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error('Erro ao atualizar pacientes:', error.message)
+        return rejectWithValue(error.message)
+      }
+      return rejectWithValue('Erro desconhecido')
     }
+  },
+)
 
-    return pacientesAtualizados
+// Thunk para atualizar sessões relacionadas
+export const updateSessoesByTerapeuta = createAsyncThunk<
+  Sessao[],
+  Terapeuta,
+  { rejectValue: string }
+>(
+  'sessoes/updateSessoesByTerapeuta',
+  async (terapeuta, { rejectWithValue }) => {
+    try {
+      const sessoes = await httpRequest<Sessao[]>(`${API_URL}/sessoes`, 'GET')
+
+      const sessoesAtualizadas = sessoes
+        .filter((s) => s.terapeutaInfo.id === terapeuta.id)
+        .map((s) => ({
+          ...s,
+          terapeutaInfo: {
+            ...s.terapeutaInfo,
+            nomeTerapeuta: terapeuta.nomeTerapeuta,
+          },
+        }))
+
+      await Promise.all(
+        sessoesAtualizadas.map((s) =>
+          httpRequest<Sessao>(`${API_URL}/sessoes/${s.id}`, 'PUT', s),
+        ),
+      )
+
+      console.log(
+        'Sessões que foram afetadas pela atualização',
+        sessoesAtualizadas,
+      )
+
+      return sessoesAtualizadas
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error('Erro ao atualizar sessões:', error.message)
+        return rejectWithValue(error.message)
+      }
+      return rejectWithValue('Erro desconhecido')
+    }
   },
 )
 
 // Thunk para excluir terapeuta
-export const deleteTerapeuta = createAsyncThunk(
+export const deleteTerapeuta = createAsyncThunk<string, string>(
   'terapeutas/deleteTerapeuta',
-  async (id: string) => {
-    await fetch(`http://localhost:3000/terapeutas/${id}`, {
-      method: 'DELETE',
-    })
+  async (id) => {
+    await httpRequest<void>(`${API_URL}/terapeutas/${id}`, 'DELETE')
     return id
   },
 )
@@ -118,9 +174,9 @@ const terapeutasSlice = createSlice({
         state.loading = false
         state.data = action.payload
       })
-      .addCase(fetchTerapeutas.rejected, (state) => {
+      .addCase(fetchTerapeutas.rejected, (state, action) => {
         state.loading = false
-        state.error = 'Erro ao buscar terapeutas'
+        state.error = action.error.message || 'Erro ao buscar terapeutas'
       })
       .addCase(
         addTerapeuta.fulfilled,

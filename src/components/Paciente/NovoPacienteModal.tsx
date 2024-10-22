@@ -214,8 +214,10 @@ export function NovoPacienteModal() {
 
           <div className="mt-6 flex justify-end">
             <button
+              className={`bg-azul text-branco hover:bg-azul/75 focus:shadow-azul inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] font-medium leading-none focus:shadow-[0_0_0_2px] focus:outline-none ${
+                isSubmitting ? 'cursor-not-allowed' : ''
+              }`}
               type="submit"
-              className="bg-azul text-white px-4 py-2 rounded hover:bg-sky-600 duration-150"
               disabled={isSubmitting}
             >
               {isSubmitting ? 'Carregando...' : 'Confirmar'}

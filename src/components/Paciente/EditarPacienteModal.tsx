@@ -61,7 +61,7 @@ export function EditarPacienteModal({
       reset({
         id: paciente.id,
         nomePaciente: paciente.nomePaciente,
-        dtNascimento: paciente.dtNascimento,
+        dtNascimento: new Date(paciente.dtNascimento),
         nomeTerapeuta: paciente.terapeutaInfo.nomeTerapeuta,
         nomeResponsavel: paciente.nomeResponsavel,
         telefoneResponsavel: paciente.telefoneResponsavel,

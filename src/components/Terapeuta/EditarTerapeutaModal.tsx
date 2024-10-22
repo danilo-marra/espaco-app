@@ -38,7 +38,6 @@ export function EditarTerapeutaModal({
 }: EditarTerapeutaModalProps) {
   const dispatch = useDispatch<AppDispatch>()
   const terapeutas = useSelector((state: RootState) => state.terapeutas.data)
-  const pacientes = useSelector((state: RootState) => state.pacientes.data)
   const [mensagemSucesso, setMensagemSucesso] = useState('')
   const [mensagemErro, setMensagemErro] = useState('')
 
@@ -61,7 +60,7 @@ export function EditarTerapeutaModal({
         telefoneTerapeuta: terapeuta.telefoneTerapeuta,
         emailTerapeuta: terapeuta.emailTerapeuta,
         enderecoTerapeuta: terapeuta.enderecoTerapeuta,
-        dtEntrada: terapeuta.dtEntrada,
+        dtEntrada: new Date(terapeuta.dtEntrada),
         chavePix: terapeuta.chavePix,
       })
     }
@@ -89,14 +88,6 @@ export function EditarTerapeutaModal({
       setMensagemErro('')
       console.log('Terapeuta atualizado:', data)
 
-      const pacientesAfetados = pacientes.filter(
-        (paciente) => paciente.terapeutaInfo.id === data.id,
-      )
-
-      console.log(
-        'Pacientes que foram afetados pela atualização: ',
-        pacientesAfetados,
-      )
       onClose()
     } catch (error) {
       setMensagemErro('Erro ao atualizar Terapeuta')
@@ -199,11 +190,13 @@ export function EditarTerapeutaModal({
             </div>
             <div className="mt-6 flex justify-end">
               <button
+                className={`bg-azul text-branco hover:bg-azul/75 focus:shadow-azul inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] font-medium leading-none focus:shadow-[0_0_0_2px] focus:outline-none ${
+                  isSubmitting ? 'cursor-not-allowed' : ''
+                }`}
                 type="submit"
-                className="bg-azul text-white px-4 py-2 rounded hover:bg-sky-600 duration-150"
                 disabled={isSubmitting}
               >
-                {isSubmitting ? 'Salvando...' : 'Salvar'}
+                {isSubmitting ? 'Carregando...' : 'Confirmar'}
               </button>
             </div>
           </form>

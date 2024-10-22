@@ -5,7 +5,7 @@
       "descricao": "transacao 1",
       "tipo": "entrada",
       "valor": 5,
-      "dtCriacao": "2024-10-15T03:00:00.000Z"
+      "dtCriacao": "2024-10-14T03:00:00.000Z"
     },
     {
       "id": "d3670131-29a8-4f43-b13f-c60d35daddd5",
@@ -13,6 +13,13 @@
       "tipo": "saida",
       "valor": 69,
       "dtCriacao": "2024-09-12T03:00:00.000Z"
+    },
+    {
+      "id": "696f4799-d8ec-4619-8b8b-76dadb166abf",
+      "descricao": "tste",
+      "tipo": "entrada",
+      "valor": 78,
+      "dtCriacao": "2024-10-01T03:00:00.000Z"
     }
   ],
   "pacientes": [
@@ -102,7 +109,7 @@
       "dtNascimento": "2024-10-15T03:00:00.000Z",
       "terapeutaInfo": {
         "id": "934e1d9d-1342-444a-9eba-48ebbbbcc12b",
-        "nomeTerapeuta": "Clara",
+        "nomeTerapeuta": "Clara Educadora",
         "telefoneTerapeuta": "61981593923",
         "emailTerapeuta": "danilo2311@gmail.com",
         "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
@@ -121,12 +128,12 @@
       "nomePaciente": "Zequinha",
       "dtNascimento": "2024-10-01T03:00:00.000Z",
       "terapeutaInfo": {
-        "id": "01604952-22ed-44bd-9dfa-2fd7f59f47b9",
-        "nomeTerapeuta": "Clara Educadora",
+        "id": "9f7a90e2-4773-4ae4-8b84-11de3872bfee",
+        "nomeTerapeuta": "Daniele",
         "telefoneTerapeuta": "61981593923",
         "emailTerapeuta": "danilo2311@gmail.com",
         "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
-        "curriculo": "teste curriculo",
+        "dtEntrada": "2021-04-05T03:00:00.000Z",
         "chavePix": "098098098098"
       },
       "nomeResponsavel": "Danilo Marra Rabelo",
@@ -142,7 +149,7 @@
       "dtNascimento": "2024-10-02T03:00:00.000Z",
       "terapeutaInfo": {
         "id": "07437780-1856-4223-a74a-881d4622dfe9",
-        "nomeTerapeuta": "juju",
+        "nomeTerapeuta": "Juliana Barbosa",
         "telefoneTerapeuta": "61992095676",
         "emailTerapeuta": "julianabarbosa.psi@gmail.com",
         "enderecoTerapeuta": "SHC AOS Entrequadras 2/8 Lote 5, Octogonal, Terraço Shopping",
@@ -206,7 +213,7 @@
         "telefoneTerapeuta": "61981593923",
         "emailTerapeuta": "danilo2311@gmail.com",
         "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
-        "curriculo": "",
+        "dtEntrada": "2024-09-20T00:00:00.000Z",
         "chavePix": ""
       },
       "nomeResponsavel": "Danilo Marra Rabelo",
@@ -262,7 +269,7 @@
       "dtNascimento": "2012-08-16T00:00:00.000Z",
       "terapeutaInfo": {
         "id": "07437780-1856-4223-a74a-881d4622dfe9",
-        "nomeTerapeuta": "Juliana",
+        "nomeTerapeuta": "Juliana Barbosa",
         "telefoneTerapeuta": "61992095676",
         "emailTerapeuta": "julianabarbosa.psi@gmail.com",
         "enderecoTerapeuta": "SHC AOS Entrequadras 2/8 Lote 5, Octogonal, Terraço Shopping",
@@ -342,7 +349,7 @@
       "dtNascimento": "2021-01-12T00:00:00.000Z",
       "terapeutaInfo": {
         "id": "07437780-1856-4223-a74a-881d4622dfe9",
-        "nomeTerapeuta": "juju",
+        "nomeTerapeuta": "Juliana Barbosa",
         "telefoneTerapeuta": "61992095676",
         "emailTerapeuta": "julianabarbosa.psi@gmail.com",
         "enderecoTerapeuta": "SHC AOS Entrequadras 2/8 Lote 5, Octogonal, Terraço Shopping",
@@ -535,6 +542,26 @@
       "cpfResponsavel": "876.876.876-87",
       "enderecoResponsavel": "SHCES 301 BLOCO C apt 202",
       "origem": "Instagram"
+    },
+    {
+      "id": "1316502e-9160-4896-832c-ef171722bc7a",
+      "nomePaciente": "Danilo Marra Rabelo",
+      "dtNascimento": "2024-10-02T03:00:00.000Z",
+      "terapeutaInfo": {
+        "id": "07437780-1856-4223-a74a-881d4622dfe9",
+        "nomeTerapeuta": "Juliana Barbosa",
+        "telefoneTerapeuta": "61992095676",
+        "emailTerapeuta": "julianabarbosa.psi@gmail.com",
+        "enderecoTerapeuta": "SHC AOS Entrequadras 2/8 Lote 5, Octogonal, Terraço Shopping",
+        "dtEntrada": "2017-09-10T00:00:00.000Z",
+        "chavePix": "02492927180"
+      },
+      "nomeResponsavel": "Danilo Marra Rabelo",
+      "telefoneResponsavel": "61981593923",
+      "emailResponsavel": "danilo2311@gmail.com",
+      "cpfResponsavel": "876.876.876-87",
+      "enderecoResponsavel": "SHCES 301 BLOCO C apt 202",
+      "origem": "Instagram"
     }
   ],
   "terapeutas": [
@@ -549,7 +576,7 @@
     },
     {
       "id": "07437780-1856-4223-a74a-881d4622dfe9",
-      "nomeTerapeuta": "Juliana",
+      "nomeTerapeuta": "Juliana Barbosa",
       "telefoneTerapeuta": "61992095676",
       "emailTerapeuta": "julianabarbosa.psi@gmail.com",
       "enderecoTerapeuta": "SHC AOS Entrequadras 2/8 Lote 5, Octogonal, Terraço Shopping",
@@ -558,7 +585,7 @@
     },
     {
       "id": "934e1d9d-1342-444a-9eba-48ebbbbcc12b",
-      "nomeTerapeuta": "Clara",
+      "nomeTerapeuta": "Clara Educadora",
       "telefoneTerapeuta": "61981593923",
       "emailTerapeuta": "danilo2311@gmail.com",
       "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
@@ -575,22 +602,13 @@
       "chavePix": ""
     },
     {
-      "id": "6185f8d8-1857-4467-b047-dca952f360f2",
-      "nomeTerapeuta": "Danilo Marra Rabelo",
+      "id": "9f7a90e2-4773-4ae4-8b84-11de3872bfee",
+      "nomeTerapeuta": "Daniele",
       "telefoneTerapeuta": "61981593923",
       "emailTerapeuta": "danilo2311@gmail.com",
       "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
-      "dtEntrada": "2024-09-25T00:00:00.000Z",
+      "dtEntrada": "2021-04-05T03:00:00.000Z",
       "chavePix": "098098098098"
-    },
-    {
-      "id": "cc27e9b5-e5b7-488e-8fbf-1af2345eec9b",
-      "nomeTerapeuta": "testeteste",
-      "telefoneTerapeuta": "61981593923",
-      "emailTerapeuta": "danilo2311@gmail.com",
-      "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
-      "dtEntrada": "2024-10-06T03:00:00.000Z",
-      "chavePix": "44"
     }
   ],
   "sessoes": [
@@ -651,7 +669,7 @@
       "id": "3c4d5e6f-7g8h-9i0j-1k2l-3m4n5o6p7q8r",
       "terapeutaInfo": {
         "id": "934e1d9d-1342-444a-9eba-48ebbbbcc12b",
-        "nomeTerapeuta": "Clara",
+        "nomeTerapeuta": "Clara Educadora",
         "telefoneTerapeuta": "61981593923",
         "emailTerapeuta": "danilo2311@gmail.com",
         "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
