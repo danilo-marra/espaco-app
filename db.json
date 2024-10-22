@@ -259,15 +259,15 @@
     {
       "id": "6f6e48bd-0089-4753-9e26-ec60c88b268b",
       "nomePaciente": "Gabriel",
-      "dtNascimento": "2024-10-06T00:00:00.000Z",
+      "dtNascimento": "2012-08-16T00:00:00.000Z",
       "terapeutaInfo": {
-        "id": "5b306851-c6d3-45c3-8f95-8f2d713e6e83",
-        "nomeTerapeuta": "Beatriz",
-        "telefoneTerapeuta": "6192095674",
-        "emailTerapeuta": "thaismarra@gmail.com",
-        "enderecoTerapeuta": "SHCES Quadra 801 Bloco A",
-        "curriculo": "teste curriculo",
-        "chavePix": "098098098098"
+        "id": "07437780-1856-4223-a74a-881d4622dfe9",
+        "nomeTerapeuta": "Juliana",
+        "telefoneTerapeuta": "61992095676",
+        "emailTerapeuta": "julianabarbosa.psi@gmail.com",
+        "enderecoTerapeuta": "SHC AOS Entrequadras 2/8 Lote 5, Octogonal, Terraço Shopping",
+        "dtEntrada": "2017-09-10T00:00:00.000Z",
+        "chavePix": "02492927180"
       },
       "nomeResponsavel": "Danilo Marra Rabelo",
       "telefoneResponsavel": "61981593923",
@@ -515,6 +515,26 @@
       "cpfResponsavel": "024.818.181-54",
       "enderecoResponsavel": "SHCES 301 BLOCO C apt 202",
       "origem": "Indicação"
+    },
+    {
+      "id": "dc6930c0-43b7-43af-9432-d931f87d7af8",
+      "nomePaciente": "Theo Rodrigues",
+      "dtNascimento": "2014-02-17T03:00:00.000Z",
+      "terapeutaInfo": {
+        "id": "5b306851-c6d3-45c3-8f95-8f2d713e6e83",
+        "nomeTerapeuta": "Beatriz",
+        "telefoneTerapeuta": "6192095674",
+        "emailTerapeuta": "thaismarra@gmail.com",
+        "enderecoTerapeuta": "SHCES Quadra 801 Bloco A",
+        "dtEntrada": "2024-09-04T00:00:00.000Z",
+        "chavePix": "098098098098"
+      },
+      "nomeResponsavel": "Danilo Marra Rabelo",
+      "telefoneResponsavel": "61981593923",
+      "emailResponsavel": "danilo2311@gmail.com",
+      "cpfResponsavel": "876.876.876-87",
+      "enderecoResponsavel": "SHCES 301 BLOCO C apt 202",
+      "origem": "Instagram"
     }
   ],
   "terapeutas": [

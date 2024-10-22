@@ -15,7 +15,9 @@ import { fetchTerapeutas } from '../../store/terapeutasSlice'
 const EditarPacienteFormSchema = z.object({
   id: z.string(),
   nomePaciente: z.string().min(1, 'Nome do paciente é obrigatório'),
-  dtNascimento: z.string().min(1, 'Data de nascimento é obrigatória'),
+  dtNascimento: z.date().refine((data) => data <= new Date(), {
+    message: 'Data de entrada não pode ser maior que a data atual',
+  }),
   nomeTerapeuta: z.string().min(1, 'Selecione um(a) terapeuta'),
   nomeResponsavel: z.string(),
   telefoneResponsavel: z.string(),
@@ -59,7 +61,7 @@ export function EditarPacienteModal({
       reset({
         id: paciente.id,
         nomePaciente: paciente.nomePaciente,
-        dtNascimento: new Date(paciente.dtNascimento).toISOString(),
+        dtNascimento: paciente.dtNascimento,
         nomeTerapeuta: paciente.terapeutaInfo.nomeTerapeuta,
         nomeResponsavel: paciente.nomeResponsavel,
         telefoneResponsavel: paciente.telefoneResponsavel,
@@ -86,7 +88,7 @@ export function EditarPacienteModal({
       const pacienteEditado = {
         id: data.id,
         nomePaciente: data.nomePaciente,
-        dtNascimento: new Date(data.dtNascimento).toISOString(),
+        dtNascimento: data.dtNascimento,
         terapeutaInfo,
         nomeResponsavel: data.nomeResponsavel,
         telefoneResponsavel: data.telefoneResponsavel,
@@ -154,10 +156,8 @@ export function EditarPacienteModal({
                     className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
                     id="dtNascimento"
                     placeholderText="Data de nascimento"
-                    selected={field.value ? new Date(field.value) : null} // Converte a data para o formato Date
-                    onChange={(date) =>
-                      field.onChange(date ? date.toISOString() : '')
-                    } // Converte a data para o formato ISOString
+                    selected={field.value}
+                    onChange={(date) => field.onChange(date)}
                     dateFormat="dd/MM/yyyy"
                     locale={ptBR}
                     onFocus={handleFocus}

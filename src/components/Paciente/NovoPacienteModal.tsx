@@ -14,7 +14,9 @@ import { addPaciente } from '../../store/pacientesSlice'
 
 const NovoPacienteFormSchema = z.object({
   nomePaciente: z.string().min(1, 'Nome do paciente é obrigatório'),
-  dtNascimento: z.string().min(1, 'Data de nascimento é obrigatória'),
+  dtNascimento: z.date().refine((data) => data <= new Date(), {
+    message: 'Data de entrada não pode ser maior que a data atual',
+  }),
   nomeTerapeuta: z.string().min(1, 'Selecione um(a) terapeuta'),
   nomeResponsavel: z.string(),
   telefoneResponsavel: z.string(),
@@ -57,7 +59,7 @@ export function NovoPacienteModal() {
       const novoPaciente = {
         id: uuidv4(),
         nomePaciente: data.nomePaciente,
-        dtNascimento: new Date(data.dtNascimento).toISOString(),
+        dtNascimento: data.dtNascimento,
         terapeutaInfo: terapeutaSelecionado,
         nomeResponsavel: data.nomeResponsavel,
         telefoneResponsavel: data.telefoneResponsavel,
@@ -112,14 +114,6 @@ export function NovoPacienteModal() {
             {errors.nomePaciente && (
               <p className="text-red-500">{errors.nomePaciente.message}</p>
             )}
-            {/* <input
-                type="date"
-                className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
-                id="dtNascimento"
-                placeholder="Data de nascimento"
-                {...register('dtNascimento')}
-                onFocus={handleFocus}
-              /> */}
             <Controller
               control={control}
               name="dtNascimento"
@@ -128,10 +122,8 @@ export function NovoPacienteModal() {
                   className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
                   id="dtNascimento"
                   placeholderText="Data de nascimento"
-                  selected={field.value ? new Date(field.value) : null} // Converte a data para o formato Date
-                  onChange={(date) =>
-                    field.onChange(date ? date.toISOString() : '')
-                  } // Converte a data para o formato ISOString
+                  selected={field.value}
+                  onChange={(date) => field.onChange(date)}
                   dateFormat="dd/MM/yyyy"
                   locale={ptBR}
                   onFocus={handleFocus}
