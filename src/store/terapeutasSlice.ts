@@ -30,7 +30,7 @@ export const addTerapeuta = createAsyncThunk<Terapeuta, Terapeuta>(
       'POST',
       terapeuta,
     )
-    console.log('Terapeuta adicionado:', terapeuta)
+    // console.log('Terapeuta adicionado:', terapeuta)
     return response
   },
 )
@@ -70,26 +70,33 @@ export const updatePacientesByTerapeuta = createAsyncThunk<
   { rejectValue: string }
 >(
   'pacientes/updatePacientesByTerapeuta',
-  async (terapeuta, { rejectWithValue }) => {
+  async (terapeuta: Terapeuta, { rejectWithValue }): Promise<Paciente[]> => {
     try {
       const pacientes = await httpRequest<Paciente[]>(
         `${API_URL}/pacientes`,
         'GET',
       )
 
-      const pacientesAtualizados = pacientes
-        .filter((p) => p.terapeutaInfo.id === terapeuta.id)
-        .map((p) => ({
-          ...p,
-          terapeutaInfo: {
-            ...p.terapeutaInfo,
-            nomeTerapeuta: terapeuta.nomeTerapeuta,
-          },
-        }))
+      const pacientesAtualizados = pacientes.map((paciente) => {
+        if (paciente.terapeutaInfo.id === terapeuta.id) {
+          return {
+            ...paciente,
+            terapeutaInfo: {
+              ...paciente.terapeutaInfo,
+              nomeTerapeuta: terapeuta.nomeTerapeuta,
+            },
+          }
+        }
+        return paciente
+      })
 
       await Promise.all(
-        pacientesAtualizados.map((p) =>
-          httpRequest<Paciente>(`${API_URL}/pacientes/${p.id}`, 'PUT', p),
+        pacientesAtualizados.map((paciente) =>
+          httpRequest<Paciente>(
+            `${API_URL}/pacientes/${paciente.id}`,
+            'PUT',
+            paciente,
+          ),
         ),
       )
 
@@ -101,9 +108,9 @@ export const updatePacientesByTerapeuta = createAsyncThunk<
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.error('Erro ao atualizar pacientes:', error.message)
-        return rejectWithValue(error.message)
+        return Promise.reject(rejectWithValue(error.message))
       }
-      return rejectWithValue('Erro desconhecido')
+      return Promise.reject(rejectWithValue('Erro desconhecido'))
     }
   },
 )
@@ -115,28 +122,25 @@ export const updateSessoesByTerapeuta = createAsyncThunk<
   { rejectValue: string }
 >(
   'sessoes/updateSessoesByTerapeuta',
-  async (terapeuta, { rejectWithValue }) => {
+  async (terapeuta: Terapeuta, { rejectWithValue }): Promise<Sessao[]> => {
     try {
       const sessoes = await httpRequest<Sessao[]>(`${API_URL}/sessoes`, 'GET')
 
-      const sessoesAtualizadas = sessoes
-        .filter((s) => s.terapeutaInfo.id === terapeuta.id)
-        .map((s) => ({
-          ...s,
-          terapeutaInfo: {
-            ...s.terapeutaInfo,
-            nomeTerapeuta: terapeuta.nomeTerapeuta,
-          },
-        }))
+      const sessoesAtualizadas = sessoes.map((sessao) => {
+        if (sessao.terapeutaInfo.id === terapeuta.id) {
+          return { ...sessao, terapeutaInfo: terapeuta }
+        }
+        return sessao
+      })
 
       await Promise.all(
-        sessoesAtualizadas.map((s) =>
-          httpRequest<Sessao>(`${API_URL}/sessoes/${s.id}`, 'PUT', s),
+        sessoesAtualizadas.map((sessao) =>
+          httpRequest<Sessao>(`${API_URL}/sessoes/${sessao.id}`, 'PUT', sessao),
         ),
       )
 
       console.log(
-        'Sessões que foram afetadas pela atualização',
+        'Sessões que foram afetadas pela atualização:',
         sessoesAtualizadas,
       )
 
@@ -144,9 +148,9 @@ export const updateSessoesByTerapeuta = createAsyncThunk<
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.error('Erro ao atualizar sessões:', error.message)
-        return rejectWithValue(error.message)
+        return Promise.reject(rejectWithValue(error.message))
       }
-      return rejectWithValue('Erro desconhecido')
+      return Promise.reject(rejectWithValue('Erro desconhecido'))
     }
   },
 )

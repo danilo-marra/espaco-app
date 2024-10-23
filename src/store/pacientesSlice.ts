@@ -4,7 +4,9 @@ import {
   type PayloadAction,
 } from '@reduxjs/toolkit'
 import type { PacientesState } from './store'
-import type { Paciente } from '../tipos'
+import type { Sessao, Paciente } from '../tipos'
+import httpRequest, { API_URL } from '../utils/api'
+import axios from 'axios'
 
 // Estado inicial
 const initialState: PacientesState = {
@@ -14,54 +16,100 @@ const initialState: PacientesState = {
 }
 
 // Thunk para buscar pacientes
-export const fetchPacientes = createAsyncThunk(
+export const fetchPacientes = createAsyncThunk<Paciente[]>(
   'pacientes/fetchPacientes',
-  async () => {
-    const response = await fetch('http://localhost:3000/pacientes')
-    return await response.json()
-  },
+  async () => httpRequest<Paciente[]>(`${API_URL}/pacientes`, 'GET'),
 )
 
 // Thunk para adicionar paciente
-export const addPaciente = createAsyncThunk(
+export const addPaciente = createAsyncThunk<Paciente, Paciente>(
   'pacientes/addPaciente',
-  async (paciente: Paciente) => {
-    const response = await fetch('http://localhost:3000/pacientes', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(paciente),
-    })
-    return await response.json()
+  async (paciente) => {
+    const response = await httpRequest<Paciente>(
+      `${API_URL}/pacientes`,
+      'POST',
+      paciente,
+    )
+    // console.log('Paciente adicionado:', paciente)
+    return response
   },
 )
 
 // Thunk para editar paciente
-export const updatePaciente = createAsyncThunk(
+export const updatePaciente = createAsyncThunk<
+  Paciente,
+  Paciente,
+  { rejectValue: string }
+>(
   'pacientes/updatePaciente',
-  async (paciente: Paciente) => {
-    const response = await fetch(
-      `http://localhost:3000/pacientes/${paciente.id}`,
-      {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(paciente),
-      },
-    )
-    return await response.json()
+  async (paciente, { dispatch, rejectWithValue }) => {
+    try {
+      const updatedPaciente = await httpRequest<Paciente>(
+        `${API_URL}/pacientes/${paciente.id}`,
+        'PUT',
+        paciente,
+      )
+      await dispatch(updateSessoesByPaciente(updatedPaciente))
+
+      // console.log('Paciente atualizado:', updatedPaciente)
+
+      return updatedPaciente
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error('Erro ao atualizar paciente:', error.message)
+        return Promise.reject(rejectWithValue(error.message))
+      }
+      return rejectWithValue('Erro desconhecido') as ReturnType<
+        typeof rejectWithValue
+      >
+    }
+  },
+)
+
+// Thunk para atualizar sessões relacionadas
+export const updateSessoesByPaciente = createAsyncThunk<
+  Sessao[],
+  Paciente,
+  { rejectValue: string }
+>(
+  'sessoes/updateSessoesByPaciente',
+  async (paciente: Paciente, { rejectWithValue }): Promise<Sessao[]> => {
+    try {
+      const sessoes = await httpRequest<Sessao[]>(`${API_URL}/sessoes`, 'GET')
+
+      const sessoesAtualizadas = sessoes.map((sessao) => {
+        if (sessao.pacienteInfo.id === paciente.id) {
+          return { ...sessao, pacienteInfo: paciente }
+        }
+        return sessao
+      })
+
+      await Promise.all(
+        sessoesAtualizadas.map((sessao) =>
+          httpRequest<Sessao>(`${API_URL}/sessoes/${sessao.id}`, 'PUT', sessao),
+        ),
+      )
+      // console.log(
+      //   'Sessões que foram afetadas pela atualização:',
+      //   sessoesAtualizadas,
+      // )
+
+      return sessoesAtualizadas
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error('Erro ao atualizar sessões:', error.message)
+        return Promise.reject(rejectWithValue(error.message))
+      }
+      throw rejectWithValue('Erro desconhecido')
+    }
   },
 )
 
 // Thunk para excluir paciente
-export const deletePaciente = createAsyncThunk(
+export const deletePaciente = createAsyncThunk<string, string>(
   'pacientes/deletePaciente',
-  async (id: string) => {
-    await fetch(`http://localhost:3000/pacientes/${id}`, {
-      method: 'DELETE',
-    })
+  async (id) => {
+    await httpRequest(`${API_URL}/pacientes/${id}`, 'DELETE')
     return id
   },
 )
@@ -80,9 +128,9 @@ const pacientesSlice = createSlice({
         state.loading = false
         state.data = action.payload
       })
-      .addCase(fetchPacientes.rejected, (state) => {
+      .addCase(fetchPacientes.rejected, (state, action) => {
         state.loading = false
-        state.error = 'Erro ao buscar pacientes'
+        state.error = action.error.message || 'Erro ao buscar pacientes'
       })
       .addCase(
         addPaciente.fulfilled,

@@ -105,7 +105,7 @@
     },
     {
       "id": "8541b835-d0d0-467b-a95b-a27e4297e451",
-      "nomePaciente": "Thais Marra",
+      "nomePaciente": "Juquinha",
       "dtNascimento": "2024-10-15T03:00:00.000Z",
       "terapeutaInfo": {
         "id": "934e1d9d-1342-444a-9eba-48ebbbbcc12b",
@@ -113,10 +113,10 @@
         "telefoneTerapeuta": "61981593923",
         "emailTerapeuta": "danilo2311@gmail.com",
         "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
-        "curriculo": "teste curriculo",
+        "dtEntrada": "2024-09-15T00:00:00.000Z",
         "chavePix": "44"
       },
-      "nomeResponsavel": "Danilo Marra Rabelo",
+      "nomeResponsavel": "Pai do Juca",
       "telefoneResponsavel": "61981593923",
       "emailResponsavel": "danilo2311@gmail.com",
       "cpfResponsavel": "876.876.876-87",
@@ -673,14 +673,23 @@
         "telefoneTerapeuta": "61981593923",
         "emailTerapeuta": "danilo2311@gmail.com",
         "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
-        "curriculo": "teste curriculo",
+        "dtEntrada": "2024-09-15T00:00:00.000Z",
         "chavePix": "44"
       },
       "pacienteInfo": {
         "id": "8541b835-d0d0-467b-a95b-a27e4297e451",
-        "nomePaciente": "Thais Marra",
+        "nomePaciente": "Juquinha",
         "dtNascimento": "2024-10-15T03:00:00.000Z",
-        "nomeResponsavel": "Danilo Marra Rabelo",
+        "terapeutaInfo": {
+          "id": "934e1d9d-1342-444a-9eba-48ebbbbcc12b",
+          "nomeTerapeuta": "Clara Educadora",
+          "telefoneTerapeuta": "61981593923",
+          "emailTerapeuta": "danilo2311@gmail.com",
+          "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
+          "dtEntrada": "2024-09-15T00:00:00.000Z",
+          "chavePix": "44"
+        },
+        "nomeResponsavel": "Pai do Juca",
         "telefoneResponsavel": "61981593923",
         "emailResponsavel": "danilo2311@gmail.com",
         "cpfResponsavel": "876.876.876-87",
