@@ -1,10 +1,7 @@
-import {
-  createSlice,
-  createAsyncThunk,
-  type PayloadAction,
-} from '@reduxjs/toolkit'
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import type { SessoesState } from './store'
 import type { Sessao } from '../tipos'
+import httpRequest, { API_URL } from '../utils/api'
 
 const initialState: SessoesState = {
   data: [],
@@ -12,50 +9,9 @@ const initialState: SessoesState = {
   error: null,
 }
 
-export const fetchSessoes = createAsyncThunk(
+export const fetchSessoes = createAsyncThunk<Sessao[]>(
   'sessoes/fetchSessoes',
-  async () => {
-    const response = await fetch('http://localhost:3000/sessoes')
-    return await response.json()
-  },
-)
-
-export const addSessao = createAsyncThunk(
-  'sessoes/addSessao',
-  async (sessao: Sessao) => {
-    const response = await fetch('http://localhost:3000/sessoes', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(sessao),
-    })
-    return await response.json()
-  },
-)
-
-export const updateSessao = createAsyncThunk(
-  'sessoes/updateSessao',
-  async (sessao: Sessao) => {
-    const response = await fetch(`http://localhost:3000/sessoes/${sessao.id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(sessao),
-    })
-    return await response.json()
-  },
-)
-
-export const deleteSessao = createAsyncThunk(
-  'sessoes/deleteSessao',
-  async (sessaoId: string) => {
-    await fetch(`http://localhost:3000/sessoes/${sessaoId}`, {
-      method: 'DELETE',
-    })
-    return sessaoId
-  },
+  async () => httpRequest<Sessao[]>(`${API_URL}/sessoes`, 'GET'),
 )
 
 const sessoesSlice = createSlice({
@@ -75,25 +31,6 @@ const sessoesSlice = createSlice({
         state.loading = false
         state.error = 'Erro ao buscar sessoes'
       })
-      .addCase(addSessao.fulfilled, (state, action: PayloadAction<Sessao>) => {
-        state.data.push(action.payload)
-      })
-      .addCase(
-        updateSessao.fulfilled,
-        (state, action: PayloadAction<Sessao>) => {
-          state.data = state.data.map((sessao) =>
-            sessao.id === action.payload.id ? action.payload : sessao,
-          )
-        },
-      )
-      .addCase(
-        deleteSessao.fulfilled,
-        (state, action: PayloadAction<string>) => {
-          state.data = state.data.filter(
-            (sessao) => sessao.id !== action.payload,
-          )
-        },
-      )
   },
 })
 

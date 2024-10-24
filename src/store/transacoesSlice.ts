@@ -5,6 +5,8 @@ import {
 } from '@reduxjs/toolkit'
 import type { Transacao } from '../tipos'
 import type { TransacoesState } from './store'
+import httpRequest, { API_URL } from '../utils/api'
+import axios from 'axios'
 
 // Estado inicial
 const initialState: TransacoesState = {
@@ -14,54 +16,57 @@ const initialState: TransacoesState = {
 }
 
 // Thunk para buscar transações
-export const fetchTransacoes = createAsyncThunk(
+export const fetchTransacoes = createAsyncThunk<Transacao[]>(
   'transacoes/fetchTransacoes',
-  async () => {
-    const response = await fetch('http://localhost:3000/transacoes')
-    return await response.json()
-  },
+  async () => httpRequest<Transacao[]>(`${API_URL}/transacoes`, 'GET'),
 )
 
 // Thunk para adicionar transação
-export const addTransacao = createAsyncThunk(
+export const addTransacao = createAsyncThunk<Transacao, Transacao>(
   'transacoes/addTransacao',
-  async (transacao: Transacao) => {
-    const response = await fetch('http://localhost:3000/transacoes', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(transacao),
-    })
-    return await response.json()
+  async (transacao) => {
+    const response = await httpRequest<Transacao>(
+      `${API_URL}/transacoes`,
+      'POST',
+      transacao,
+    )
+    return response
   },
 )
 
 // Thunk para atualizar transação
-export const updateTransacao = createAsyncThunk(
-  'transacoes/updateTransacao',
-  async (transacao: Transacao) => {
-    const response = await fetch(
-      `http://localhost:3000/transacoes/${transacao.id}`,
-      {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(transacao),
-      },
+export const updateTransacao = createAsyncThunk<
+  Transacao,
+  Transacao,
+  { rejectValue: string }
+>('transacoes/updateTransacao', async (transacao, { rejectWithValue }) => {
+  try {
+    const updatedTransacao = await httpRequest<Transacao>(
+      `${API_URL}/transacoes/${transacao.id}`,
+      'PUT',
+      transacao,
     )
-    return await response.json()
-  },
-)
+    return updatedTransacao
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error('Erro ao atualizar transação:', error.message)
+      return rejectWithValue(error.message)
+    }
+    if (error instanceof Error) {
+      console.error('Erro ao atualizar transação:', error.message)
+      return rejectWithValue(error.message)
+    }
+
+    console.error('Erro ao atualizar transação')
+    return rejectWithValue('Erro ao atualizar transação')
+  }
+})
 
 // Thunk para excluir transação
-export const deleteTransacao = createAsyncThunk(
+export const deleteTransacao = createAsyncThunk<string, string>(
   'transacoes/deleteTransacao',
-  async (id: string) => {
-    await fetch(`http://localhost:3000/transacoes/${id}`, {
-      method: 'DELETE',
-    })
+  async (id) => {
+    await httpRequest(`${API_URL}/transacoes/${id}`, 'DELETE')
     return id
   },
 )
