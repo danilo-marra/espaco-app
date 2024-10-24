@@ -47,8 +47,22 @@ export function Pacientes() {
     null,
   )
   const [isSuccess, setIsSuccess] = useState(false)
-
   const [filteredPacientes, setFilteredPacientes] = useState<Paciente[]>([])
+  const [selectedTerapeuta, setSelectedTerapeuta] = useState('Todos')
+  const handleTerapeutaChange = (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    setSelectedTerapeuta(event.target.value)
+  }
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage)
+  }
+  const indexOfLastPaciente = currentPage * pacientesPerPage
+  const indexOfFirstPaciente = indexOfLastPaciente - pacientesPerPage
+  const pacientesAtuais = filteredPacientes.slice(
+    indexOfFirstPaciente,
+    indexOfLastPaciente,
+  )
 
   useEffect(() => {
     dispatch(fetchPacientes())
@@ -63,36 +77,16 @@ export function Pacientes() {
     setTotalPages(Math.ceil(filtered.length / pacientesPerPage))
   }, [searchQuery, pacientes])
 
-  const [selectedTerapeuta, setSelectedTerapeuta] = useState('Todos')
-  const handleTerapeutaChange = (
-    event: React.ChangeEvent<HTMLSelectElement>,
-  ) => {
-    const terapeutaId = event.target.value
-    setSelectedTerapeuta(terapeutaId)
-
-    if (terapeutaId === 'Todos') {
-      setFilteredPacientes(pacientes)
-    } else {
-      const filtered = pacientes.filter(
-        (paciente) => paciente.terapeutaInfo?.id === terapeutaId,
-      )
-      setFilteredPacientes(filtered)
-    }
-
-    setCurrentPage(1) // Resetar para a primeira página
-    setTotalPages(Math.ceil(filteredPacientes.length / pacientesPerPage))
-  }
-
-  const handlePageChange = (newPage: number) => {
-    setCurrentPage(newPage)
-  }
-
-  const indexOfLastPaciente = currentPage * pacientesPerPage
-  const indexOfFirstPaciente = indexOfLastPaciente - pacientesPerPage
-  const pacientesAtuais = filteredPacientes.slice(
-    indexOfFirstPaciente,
-    indexOfLastPaciente,
-  )
+  useEffect(() => {
+    const filtered =
+      selectedTerapeuta === 'Todos'
+        ? pacientes
+        : pacientes.filter(
+            (paciente) => paciente.terapeutaInfo.id === selectedTerapeuta,
+          )
+    setFilteredPacientes(filtered)
+    setTotalPages(Math.ceil(filtered.length / pacientesPerPage))
+  }, [pacientes, selectedTerapeuta])
 
   function handleEditPaciente(paciente: Paciente) {
     setPacienteEditando(paciente)

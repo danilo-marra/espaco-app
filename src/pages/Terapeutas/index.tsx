@@ -44,13 +44,21 @@ export function Terapeutas() {
   >(null)
   const [isSuccess, setIsSuccess] = useState(false)
   const [selectedTerapeuta, setSelectedTerapeuta] = useState('Todos')
+  const [filteredTerapeutas, setFilteredTerapeutas] = useState<Terapeuta[]>([])
   const handleTerapeutaChange = (
     event: React.ChangeEvent<HTMLSelectElement>,
   ) => {
     setSelectedTerapeuta(event.target.value)
   }
-
-  const [filteredTerapeutas, setFilteredTerapeutas] = useState<Terapeuta[]>([])
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage)
+  }
+  const indexOfLastTerapeuta = currentPage * terapeutasPerPage
+  const indexOfFirstTerapeuta = indexOfLastTerapeuta - terapeutasPerPage
+  const terapeutasAtuais = filteredTerapeutas.slice(
+    indexOfFirstTerapeuta,
+    indexOfLastTerapeuta,
+  )
 
   useEffect(() => {
     dispatch(fetchTerapeutas())
@@ -65,17 +73,6 @@ export function Terapeutas() {
     setFilteredTerapeutas(filtered)
     setTotalPages(Math.ceil(filtered.length / terapeutasPerPage))
   }, [terapeutas, selectedTerapeuta])
-
-  const handlePageChange = (newPage: number) => {
-    setCurrentPage(newPage)
-  }
-
-  const indexOfLastTerapeuta = currentPage * terapeutasPerPage
-  const indexOfFirstTerapeuta = indexOfLastTerapeuta - terapeutasPerPage
-  const terapeutasAtuais = filteredTerapeutas.slice(
-    indexOfFirstTerapeuta,
-    indexOfLastTerapeuta,
-  )
 
   function handleEditTerapeuta(terapeuta: Terapeuta) {
     setTerapeutaEditando(terapeuta)

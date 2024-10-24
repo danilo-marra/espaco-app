@@ -149,7 +149,7 @@
       "dtNascimento": "2024-10-02T03:00:00.000Z",
       "terapeutaInfo": {
         "id": "07437780-1856-4223-a74a-881d4622dfe9",
-        "nomeTerapeuta": "Juliana Barbosa",
+        "nomeTerapeuta": "Juliana",
         "telefoneTerapeuta": "61992095676",
         "emailTerapeuta": "julianabarbosa.psi@gmail.com",
         "enderecoTerapeuta": "SHC AOS Entrequadras 2/8 Lote 5, Octogonal, Terraço Shopping",
@@ -209,7 +209,7 @@
       "dtNascimento": "2024-10-07T00:00:00.000Z",
       "terapeutaInfo": {
         "id": "2b6f8404-38dc-4b1e-9c12-8a470f220253",
-        "nomeTerapeuta": "Gabi",
+        "nomeTerapeuta": "Gabi Fonseca",
         "telefoneTerapeuta": "61981593923",
         "emailTerapeuta": "danilo2311@gmail.com",
         "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
@@ -269,7 +269,7 @@
       "dtNascimento": "2012-08-16T00:00:00.000Z",
       "terapeutaInfo": {
         "id": "07437780-1856-4223-a74a-881d4622dfe9",
-        "nomeTerapeuta": "Juliana Barbosa",
+        "nomeTerapeuta": "Juliana",
         "telefoneTerapeuta": "61992095676",
         "emailTerapeuta": "julianabarbosa.psi@gmail.com",
         "enderecoTerapeuta": "SHC AOS Entrequadras 2/8 Lote 5, Octogonal, Terraço Shopping",
@@ -349,7 +349,7 @@
       "dtNascimento": "2021-01-12T00:00:00.000Z",
       "terapeutaInfo": {
         "id": "07437780-1856-4223-a74a-881d4622dfe9",
-        "nomeTerapeuta": "Juliana Barbosa",
+        "nomeTerapeuta": "Juliana",
         "telefoneTerapeuta": "61992095676",
         "emailTerapeuta": "julianabarbosa.psi@gmail.com",
         "enderecoTerapeuta": "SHC AOS Entrequadras 2/8 Lote 5, Octogonal, Terraço Shopping",
@@ -469,7 +469,7 @@
       "dtNascimento": "2024-09-02T03:00:00.000Z",
       "terapeutaInfo": {
         "id": "07437780-1856-4223-a74a-881d4622dfe9",
-        "nomeTerapeuta": "Juliana Barbosa",
+        "nomeTerapeuta": "Juliana",
         "telefoneTerapeuta": "61992095676",
         "emailTerapeuta": "julianabarbosa.psi@gmail.com",
         "enderecoTerapeuta": "SHC AOS Entrequadras 2/8 Lote 5, Octogonal, Terraço Shopping",
@@ -509,7 +509,7 @@
       "dtNascimento": "2024-10-01T03:00:00.000Z",
       "terapeutaInfo": {
         "id": "07437780-1856-4223-a74a-881d4622dfe9",
-        "nomeTerapeuta": "Juliana Barbosa",
+        "nomeTerapeuta": "Juliana",
         "telefoneTerapeuta": "61992095676",
         "emailTerapeuta": "julianabarbosa.psi@gmail.com",
         "enderecoTerapeuta": "SHC AOS Entrequadras 2/8 Lote 5, Octogonal, Terraço Shopping",
@@ -549,7 +549,7 @@
       "dtNascimento": "2024-10-02T03:00:00.000Z",
       "terapeutaInfo": {
         "id": "07437780-1856-4223-a74a-881d4622dfe9",
-        "nomeTerapeuta": "Juliana Barbosa",
+        "nomeTerapeuta": "Juliana",
         "telefoneTerapeuta": "61992095676",
         "emailTerapeuta": "julianabarbosa.psi@gmail.com",
         "enderecoTerapeuta": "SHC AOS Entrequadras 2/8 Lote 5, Octogonal, Terraço Shopping",
@@ -576,7 +576,7 @@
     },
     {
       "id": "07437780-1856-4223-a74a-881d4622dfe9",
-      "nomeTerapeuta": "Juliana Barbosa",
+      "nomeTerapeuta": "Juliana",
       "telefoneTerapeuta": "61992095676",
       "emailTerapeuta": "julianabarbosa.psi@gmail.com",
       "enderecoTerapeuta": "SHC AOS Entrequadras 2/8 Lote 5, Octogonal, Terraço Shopping",
@@ -589,12 +589,12 @@
       "telefoneTerapeuta": "61981593923",
       "emailTerapeuta": "danilo2311@gmail.com",
       "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
-      "dtEntrada": "2024-09-15T00:00:00.000Z",
+      "dtEntrada": "2024-09-02T00:00:00.000Z",
       "chavePix": "44"
     },
     {
       "id": "2b6f8404-38dc-4b1e-9c12-8a470f220253",
-      "nomeTerapeuta": "Gabi",
+      "nomeTerapeuta": "Gabi Fonseca",
       "telefoneTerapeuta": "61981593923",
       "emailTerapeuta": "danilo2311@gmail.com",
       "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
@@ -620,7 +620,7 @@
         "telefoneTerapeuta": "6192095674",
         "emailTerapeuta": "thaismarra@gmail.com",
         "enderecoTerapeuta": "SHCES Quadra 801 Bloco A",
-        "curriculo": "teste curriculo",
+        "dtEntrada": "2024-09-04T00:00:00.000Z",
         "chavePix": "098098098098"
       },
       "pacienteInfo": {
@@ -646,7 +646,7 @@
         "telefoneTerapeuta": "61992095676",
         "emailTerapeuta": "julianabarbosa.psi@gmail.com",
         "enderecoTerapeuta": "SHC AOS Entrequadras 2/8 Lote 5, Octogonal, Terraço Shopping",
-        "curriculo": "Mestrado UnB",
+        "dtEntrada": "2017-09-10T00:00:00.000Z",
         "chavePix": "02492927180"
       },
       "pacienteInfo": {
@@ -673,7 +673,7 @@
         "telefoneTerapeuta": "61981593923",
         "emailTerapeuta": "danilo2311@gmail.com",
         "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
-        "dtEntrada": "2024-09-15T00:00:00.000Z",
+        "dtEntrada": "2024-09-02T00:00:00.000Z",
         "chavePix": "44"
       },
       "pacienteInfo": {

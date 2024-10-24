@@ -77,18 +77,19 @@ export const updatePacientesByTerapeuta = createAsyncThunk<
         'GET',
       )
 
-      const pacientesAtualizados = pacientes.map((paciente) => {
-        if (paciente.terapeutaInfo.id === terapeuta.id) {
-          return {
-            ...paciente,
-            terapeutaInfo: {
-              ...paciente.terapeutaInfo,
-              nomeTerapeuta: terapeuta.nomeTerapeuta,
-            },
-          }
-        }
-        return paciente
-      })
+      // Filtrar apenas os pacientes que têm o terapeuta específico
+      const pacientesRelacionados = pacientes.filter(
+        (paciente) => paciente.terapeutaInfo.id === terapeuta.id,
+      )
+
+      // Atualizar os pacientes relacionados
+      const pacientesAtualizados = pacientesRelacionados.map((paciente) => ({
+        ...paciente,
+        terapeutaInfo: {
+          ...paciente.terapeutaInfo,
+          nomeTerapeuta: terapeuta.nomeTerapeuta,
+        },
+      }))
 
       await Promise.all(
         pacientesAtualizados.map((paciente) =>
@@ -126,11 +127,20 @@ export const updateSessoesByTerapeuta = createAsyncThunk<
     try {
       const sessoes = await httpRequest<Sessao[]>(`${API_URL}/sessoes`, 'GET')
 
-      const sessoesAtualizadas = sessoes.map((sessao) => {
-        if (sessao.terapeutaInfo.id === terapeuta.id) {
-          return { ...sessao, terapeutaInfo: terapeuta }
+      // Filtrar apenas as sessões que têm o terapeuta específico
+      const sessoesRelacionadas = sessoes.filter(
+        (sessao) => sessao.terapeutaInfo.id === terapeuta.id,
+      )
+
+      const sessoesAtualizadas = sessoesRelacionadas.map((sessao) => {
+        return {
+          ...sessao,
+          terapeutaInfo: {
+            ...sessao.terapeutaInfo,
+            nomeTerapeuta: terapeuta.nomeTerapeuta,
+            dtEntrada: terapeuta.dtEntrada,
+          },
         }
-        return sessao
       })
 
       await Promise.all(
