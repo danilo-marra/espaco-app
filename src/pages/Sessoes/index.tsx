@@ -152,49 +152,6 @@ export function Sessoes() {
     dispatch(fetchTerapeutas())
   }, [dispatch])
 
-  // Componente TableRow
-  const TableRow = ({ sessao }: { sessao: Sessao }) => {
-    const calculations = calculateRepasseInfo(sessao)
-
-    return (
-      <tr>
-        <td className="p-4">{sessao.terapeutaInfo.nomeTerapeuta}</td>
-        {/* <td className="p-4">
-          {dateFormatter.format(new Date(sessao.terapeutaInfo.dtEntrada))}
-        </td> */}
-        <td className="p-4">{sessao.pacienteInfo.nomePaciente}</td>
-        <td className="p-4">{sessao.pacienteInfo.nomeResponsavel}</td>
-        <td className="p-4">{priceFormatter.format(sessao.valorSessao)}</td>
-        <td className="p-4">{sessao.notaFiscal}</td>
-        {[1, 2, 3, 4, 5, 6].map((num) => {
-          const dateKey = `dtSessao${num}` as keyof Sessao
-          return (
-            <td key={num} className="p-4">
-              {sessao[dateKey]
-                ? dateFormatter.format(new Date(sessao[dateKey] as string))
-                : 'N/A'}
-            </td>
-          )
-        })}
-        <td className="p-4">
-          {priceFormatter.format(calculations.totalValue)}
-        </td>
-        <td className="p-4">
-          {priceFormatter.format(calculations.repasseValue)} (
-          {calculations.repassePercentage * 100}%)
-        </td>
-        <td className="p-2 space-x-2">
-          <button type="button" className="text-green-500 hover:text-green-700">
-            <PencilSimple size={20} weight="bold" />
-          </button>
-          <button className="text-red-500 hover:text-red-700" type="button">
-            <TrashSimple size={20} weight="bold" />
-          </button>
-        </td>
-      </tr>
-    )
-  }
-
   return (
     <div className="flex min-h-screen">
       <main className="flex-1 bg-gray-100 p-8">
@@ -290,7 +247,6 @@ export function Sessoes() {
             <thead className="bg-rosa text-white">
               <tr>
                 <th className="p-4">Terapeuta</th>
-                {/* <th className="p-4">Data Entrada</th> */}
                 <th className="p-4">Paciente</th>
                 <th className="p-4">Responsável</th>
                 <th className="p-4">Valor da Sessão</th>
@@ -307,9 +263,57 @@ export function Sessoes() {
               </tr>
             </thead>
             <tbody className="text-center">
-              {paginatedSessoes.map((sessao) => (
-                <TableRow key={sessao.id} sessao={sessao} />
-              ))}
+              {paginatedSessoes.map((sessao) => {
+                const calculations = calculateRepasseInfo(sessao)
+                return (
+                  <tr key={sessao.id}>
+                    <td className="p-4">
+                      {sessao.terapeutaInfo.nomeTerapeuta}
+                    </td>
+                    <td className="p-4">{sessao.pacienteInfo.nomePaciente}</td>
+                    <td className="p-4">
+                      {sessao.pacienteInfo.nomeResponsavel}
+                    </td>
+                    <td className="p-4">
+                      {priceFormatter.format(sessao.valorSessao)}
+                    </td>
+                    <td className="p-4">{sessao.notaFiscal}</td>
+                    {[1, 2, 3, 4, 5, 6].map((num) => {
+                      const dateKey = `dtSessao${num}` as keyof Sessao
+                      return (
+                        <td key={num} className="p-4">
+                          {sessao[dateKey]
+                            ? dateFormatter.format(
+                                new Date(sessao[dateKey] as string),
+                              )
+                            : 'N/A'}
+                        </td>
+                      )
+                    })}
+                    <td className="p-4">
+                      {priceFormatter.format(calculations.totalValue)}
+                    </td>
+                    <td className="p-4">
+                      {priceFormatter.format(calculations.repasseValue)} (
+                      {calculations.repassePercentage * 100}%)
+                    </td>
+                    <td className="p-2 space-x-2">
+                      <button
+                        type="button"
+                        className="text-green-500 hover:text-green-700"
+                      >
+                        <PencilSimple size={20} weight="bold" />
+                      </button>
+                      <button
+                        className="text-red-500 hover:text-red-700"
+                        type="button"
+                      >
+                        <TrashSimple size={20} weight="bold" />
+                      </button>
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>
