@@ -3,6 +3,7 @@ import {
   CaretLeft,
   CaretRight,
   HandCoins,
+  Money,
   PencilSimple,
   Plus,
   TrashSimple,
@@ -16,11 +17,13 @@ import { ptBR } from 'date-fns/locale'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import type { Sessao } from '../../tipos'
+import * as Dialog from '@radix-ui/react-dialog'
 import Pagination from '../../components/Pagination'
 import { useSelector, useDispatch } from 'react-redux'
 import type { RootState, AppDispatch } from '../../store/store'
 import { fetchSessoes } from '../../store/sessoesSlice'
 import { fetchTerapeutas } from '../../store/terapeutasSlice'
+import { NovaSessaoModal } from '../../components/Sessao/NovaSessaoModal'
 
 interface SessaoCalculations {
   totalValue: number
@@ -156,9 +159,9 @@ export function Sessoes() {
     return (
       <tr>
         <td className="p-4">{sessao.terapeutaInfo.nomeTerapeuta}</td>
-        <td className="p-4">
+        {/* <td className="p-4">
           {dateFormatter.format(new Date(sessao.terapeutaInfo.dtEntrada))}
-        </td>
+        </td> */}
         <td className="p-4">{sessao.pacienteInfo.nomePaciente}</td>
         <td className="p-4">{sessao.pacienteInfo.nomeResponsavel}</td>
         <td className="p-4">{priceFormatter.format(sessao.valorSessao)}</td>
@@ -198,13 +201,18 @@ export function Sessoes() {
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-2xl font-bold">Sessões</h1>
-          <button
-            type="button"
-            className="flex items-center bg-azul text-white px-4 py-2 rounded hover:bg-sky-600"
-          >
-            <Plus size={20} weight="bold" className="mr-2" />
-            Nova Sessão
-          </button>
+          <Dialog.Root>
+            <Dialog.Trigger asChild>
+              <button
+                type="button"
+                className="flex items-center bg-azul text-white px-4 py-2 rounded hover:bg-sky-600"
+              >
+                <Plus size={20} weight="bold" className="mr-2" />
+                Nova Sessão
+              </button>
+            </Dialog.Trigger>
+            <NovaSessaoModal />
+          </Dialog.Root>
         </div>
 
         {/* Filters and Summary */}
@@ -221,6 +229,9 @@ export function Sessoes() {
           </div>
           <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
             <User size={24} />
+            <label htmlFor="terapeutas" className="text-xl font-semibold">
+              Terapeuta:
+            </label>
             <select
               className="text-xl"
               value={selectedTerapeuta}
@@ -235,7 +246,7 @@ export function Sessoes() {
             </select>
           </div>
           <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
-            <HandCoins size={24} />
+            <Money size={24} />
             <span className="text-xl font-semibold">
               Paciente: {priceFormatter.format(totals.totalValue)}
             </span>
@@ -279,7 +290,7 @@ export function Sessoes() {
             <thead className="bg-rosa text-white">
               <tr>
                 <th className="p-4">Terapeuta</th>
-                <th className="p-4">Data Entrada</th>
+                {/* <th className="p-4">Data Entrada</th> */}
                 <th className="p-4">Paciente</th>
                 <th className="p-4">Responsável</th>
                 <th className="p-4">Valor da Sessão</th>

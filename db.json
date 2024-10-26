@@ -49,7 +49,7 @@
       "dtNascimento": "2024-10-08T00:00:00.000Z",
       "terapeutaInfo": {
         "id": "5b306851-c6d3-45c3-8f95-8f2d713e6e83",
-        "nomeTerapeuta": "Beatriz",
+        "nomeTerapeuta": "Bia",
         "telefoneTerapeuta": "6192095674",
         "emailTerapeuta": "thaismarra@gmail.com",
         "enderecoTerapeuta": "SHCES Quadra 801 Bloco A",
@@ -69,7 +69,7 @@
       "dtNascimento": "2024-10-01T03:00:00.000Z",
       "terapeutaInfo": {
         "id": "5b306851-c6d3-45c3-8f95-8f2d713e6e83",
-        "nomeTerapeuta": "Beatriz",
+        "nomeTerapeuta": "Bia",
         "telefoneTerapeuta": "6192095674",
         "emailTerapeuta": "thaismarra@gmail.com",
         "enderecoTerapeuta": "SHCES Quadra 801 Bloco A",
@@ -89,7 +89,7 @@
       "dtNascimento": "2024-09-30T03:00:00.000Z",
       "terapeutaInfo": {
         "id": "5b306851-c6d3-45c3-8f95-8f2d713e6e83",
-        "nomeTerapeuta": "Beatriz",
+        "nomeTerapeuta": "Bia",
         "telefoneTerapeuta": "6192095674",
         "emailTerapeuta": "thaismarra@gmail.com",
         "enderecoTerapeuta": "SHCES Quadra 801 Bloco A",
@@ -189,7 +189,7 @@
       "dtNascimento": "2024-09-29T03:00:00.000Z",
       "terapeutaInfo": {
         "id": "5b306851-c6d3-45c3-8f95-8f2d713e6e83",
-        "nomeTerapeuta": "Beatriz",
+        "nomeTerapeuta": "Bia",
         "telefoneTerapeuta": "6192095674",
         "emailTerapeuta": "thaismarra@gmail.com",
         "enderecoTerapeuta": "SHCES Quadra 801 Bloco A",
@@ -209,7 +209,7 @@
       "dtNascimento": "2024-10-07T00:00:00.000Z",
       "terapeutaInfo": {
         "id": "2b6f8404-38dc-4b1e-9c12-8a470f220253",
-        "nomeTerapeuta": "Gabi Fonseca",
+        "nomeTerapeuta": "Gabi",
         "telefoneTerapeuta": "61981593923",
         "emailTerapeuta": "danilo2311@gmail.com",
         "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
@@ -489,7 +489,7 @@
       "dtNascimento": "2024-10-18T03:00:00.000Z",
       "terapeutaInfo": {
         "id": "5b306851-c6d3-45c3-8f95-8f2d713e6e83",
-        "nomeTerapeuta": "Beatriz",
+        "nomeTerapeuta": "Bia",
         "telefoneTerapeuta": "6192095674",
         "emailTerapeuta": "thaismarra@gmail.com",
         "enderecoTerapeuta": "SHCES Quadra 801 Bloco A",
@@ -529,7 +529,7 @@
       "dtNascimento": "2014-02-17T03:00:00.000Z",
       "terapeutaInfo": {
         "id": "5b306851-c6d3-45c3-8f95-8f2d713e6e83",
-        "nomeTerapeuta": "Beatriz",
+        "nomeTerapeuta": "Bia",
         "telefoneTerapeuta": "6192095674",
         "emailTerapeuta": "thaismarra@gmail.com",
         "enderecoTerapeuta": "SHCES Quadra 801 Bloco A",
@@ -562,12 +562,92 @@
       "cpfResponsavel": "876.876.876-87",
       "enderecoResponsavel": "SHCES 301 BLOCO C apt 202",
       "origem": "Instagram"
+    },
+    {
+      "id": "b969c691-f3eb-44d2-92cb-03a2eedc09f8",
+      "nomePaciente": "Danilo Marra Rabelo",
+      "dtNascimento": "2024-10-06T03:00:00.000Z",
+      "terapeutaInfo": {
+        "id": "5b306851-c6d3-45c3-8f95-8f2d713e6e83",
+        "nomeTerapeuta": "Bia",
+        "telefoneTerapeuta": "6192095674",
+        "emailTerapeuta": "thaismarra@gmail.com",
+        "enderecoTerapeuta": "SHCES Quadra 801 Bloco A",
+        "dtEntrada": "2024-09-04T00:00:00.000Z",
+        "chavePix": "098098098098"
+      },
+      "nomeResponsavel": "Danilo Marra Rabelo",
+      "telefoneResponsavel": "61981593923",
+      "emailResponsavel": "danilo2311@gmail.com",
+      "cpfResponsavel": "876.876.876-87",
+      "enderecoResponsavel": "SHCES 301 BLOCO C apt 202",
+      "origem": "Indicação"
+    },
+    {
+      "id": "f593abc3-4460-445f-b6d4-d3bae64eac4b",
+      "nomePaciente": "Henrique",
+      "dtNascimento": "2014-08-04T03:00:00.000Z",
+      "terapeutaInfo": {
+        "id": "2b6f8404-38dc-4b1e-9c12-8a470f220253",
+        "nomeTerapeuta": "Gabi",
+        "telefoneTerapeuta": "61981593923",
+        "emailTerapeuta": "danilo2311@gmail.com",
+        "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
+        "dtEntrada": "2024-09-20T00:00:00.000Z",
+        "chavePix": ""
+      },
+      "nomeResponsavel": "Thais Marra",
+      "telefoneResponsavel": "61981593923",
+      "emailResponsavel": "thaismarra@gmail.com",
+      "cpfResponsavel": "876.876.876-87",
+      "enderecoResponsavel": "SHCES Quadra 801 Bloco A",
+      "origem": "Indicação"
+    },
+    {
+      "id": "996dc835-5113-4786-9cfa-52ca523a081b",
+      "nomePaciente": "Carlos",
+      "dtNascimento": "2011-05-13T03:00:00.000Z",
+      "terapeutaInfo": {
+        "id": "2b6f8404-38dc-4b1e-9c12-8a470f220253",
+        "nomeTerapeuta": "Gabi",
+        "telefoneTerapeuta": "61981593923",
+        "emailTerapeuta": "danilo2311@gmail.com",
+        "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
+        "dtEntrada": "2024-09-20T00:00:00.000Z",
+        "chavePix": ""
+      },
+      "nomeResponsavel": "Evilsásio",
+      "telefoneResponsavel": "61981593923",
+      "emailResponsavel": "danilo2311@gmail.com",
+      "cpfResponsavel": "876.876.876-87",
+      "enderecoResponsavel": "SHCES 301 BLOCO C apt 202",
+      "origem": "Outros"
+    },
+    {
+      "id": "f0bbf8b4-58f7-47e5-b89b-6aaebb59b446",
+      "nomePaciente": "Igor",
+      "dtNascimento": "2021-08-11T03:00:00.000Z",
+      "terapeutaInfo": {
+        "id": "5b306851-c6d3-45c3-8f95-8f2d713e6e83",
+        "nomeTerapeuta": "Bia",
+        "telefoneTerapeuta": "6192095674",
+        "emailTerapeuta": "thaismarra@gmail.com",
+        "enderecoTerapeuta": "SHCES Quadra 801 Bloco A",
+        "dtEntrada": "2024-09-04T00:00:00.000Z",
+        "chavePix": "098098098098"
+      },
+      "nomeResponsavel": "Pai do Igor",
+      "telefoneResponsavel": "61981593923",
+      "emailResponsavel": "danilo2311@gmail.com",
+      "cpfResponsavel": "876.876.876-87",
+      "enderecoResponsavel": "SHCES 301 BLOCO C apt 202",
+      "origem": "Indicação"
     }
   ],
   "terapeutas": [
     {
       "id": "5b306851-c6d3-45c3-8f95-8f2d713e6e83",
-      "nomeTerapeuta": "Beatriz",
+      "nomeTerapeuta": "Bia",
       "telefoneTerapeuta": "6192095674",
       "emailTerapeuta": "thaismarra@gmail.com",
       "enderecoTerapeuta": "SHCES Quadra 801 Bloco A",
@@ -594,7 +674,7 @@
     },
     {
       "id": "2b6f8404-38dc-4b1e-9c12-8a470f220253",
-      "nomeTerapeuta": "Gabi Fonseca",
+      "nomeTerapeuta": "Gabi",
       "telefoneTerapeuta": "61981593923",
       "emailTerapeuta": "danilo2311@gmail.com",
       "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
@@ -616,7 +696,7 @@
       "id": "1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p",
       "terapeutaInfo": {
         "id": "5b306851-c6d3-45c3-8f95-8f2d713e6e83",
-        "nomeTerapeuta": "Beatriz",
+        "nomeTerapeuta": "Bia",
         "telefoneTerapeuta": "6192095674",
         "emailTerapeuta": "thaismarra@gmail.com",
         "enderecoTerapeuta": "SHCES Quadra 801 Bloco A",

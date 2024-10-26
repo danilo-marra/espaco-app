@@ -49,7 +49,7 @@ export function NovoPacienteModal() {
       await new Promise((resolve) => setTimeout(resolve, 2000))
 
       const terapeutaSelecionado = terapeutas.find(
-        (terapeuta) => terapeuta.nomeTerapeuta === data.nomeTerapeuta,
+        (terapeuta) => terapeuta.id === data.nomeTerapeuta,
       )
 
       if (!terapeutaSelecionado) {
@@ -145,7 +145,7 @@ export function NovoPacienteModal() {
             >
               <option value="">Selecione o terapeuta</option>
               {terapeutas.map((terapeuta) => (
-                <option key={terapeuta.id} value={terapeuta.nomeTerapeuta}>
+                <option key={terapeuta.id} value={terapeuta.id}>
                   {terapeuta.nomeTerapeuta}
                 </option>
               ))}
