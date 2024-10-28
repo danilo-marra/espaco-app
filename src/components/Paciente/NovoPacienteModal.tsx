@@ -17,7 +17,7 @@ const NovoPacienteFormSchema = z.object({
   dtNascimento: z.date().refine((data) => data <= new Date(), {
     message: 'Data de entrada não pode ser maior que a data atual',
   }),
-  nomeTerapeuta: z.string().min(1, 'Selecione um(a) terapeuta'),
+  terapeutaId: z.string().min(1, 'Selecione um(a) terapeuta'),
   nomeResponsavel: z.string(),
   telefoneResponsavel: z.string(),
   emailResponsavel: z.string(),
@@ -49,7 +49,7 @@ export function NovoPacienteModal() {
       await new Promise((resolve) => setTimeout(resolve, 2000))
 
       const terapeutaSelecionado = terapeutas.find(
-        (terapeuta) => terapeuta.id === data.nomeTerapeuta,
+        (terapeuta) => terapeuta.id === data.terapeutaId,
       )
 
       if (!terapeutaSelecionado) {
@@ -139,8 +139,8 @@ export function NovoPacienteModal() {
             )}
             <select
               className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
-              id="nomeTerapeuta"
-              {...register('nomeTerapeuta')}
+              id="terapeutaId"
+              {...register('terapeutaId')}
               onFocus={handleFocus}
             >
               <option value="">Selecione o terapeuta</option>
@@ -150,8 +150,8 @@ export function NovoPacienteModal() {
                 </option>
               ))}
             </select>
-            {errors.nomeTerapeuta && (
-              <p className="text-red-500">{errors.nomeTerapeuta.message}</p>
+            {errors.terapeutaId && (
+              <p className="text-red-500">{errors.terapeutaId.message}</p>
             )}
           </div>
           <h3 className="font-medium text-azul text-xl mt-6">

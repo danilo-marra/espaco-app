@@ -24,8 +24,13 @@ export interface Sessao {
   id: string
   terapeutaInfo: Terapeuta
   pacienteInfo: Paciente
+  statusSessao:
+    | 'Pagamento Pendente'
+    | 'Pagamento Realizado'
+    | 'Nota Fiscal Emitida'
+    | 'Nota Fiscal Enviada'
+    | undefined
   valorSessao: number
-  notaFiscal: 'Emitida' | 'Enviada' | undefined
   dtSessao1: Date
   dtSessao2?: Date
   dtSessao3?: Date

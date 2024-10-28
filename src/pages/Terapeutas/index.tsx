@@ -6,7 +6,7 @@ import {
   Users,
   UsersThree,
 } from '@phosphor-icons/react'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useModal } from '../../hooks/useModal'
 import { useSelector, useDispatch } from 'react-redux'
 import { NovoTerapeutaModal } from '../../components/Terapeuta/NovoTerapeutaModal'
@@ -20,13 +20,36 @@ import { deleteTerapeuta, fetchTerapeutas } from '../../store/terapeutasSlice'
 import { fetchPacientes } from '../../store/pacientesSlice'
 import { dateFormatter } from '../../utils/formatter'
 
+const TERAPEUTAS_PER_PAGE = 10
+
+const filterTerapeutas = (
+  terapeutas: Terapeuta[],
+  selectedTerapeuta: string,
+): Terapeuta[] => {
+  return terapeutas.filter((terapeuta) => {
+    const matchesTerapeuta =
+      selectedTerapeuta === 'Todos' || terapeuta.id === selectedTerapeuta
+
+    return matchesTerapeuta
+  })
+}
+
 export function Terapeutas() {
   const dispatch = useDispatch<AppDispatch>()
   const terapeutas = useSelector((state: RootState) => state.terapeutas.data)
   const pacientes = useSelector((state: RootState) => state.pacientes.data)
-  const [totalPages, setTotalPages] = useState<number>(0)
+
+  // Estados
   const [currentPage, setCurrentPage] = useState(1)
-  const terapeutasPerPage = 10
+  const [selectedTerapeuta, setSelectedTerapeuta] = useState('Todos')
+  const [terapeutaEditando, setTerapeutaEditando] = useState<Terapeuta | null>(
+    null,
+  )
+  const [terapeutaParaExcluir, setTerapeutaParaExcluir] = useState<
+    string | null
+  >(null)
+  const [isSuccess, setIsSuccess] = useState(false)
+
   const {
     isModalOpen,
     modalMessage,
@@ -36,57 +59,43 @@ export function Terapeutas() {
     openEditModal,
     closeEditModal,
   } = useModal()
-  const [terapeutaEditando, setTerapeutaEditando] = useState<Terapeuta | null>(
-    null,
+
+  // Dados filtrados e paginação usando useMemo
+  const filteredTerapeutas = useMemo(
+    () => filterTerapeutas(terapeutas, selectedTerapeuta),
+    [terapeutas, selectedTerapeuta],
   )
-  const [terapeutaParaExcluir, setTerapeutaParaExcluir] = useState<
-    string | null
-  >(null)
-  const [isSuccess, setIsSuccess] = useState(false)
-  const [selectedTerapeuta, setSelectedTerapeuta] = useState('Todos')
-  const [filteredTerapeutas, setFilteredTerapeutas] = useState<Terapeuta[]>([])
+
+  const paginatedTerapeutas = useMemo(() => {
+    const startIndex = (currentPage - 1) * TERAPEUTAS_PER_PAGE
+    return filteredTerapeutas.slice(
+      startIndex,
+      startIndex + TERAPEUTAS_PER_PAGE,
+    )
+  }, [filteredTerapeutas, currentPage])
+
+  const totalPages = Math.ceil(filteredTerapeutas.length / TERAPEUTAS_PER_PAGE)
+
+  // Handlers
   const handleTerapeutaChange = (
     event: React.ChangeEvent<HTMLSelectElement>,
   ) => {
     setSelectedTerapeuta(event.target.value)
+    setCurrentPage(1)
   }
-  const handlePageChange = (newPage: number) => {
-    setCurrentPage(newPage)
-  }
-  const indexOfLastTerapeuta = currentPage * terapeutasPerPage
-  const indexOfFirstTerapeuta = indexOfLastTerapeuta - terapeutasPerPage
-  const terapeutasAtuais = filteredTerapeutas.slice(
-    indexOfFirstTerapeuta,
-    indexOfLastTerapeuta,
-  )
 
-  useEffect(() => {
-    dispatch(fetchTerapeutas())
-    dispatch(fetchPacientes())
-  }, [dispatch])
-
-  useEffect(() => {
-    const filtered =
-      selectedTerapeuta === 'Todos'
-        ? terapeutas
-        : terapeutas.filter((terapeuta) => terapeuta.id === selectedTerapeuta)
-    setFilteredTerapeutas(filtered)
-    setTotalPages(Math.ceil(filtered.length / terapeutasPerPage))
-  }, [terapeutas, selectedTerapeuta])
-
-  function handleEditTerapeuta(terapeuta: Terapeuta) {
+  const handleEditTerapeuta = (terapeuta: Terapeuta) => {
     setTerapeutaEditando(terapeuta)
     openEditModal()
   }
 
-  async function handleDeleteTerapeuta() {
+  const handleDeleteTerapeuta = async () => {
     if (!terapeutaParaExcluir) return
 
     try {
       await dispatch(deleteTerapeuta(terapeutaParaExcluir)).unwrap()
       openModal('Terapeuta excluído com sucesso!')
       setIsSuccess(true)
-      console.log('Terapeuta excluído:', terapeutaParaExcluir)
     } catch (error) {
       openModal('Erro ao excluir terapeuta!')
       console.error('Erro ao excluir terapeuta:', error)
@@ -101,60 +110,71 @@ export function Terapeutas() {
     setIsSuccess(false)
   }
 
+  // Effect para carregar dados iniciais
+  useEffect(() => {
+    dispatch(fetchTerapeutas())
+    dispatch(fetchPacientes())
+  }, [dispatch])
+
   return (
     <div className="flex min-h-screen">
-      <main className={'flex-1 bg-gray-100 p-8'}>
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-2xl font-bold">Terapeutas</h1>
-            <Dialog.Root>
-              <Dialog.Trigger asChild>
-                <button
-                  type="button"
-                  className="flex items-center bg-azul text-white px-4 py-2 rounded hover:bg-sky-600 duration-150"
-                >
-                  <Plus size={20} weight="bold" className="mr-2" />
-                  Novo Terapeuta
-                </button>
-              </Dialog.Trigger>
-              <NovoTerapeutaModal />
-            </Dialog.Root>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
-              <User size={24} />
-              <label htmlFor="terapeutas" className="text-xl font-semibold">
-                Terapeuta:
-              </label>
-              <select
-                className="text-xl"
-                name="terapeutas"
-                id="terapeutas"
-                value={selectedTerapeuta}
-                onChange={handleTerapeutaChange}
+      <main className="flex-1 bg-gray-100 p-8">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-2xl font-semibold">Terapeutas</h1>
+          <Dialog.Root>
+            <Dialog.Trigger asChild>
+              <button
+                type="button"
+                className="flex items-center bg-azul text-white px-4 py-2 rounded hover:bg-sky-600 duration-150"
               >
-                <option value="Todos">Todos</option>
-                {terapeutas.map((terapeuta) => (
-                  <option key={terapeuta.id} value={terapeuta.id}>
-                    {terapeuta.nomeTerapeuta}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
-              <UsersThree size={24} />
-              <span className="text-xl font-semibold">
-                Total de Terapeutas: {terapeutas.length}
-              </span>
-            </div>
-            <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
-              <Users size={24} />
-              <span className="text-xl font-semibold">
-                Total de Pacientes: {pacientes.length}
-              </span>
-            </div>
+                <Plus size={20} weight="bold" className="mr-2" />
+                Novo Terapeuta
+              </button>
+            </Dialog.Trigger>
+            <NovoTerapeutaModal />
+          </Dialog.Root>
+        </div>
+
+        {/* Filters and Summary */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
+            <User size={24} />
+            <label htmlFor="terapeutas" className="text-xl font-semibold">
+              Terapeuta
+            </label>
+            <select
+              className="text-xl"
+              name="terapeutas"
+              id="terapeutas"
+              value={selectedTerapeuta}
+              onChange={handleTerapeutaChange}
+            >
+              <option value="Todos">Todos</option>
+              {terapeutas.map((terapeuta) => (
+                <option key={terapeuta.id} value={terapeuta.id}>
+                  {terapeuta.nomeTerapeuta}
+                </option>
+              ))}
+            </select>
           </div>
-          <table className="listaTerapeutas w-full bg-white rounded shadow">
+          <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
+            <UsersThree size={24} />
+            <span className="text-xl font-semibold">
+              Total de Terapeutas: {terapeutas.length}
+            </span>
+          </div>
+          <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
+            <Users size={24} />
+            <span className="text-xl font-semibold">
+              Total de Pacientes: {pacientes.length}
+            </span>
+          </div>
+        </div>
+
+        {/* Table */}
+        <div className="bg-white rounded shadow overflow-x-auto">
+          <table className="w-full">
             <thead className="bg-rosa text-white">
               <tr>
                 <th className="p-4 text-left">Nome</th>
@@ -167,7 +187,7 @@ export function Terapeutas() {
               </tr>
             </thead>
             <tbody>
-              {terapeutasAtuais.map((terapeuta) => (
+              {paginatedTerapeutas.map((terapeuta) => (
                 <tr key={terapeuta.id}>
                   <td className="p-4">{terapeuta.nomeTerapeuta}</td>
                   <td className="p-4">{terapeuta.telefoneTerapeuta}</td>
@@ -204,28 +224,32 @@ export function Terapeutas() {
               ))}
             </tbody>
           </table>
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-          />
         </div>
-      </main>
-      <ExcluirModal
-        isOpen={isModalOpen}
-        onOpenChange={closeModal}
-        title="Excluir Terapeuta"
-        message={modalMessage}
-        onConfirm={handleDeleteTerapeuta}
-        isSuccess={isSuccess}
-      />
-      {terapeutaEditando && (
-        <EditarTerapeutaModal
-          terapeutaId={terapeutaEditando.id}
-          open={isEditModalOpen}
-          onClose={closeEditModal}
+
+        {/* Pagination */}
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
         />
-      )}
+
+        {/* Modals */}
+        <ExcluirModal
+          isOpen={isModalOpen}
+          onOpenChange={closeModal}
+          title="Excluir Terapeuta"
+          message={modalMessage}
+          onConfirm={handleDeleteTerapeuta}
+          isSuccess={isSuccess}
+        />
+        {terapeutaEditando && (
+          <EditarTerapeutaModal
+            terapeutaId={terapeutaEditando.id}
+            open={isEditModalOpen}
+            onClose={closeEditModal}
+          />
+        )}
+      </main>
     </div>
   )
 }

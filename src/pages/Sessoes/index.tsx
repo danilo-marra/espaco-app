@@ -5,6 +5,7 @@ import {
   HandCoins,
   Money,
   PencilSimple,
+  PiggyBank,
   Plus,
   TrashSimple,
   User,
@@ -173,7 +174,7 @@ export function Sessoes() {
         </div>
 
         {/* Filters and Summary */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
           <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
             <Users size={24} />
             <input
@@ -205,13 +206,20 @@ export function Sessoes() {
           <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
             <Money size={24} />
             <span className="text-xl font-semibold">
-              Paciente: {priceFormatter.format(totals.totalValue)}
+              Total Paciente: {priceFormatter.format(totals.totalValue)}
             </span>
           </div>
           <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
             <HandCoins size={24} />
             <span className="text-xl font-semibold">
-              PSI: {priceFormatter.format(totals.totalRepasse)}
+              Total para PSI: {priceFormatter.format(totals.totalRepasse)}
+            </span>
+          </div>
+          <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
+            <PiggyBank size={24} />
+            <span className="text-xl font-semibold">
+              Lucro:{' '}
+              {priceFormatter.format(totals.totalValue - totals.totalRepasse)}
             </span>
           </div>
         </div>
@@ -249,8 +257,8 @@ export function Sessoes() {
                 <th className="p-4">Terapeuta</th>
                 <th className="p-4">Paciente</th>
                 <th className="p-4">Responsável</th>
+                <th className="p-4">Status</th>
                 <th className="p-4">Valor da Sessão</th>
-                <th className="p-4">Nota Fiscal</th>
                 <th className="p-4">Sessão 1</th>
                 <th className="p-4">Sessão 2</th>
                 <th className="p-4">Sessão 3</th>
@@ -274,10 +282,10 @@ export function Sessoes() {
                     <td className="p-4">
                       {sessao.pacienteInfo.nomeResponsavel}
                     </td>
+                    <td className="p-4">{sessao.statusSessao}</td>
                     <td className="p-4">
                       {priceFormatter.format(sessao.valorSessao)}
                     </td>
-                    <td className="p-4">{sessao.notaFiscal}</td>
                     {[1, 2, 3, 4, 5, 6].map((num) => {
                       const dateKey = `dtSessao${num}` as keyof Sessao
                       return (

@@ -108,13 +108,13 @@
       "nomePaciente": "Juquinha",
       "dtNascimento": "2024-10-15T03:00:00.000Z",
       "terapeutaInfo": {
-        "id": "934e1d9d-1342-444a-9eba-48ebbbbcc12b",
-        "nomeTerapeuta": "Clara Educadora",
+        "id": "6319090b-0f6d-4808-b6b2-872156bccd65",
+        "nomeTerapeuta": "Afonso Gonzales",
         "telefoneTerapeuta": "61981593923",
         "emailTerapeuta": "danilo2311@gmail.com",
         "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
-        "dtEntrada": "2024-09-15T00:00:00.000Z",
-        "chavePix": "44"
+        "dtEntrada": "2022-06-28T03:00:00.000Z",
+        "chavePix": "098098098098"
       },
       "nomeResponsavel": "Pai do Juca",
       "telefoneResponsavel": "61981593923",
@@ -125,7 +125,7 @@
     },
     {
       "id": "f1062935-c939-4470-819b-5f51e625d516",
-      "nomePaciente": "Zequinha",
+      "nomePaciente": "Zequinha Junior",
       "dtNascimento": "2024-10-01T03:00:00.000Z",
       "terapeutaInfo": {
         "id": "9f7a90e2-4773-4ae4-8b84-11de3872bfee",
@@ -642,6 +642,46 @@
       "cpfResponsavel": "876.876.876-87",
       "enderecoResponsavel": "SHCES 301 BLOCO C apt 202",
       "origem": "Indicação"
+    },
+    {
+      "id": "b2ad2be4-89dd-4c6d-8624-e83b2955086f",
+      "nomePaciente": "Zézinho",
+      "dtNascimento": "2024-09-30T03:00:00.000Z",
+      "terapeutaInfo": {
+        "id": "5b306851-c6d3-45c3-8f95-8f2d713e6e83",
+        "nomeTerapeuta": "Bia",
+        "telefoneTerapeuta": "6192095674",
+        "emailTerapeuta": "thaismarra@gmail.com",
+        "enderecoTerapeuta": "SHCES Quadra 801 Bloco A",
+        "dtEntrada": "2024-09-04T00:00:00.000Z",
+        "chavePix": "098098098098"
+      },
+      "nomeResponsavel": "Thais Marra",
+      "telefoneResponsavel": "61981593923",
+      "emailResponsavel": "thaismarra@gmail.com",
+      "cpfResponsavel": "024.818.181-54",
+      "enderecoResponsavel": "SHCES Quadra 801 Bloco A",
+      "origem": "Indicação"
+    },
+    {
+      "id": "18c3d920-d996-4e79-9324-750d92d6fd4e",
+      "nomePaciente": "Dara",
+      "dtNascimento": "2014-03-11T03:00:00.000Z",
+      "terapeutaInfo": {
+        "id": "772cf569-5487-407f-975b-200e1dc7ea6c",
+        "nomeTerapeuta": "Samara",
+        "telefoneTerapeuta": "61981593923",
+        "emailTerapeuta": "danilo2311@gmail.com",
+        "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
+        "dtEntrada": "2024-07-29T03:00:00.000Z",
+        "chavePix": "098098098098"
+      },
+      "nomeResponsavel": "Ricardo Calembo",
+      "telefoneResponsavel": "61981593923",
+      "emailResponsavel": "ricardo@gmail.com",
+      "cpfResponsavel": "024.818.181-54",
+      "enderecoResponsavel": "SHCES 301 BLOCO C apt 202",
+      "origem": "Outros"
     }
   ],
   "terapeutas": [
@@ -665,7 +705,7 @@
     },
     {
       "id": "934e1d9d-1342-444a-9eba-48ebbbbcc12b",
-      "nomeTerapeuta": "Clara Educadora",
+      "nomeTerapeuta": "Clara",
       "telefoneTerapeuta": "61981593923",
       "emailTerapeuta": "danilo2311@gmail.com",
       "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
@@ -688,6 +728,24 @@
       "emailTerapeuta": "danilo2311@gmail.com",
       "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
       "dtEntrada": "2021-04-05T03:00:00.000Z",
+      "chavePix": "098098098098"
+    },
+    {
+      "id": "6319090b-0f6d-4808-b6b2-872156bccd65",
+      "nomeTerapeuta": "Afonso Gonzales",
+      "telefoneTerapeuta": "61981593923",
+      "emailTerapeuta": "danilo2311@gmail.com",
+      "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
+      "dtEntrada": "2022-06-28T03:00:00.000Z",
+      "chavePix": "098098098098"
+    },
+    {
+      "id": "772cf569-5487-407f-975b-200e1dc7ea6c",
+      "nomeTerapeuta": "Samara",
+      "telefoneTerapeuta": "61981593923",
+      "emailTerapeuta": "danilo2311@gmail.com",
+      "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
+      "dtEntrada": "2024-07-29T03:00:00.000Z",
       "chavePix": "098098098098"
     }
   ],
@@ -714,8 +772,8 @@
         "enderecoResponsavel": "SHCES 301 BLOCO C apt 202",
         "origem": "Indicação"
       },
+      "statusSessao": "Pagamento Pendente",
       "valorSessao": 100,
-      "notaFiscal": "Emitida",
       "dtSessao1": "2024-10-01T00:00:00.000Z"
     },
     {
@@ -740,8 +798,8 @@
         "enderecoResponsavel": "SHCES Quadra 801 Bloco A",
         "origem": "Indicação"
       },
+      "statusSessao": "Nota Fiscal Emitida",
       "valorSessao": 120,
-      "notaFiscal": "Enviada",
       "dtSessao1": "2024-10-10T00:00:00.000Z",
       "dtSessao2": "2024-10-17T00:00:00.000Z"
     },
@@ -749,7 +807,7 @@
       "id": "3c4d5e6f-7g8h-9i0j-1k2l-3m4n5o6p7q8r",
       "terapeutaInfo": {
         "id": "934e1d9d-1342-444a-9eba-48ebbbbcc12b",
-        "nomeTerapeuta": "Clara Educadora",
+        "nomeTerapeuta": "Clara",
         "telefoneTerapeuta": "61981593923",
         "emailTerapeuta": "danilo2311@gmail.com",
         "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
@@ -761,13 +819,13 @@
         "nomePaciente": "Juquinha",
         "dtNascimento": "2024-10-15T03:00:00.000Z",
         "terapeutaInfo": {
-          "id": "934e1d9d-1342-444a-9eba-48ebbbbcc12b",
-          "nomeTerapeuta": "Clara Educadora",
+          "id": "6319090b-0f6d-4808-b6b2-872156bccd65",
+          "nomeTerapeuta": "Afonso",
           "telefoneTerapeuta": "61981593923",
           "emailTerapeuta": "danilo2311@gmail.com",
           "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
-          "dtEntrada": "2024-09-15T00:00:00.000Z",
-          "chavePix": "44"
+          "dtEntrada": "2022-06-28T03:00:00.000Z",
+          "chavePix": "098098098098"
         },
         "nomeResponsavel": "Pai do Juca",
         "telefoneResponsavel": "61981593923",
@@ -776,10 +834,45 @@
         "enderecoResponsavel": "SHCES 301 BLOCO C apt 202",
         "origem": "Indicação"
       },
+      "statusSessao": "Nota Fiscal Enviada",
       "valorSessao": 150,
-      "notaFiscal": "Emitida",
       "dtSessao1": "2024-10-20T00:00:00.000Z",
       "dtSessao2": "2024-10-27T00:00:00.000Z"
+    },
+    {
+      "id": "1291bf7b-0ec7-4e07-b5f5-31a885176b31",
+      "terapeutaInfo": {
+        "id": "2b6f8404-38dc-4b1e-9c12-8a470f220253",
+        "nomeTerapeuta": "Gabi",
+        "telefoneTerapeuta": "61981593923",
+        "emailTerapeuta": "danilo2311@gmail.com",
+        "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
+        "dtEntrada": "2024-09-20T00:00:00.000Z",
+        "chavePix": ""
+      },
+      "pacienteInfo": {
+        "id": "f593abc3-4460-445f-b6d4-d3bae64eac4b",
+        "nomePaciente": "Henrique",
+        "dtNascimento": "2014-08-04T03:00:00.000Z",
+        "terapeutaInfo": {
+          "id": "2b6f8404-38dc-4b1e-9c12-8a470f220253",
+          "nomeTerapeuta": "Gabi",
+          "telefoneTerapeuta": "61981593923",
+          "emailTerapeuta": "danilo2311@gmail.com",
+          "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
+          "dtEntrada": "2024-09-20T00:00:00.000Z",
+          "chavePix": ""
+        },
+        "nomeResponsavel": "Thais Marra",
+        "telefoneResponsavel": "61981593923",
+        "emailResponsavel": "thaismarra@gmail.com",
+        "cpfResponsavel": "876.876.876-87",
+        "enderecoResponsavel": "SHCES Quadra 801 Bloco A",
+        "origem": "Indicação"
+      },
+      "statusSessao": "Pagamento Pendente",
+      "valorSessao": 120,
+      "dtSessao1": "2024-10-01T03:00:00.000Z"
     }
   ]
 }

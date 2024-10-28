@@ -1,4 +1,8 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
+import {
+  createSlice,
+  createAsyncThunk,
+  type PayloadAction,
+} from '@reduxjs/toolkit'
 import type { SessoesState } from './store'
 import type { Sessao } from '../tipos'
 import httpRequest, { API_URL } from '../utils/api'
@@ -12,6 +16,19 @@ const initialState: SessoesState = {
 export const fetchSessoes = createAsyncThunk<Sessao[]>(
   'sessoes/fetchSessoes',
   async () => httpRequest<Sessao[]>(`${API_URL}/sessoes`, 'GET'),
+)
+
+export const addSessao = createAsyncThunk<Sessao, Sessao>(
+  'sessoes/addSessao',
+  async (sessao) => {
+    const response = await httpRequest<Sessao>(
+      `${API_URL}/sessoes`,
+      'POST',
+      sessao,
+    )
+    // console.log('Sessao adicionada:', sessao)
+    return response
+  },
 )
 
 const sessoesSlice = createSlice({
@@ -30,6 +47,9 @@ const sessoesSlice = createSlice({
       .addCase(fetchSessoes.rejected, (state) => {
         state.loading = false
         state.error = 'Erro ao buscar sessoes'
+      })
+      .addCase(addSessao.fulfilled, (state, action: PayloadAction<Sessao>) => {
+        state.data.push(action.payload)
       })
   },
 })

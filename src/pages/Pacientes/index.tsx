@@ -7,7 +7,7 @@ import {
   Users,
   UsersThree,
 } from '@phosphor-icons/react'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { dateFormatter } from '../../utils/formatter'
 import { calcularIdade } from '../../utils/caculateAge'
 import Pagination from '../../components/Pagination'
@@ -23,14 +23,42 @@ import { deletePaciente, fetchPacientes } from '../../store/pacientesSlice'
 import { fetchTerapeutas } from '../../store/terapeutasSlice'
 import { isBirthday } from '../../utils/dateUtils'
 
+const PACIENTES_PER_PAGE = 10
+
+const filterPacientes = (
+  pacientes: Paciente[],
+  searchQuery: string,
+  selectedTerapeuta: string,
+): Paciente[] => {
+  return pacientes.filter((paciente) => {
+    const matchesSearch = paciente.nomePaciente
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase())
+    const matchesTerapeuta =
+      selectedTerapeuta === 'Todos' ||
+      paciente.terapeutaInfo.id === selectedTerapeuta
+
+    return matchesSearch && matchesTerapeuta
+  })
+}
+
 export function Pacientes() {
   const dispatch = useDispatch<AppDispatch>()
   const pacientes = useSelector((state: RootState) => state.pacientes.data)
   const terapeutas = useSelector((state: RootState) => state.terapeutas.data)
+
+  // Estados
   const [searchQuery, setSearchQuery] = useState('')
-  const [totalPages, setTotalPages] = useState<number>(0)
   const [currentPage, setCurrentPage] = useState(1)
-  const pacientesPerPage = 10
+  const [selectedTerapeuta, setSelectedTerapeuta] = useState('Todos')
+  const [pacienteEditando, setPacienteEditando] = useState<Paciente | null>(
+    null,
+  )
+  const [pacienteParaExcluir, setPacienteParaExcluir] = useState<string | null>(
+    null,
+  )
+  const [isSuccess, setIsSuccess] = useState(false)
+
   const {
     isModalOpen,
     modalMessage,
@@ -40,67 +68,45 @@ export function Pacientes() {
     openEditModal,
     closeEditModal,
   } = useModal()
-  const [pacienteEditando, setPacienteEditando] = useState<Paciente | null>(
-    null,
+
+  // Dados filtrados e paginação usando useMemo
+  const filteredPacientes = useMemo(
+    () => filterPacientes(pacientes, searchQuery, selectedTerapeuta),
+    [pacientes, searchQuery, selectedTerapeuta],
   )
-  const [pacienteParaExcluir, setPacienteParaExcluir] = useState<string | null>(
-    null,
-  )
-  const [isSuccess, setIsSuccess] = useState(false)
-  const [filteredPacientes, setFilteredPacientes] = useState<Paciente[]>([])
-  const [selectedTerapeuta, setSelectedTerapeuta] = useState('Todos')
+
+  const paginatedPacientes = useMemo(() => {
+    const startIndex = (currentPage - 1) * PACIENTES_PER_PAGE
+    return filteredPacientes.slice(startIndex, startIndex + PACIENTES_PER_PAGE)
+  }, [filteredPacientes, currentPage])
+
+  const totalPages = Math.ceil(filteredPacientes.length / PACIENTES_PER_PAGE)
+
+  // Handlers
   const handleTerapeutaChange = (
     event: React.ChangeEvent<HTMLSelectElement>,
   ) => {
     setSelectedTerapeuta(event.target.value)
+    setCurrentPage(1)
   }
-  const handlePageChange = (newPage: number) => {
-    setCurrentPage(newPage)
+
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value)
+    setCurrentPage(1)
   }
-  const indexOfLastPaciente = currentPage * pacientesPerPage
-  const indexOfFirstPaciente = indexOfLastPaciente - pacientesPerPage
-  const pacientesAtuais = filteredPacientes.slice(
-    indexOfFirstPaciente,
-    indexOfLastPaciente,
-  )
 
-  useEffect(() => {
-    dispatch(fetchPacientes())
-    dispatch(fetchTerapeutas())
-  }, [dispatch])
-
-  useEffect(() => {
-    const filtered = pacientes.filter((paciente) =>
-      paciente.nomePaciente.toLowerCase().includes(searchQuery.toLowerCase()),
-    )
-    setFilteredPacientes(filtered)
-    setTotalPages(Math.ceil(filtered.length / pacientesPerPage))
-  }, [searchQuery, pacientes])
-
-  useEffect(() => {
-    const filtered =
-      selectedTerapeuta === 'Todos'
-        ? pacientes
-        : pacientes.filter(
-            (paciente) => paciente.terapeutaInfo.id === selectedTerapeuta,
-          )
-    setFilteredPacientes(filtered)
-    setTotalPages(Math.ceil(filtered.length / pacientesPerPage))
-  }, [pacientes, selectedTerapeuta])
-
-  function handleEditPaciente(paciente: Paciente) {
+  const handleEditPaciente = (paciente: Paciente) => {
     setPacienteEditando(paciente)
     openEditModal()
   }
 
-  async function handleDeletePaciente() {
+  const handleDeletePaciente = async () => {
     if (!pacienteParaExcluir) return
 
     try {
       await dispatch(deletePaciente(pacienteParaExcluir)).unwrap()
       openModal('Paciente excluído com sucesso!')
       setIsSuccess(true)
-      console.log('Paciente excluído:', pacienteParaExcluir)
     } catch (error) {
       openModal('Erro ao excluir paciente!')
       console.error('Erro ao excluir paciente:', error)
@@ -115,9 +121,16 @@ export function Pacientes() {
     setIsSuccess(false)
   }
 
+  // Effect para carregar dados iniciais
+  useEffect(() => {
+    dispatch(fetchPacientes())
+    dispatch(fetchTerapeutas())
+  }, [dispatch])
+
   return (
     <div className="flex min-h-screen">
       <main className="flex-1 bg-gray-100 p-8">
+        {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-2xl font-semibold">Pacientes</h1>
           <Dialog.Root>
@@ -133,15 +146,17 @@ export function Pacientes() {
             <NovoPacienteModal />
           </Dialog.Root>
         </div>
+
+        {/* Filters and Summary */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <div className="flex items-center space-x-4 p-4 bg-white rounded shadow ">
+          <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
             <Users size={24} />
             <input
-              className="text-xl w-full  text-gray-800 focus:outline-none"
+              className="text-xl w-full text-gray-800 focus:outline-none"
               type="text"
               placeholder="Buscar paciente"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => handleSearchChange(e.target.value)}
             />
           </div>
           <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
@@ -164,7 +179,6 @@ export function Pacientes() {
               ))}
             </select>
           </div>
-
           <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
             <Users size={24} />
             <span className="text-xl font-semibold">
@@ -178,103 +192,108 @@ export function Pacientes() {
             </span>
           </div>
         </div>
-        <table className="w-full bg-white rounded shadow">
-          <thead className="bg-rosa text-white">
-            <tr>
-              <th className="p-4">Paciente</th>
-              <th className="p-4">Data de Nascimento</th>
-              <th className="p-4">Idade</th>
-              <th className="p-4">Terapeuta</th>
-              <th className="p-4">Responsável</th>
-              <th className="p-4">Telefone Responsável</th>
-              <th className="p-4">Email Resoponsável</th>
-              <th className="p-4">CPF Responsável</th>
-              <th className="p-4">Endereço</th>
-              <th className="p-4">Origem</th>
-              <th className="p-4">Ações</th>
-            </tr>
-          </thead>
-          <tbody className="text-center">
-            {pacientesAtuais.map((paciente) => {
-              const today = new Date()
-              const birthDate = new Date(paciente.dtNascimento)
-              const birthdayToday = isBirthday(today, birthDate)
 
-              return (
-                <tr key={paciente.id}>
-                  <td className="p-4">{paciente.nomePaciente}</td>
-                  <td className="p-4">
-                    {birthdayToday && (
-                      <span
-                        title="Aniversário hoje!"
-                        className="flex justify-center items-center"
+        {/* Table */}
+        <div className="bg-white rounded shadow overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-rosa text-white">
+              <tr>
+                <th className="p-4">Paciente</th>
+                <th className="p-4">Data de Nascimento</th>
+                <th className="p-4">Idade</th>
+                <th className="p-4">Terapeuta</th>
+                <th className="p-4">Responsável</th>
+                <th className="p-4">Telefone Responsável</th>
+                <th className="p-4">Email Responsável</th>
+                <th className="p-4">CPF Responsável</th>
+                <th className="p-4">Endereço</th>
+                <th className="p-4">Origem</th>
+                <th className="p-4">Ações</th>
+              </tr>
+            </thead>
+            <tbody className="text-center">
+              {paginatedPacientes.map((paciente) => {
+                const birthDate = new Date(paciente.dtNascimento)
+                const birthdayToday = isBirthday(new Date(), birthDate)
+
+                return (
+                  <tr key={paciente.id}>
+                    <td className="p-4">{paciente.nomePaciente}</td>
+                    <td className="p-4">
+                      {birthdayToday && (
+                        <span
+                          title="Aniversário hoje!"
+                          className="flex justify-center items-center"
+                        >
+                          <Cake size={28} color="#C3586A" />
+                        </span>
+                      )}
+                      {dateFormatter.format(birthDate)}
+                    </td>
+                    <td className="p-4">{calcularIdade(birthDate)}</td>
+                    <td className="p-4">
+                      {paciente.terapeutaInfo?.nomeTerapeuta || 'Sem Terapeuta'}
+                    </td>
+                    <td className="p-4">{paciente.nomeResponsavel}</td>
+                    <td className="p-4">{paciente.telefoneResponsavel}</td>
+                    <td className="p-4">{paciente.emailResponsavel}</td>
+                    <td className="p-4">{paciente.cpfResponsavel}</td>
+                    <td className="p-4">{paciente.enderecoResponsavel}</td>
+                    <td className="p-4">{paciente.origem}</td>
+                    <td className="p-2 space-x-2">
+                      <button
+                        type="button"
+                        title="Editar Paciente"
+                        className="text-green-500 hover:text-green-700"
+                        onClick={() => handleEditPaciente(paciente)}
                       >
-                        <Cake size={28} color="#C3586A" />
-                      </span>
-                    )}
-                    {dateFormatter.format(birthDate)}
-                  </td>
-                  <td className="p-4">
-                    {calcularIdade(new Date(paciente.dtNascimento))}
-                  </td>
-                  <td className="p-4">
-                    {paciente.terapeutaInfo?.nomeTerapeuta || 'Sem Terapeuta'}
-                  </td>
-                  <td className="p-4">{paciente.nomeResponsavel}</td>
-                  <td className="p-4">{paciente.telefoneResponsavel}</td>
-                  <td className="p-4">{paciente.emailResponsavel}</td>
-                  <td className="p-4">{paciente.cpfResponsavel}</td>
-                  <td className="p-4">{paciente.enderecoResponsavel}</td>
-                  <td className="p-4">{paciente.origem}</td>
-                  <td className="p-2 space-x-2">
-                    <button
-                      type="button"
-                      title="Editar Paciente"
-                      className="text-green-500 hover:text-green-700"
-                      onClick={() => handleEditPaciente(paciente)}
-                    >
-                      <PencilSimple size={20} weight="bold" />
-                    </button>
-                    <button
-                      type="button"
-                      title="Excluir Paciente"
-                      className="text-red-500 hover:text-red-700"
-                      onClick={() =>
-                        openModalExcluir(
-                          'Deseja realmente excluir este paciente?',
-                          paciente.id,
-                        )
-                      }
-                    >
-                      <TrashSimple size={20} weight="bold" />
-                    </button>
-                  </td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
+                        <PencilSimple size={20} weight="bold" />
+                      </button>
+                      <button
+                        type="button"
+                        title="Excluir Paciente"
+                        className="text-red-500 hover:text-red-700"
+                        onClick={() =>
+                          openModalExcluir(
+                            'Deseja realmente excluir este paciente?',
+                            paciente.id,
+                          )
+                        }
+                      >
+                        <TrashSimple size={20} weight="bold" />
+                      </button>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
-          onPageChange={handlePageChange}
+          onPageChange={setCurrentPage}
         />
+
+        {/* Modals */}
+        <ExcluirModal
+          isOpen={isModalOpen}
+          onOpenChange={closeModal}
+          title="Excluir Paciente"
+          message={modalMessage}
+          onConfirm={handleDeletePaciente}
+          isSuccess={isSuccess}
+        />
+        {pacienteEditando && (
+          <EditarPacienteModal
+            pacienteId={pacienteEditando.id}
+            open={isEditModalOpen}
+            onClose={closeEditModal}
+          />
+        )}
       </main>
-      <ExcluirModal
-        isOpen={isModalOpen}
-        onOpenChange={closeModal}
-        title="Excluir Paciente"
-        message={modalMessage}
-        onConfirm={handleDeletePaciente}
-        isSuccess={isSuccess}
-      />
-      {pacienteEditando && (
-        <EditarPacienteModal
-          pacienteId={pacienteEditando.id}
-          open={isEditModalOpen}
-          onClose={closeEditModal}
-        />
-      )}
     </div>
   )
 }
