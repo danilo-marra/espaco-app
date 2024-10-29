@@ -86,6 +86,7 @@ export function Sessoes() {
 
   // Estados
   const [currentDate, setCurrentDate] = useState<Date>(new Date())
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedTerapeuta, setSelectedTerapeuta] = useState('Todos')
@@ -159,7 +160,10 @@ export function Sessoes() {
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-2xl font-bold">Sessões</h1>
-          <Dialog.Root>
+          <Dialog.Root
+            open={isModalOpen}
+            onOpenChange={(isOpen) => setIsModalOpen(isOpen)}
+          >
             <Dialog.Trigger asChild>
               <button
                 type="button"
@@ -169,7 +173,7 @@ export function Sessoes() {
                 Nova Sessão
               </button>
             </Dialog.Trigger>
-            <NovaSessaoModal />
+            <NovaSessaoModal onClose={() => setIsModalOpen(false)} />
           </Dialog.Root>
         </div>
 

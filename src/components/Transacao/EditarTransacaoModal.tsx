@@ -123,6 +123,7 @@ export function EditarTransacaoModal({
               />
               <input
                 type="number"
+                step="any"
                 className="text-rosa shadow-rosa/50 focus:shadow-rosa inline-flex h-[35px] w-full flex-1 items-center justify-center rounded-[4px] px-[10px] text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
                 id="valor"
                 placeholder="Valor"

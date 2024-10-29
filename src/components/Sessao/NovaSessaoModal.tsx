@@ -13,8 +13,10 @@ import { z } from 'zod'
 import { ptBR } from 'date-fns/locale'
 import DatePicker from 'react-datepicker'
 import { addSessao } from '../../store/sessoesSlice'
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 
 // Schema de validação
+// TODO Verificar se a sessão criada para o terapauta já existe no mês atual
 const novaSessaoFormSchema = z.object({
   terapeutaId: z.string().min(1, 'Selecione um terapeuta'),
   pacienteId: z.string().min(1, 'Selecione um paciente'),
@@ -37,12 +39,14 @@ const novaSessaoFormSchema = z.object({
 
 type NovaSessaoFormInputs = z.infer<typeof novaSessaoFormSchema>
 
-export function NovaSessaoModal() {
+interface NovaSessaoModalProps {
+  onClose: () => void
+}
+
+export function NovaSessaoModal({ onClose }: NovaSessaoModalProps) {
   const dispatch = useDispatch<AppDispatch>()
   const terapeutas = useSelector((state: RootState) => state.terapeutas.data)
   const pacientes = useSelector((state: RootState) => state.pacientes.data)
-  const [mensagemSucesso, setMensagemSucesso] = useState('')
-  const [mensagemErro, setMensagemErro] = useState('')
   const {
     control,
     register,
@@ -52,8 +56,12 @@ export function NovaSessaoModal() {
     reset,
   } = useForm<NovaSessaoFormInputs>({
     resolver: zodResolver(novaSessaoFormSchema),
+    defaultValues: {
+      statusSessao: 'Pagamento Pendente',
+    },
   })
-
+  const [mensagemSucesso, setMensagemSucesso] = useState('')
+  const [mensagemErro, setMensagemErro] = useState('')
   const pacienteId = watch('pacienteId')
   const terapeutaId = watch('terapeutaId')
   const pacienteSelecionado = useMemo(
@@ -105,9 +113,8 @@ export function NovaSessaoModal() {
       dispatch(addSessao(novaSessao)).unwrap()
 
       reset() // Limpa o formulário após sucesso
-      // Adicionar notificação de sucesso
       setMensagemSucesso('Sessão criada com sucesso!')
-      setMensagemErro('') // Limpa a mensagem de erro, se houver
+
       console.log('Nova sessão criada:', {
         ...data,
         terapeutaInfo: terapeutaSelecionado,
@@ -117,7 +124,6 @@ export function NovaSessaoModal() {
       console.error('Erro ao criar nova sessão:', error)
       // Adicionar notificação de erro
       setMensagemErro('Erro ao criar sessão. Tente novamente.')
-      setMensagemSucesso('') // Limpa a mensagem de sucesso, se houver
     }
   }
 
@@ -128,7 +134,9 @@ export function NovaSessaoModal() {
         <Dialog.Title className="text-2xl font-bold text-azul mb-6">
           Nova Sessão
         </Dialog.Title>
-
+        <Dialog.Description>
+          <VisuallyHidden>Cadastrar Nova Sessão</VisuallyHidden>
+        </Dialog.Description>
         <form
           onSubmit={handleSubmit(handleCreateNewSessao)}
           className="space-y-6 bg-white rounded-lg"
@@ -273,20 +281,26 @@ export function NovaSessaoModal() {
 
             <input
               type="number"
+              step="any"
               className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
               placeholder="Valor da sessão"
-              required
-              {...register('valorSessao', { valueAsNumber: true })}
+              {...register('valorSessao', {
+                valueAsNumber: true,
+              })}
             />
+            {errors.valorSessao && (
+              <p className="text-red-500">{errors.valorSessao.message}</p>
+            )}
 
             <div className="space-y-5">
               <div className="flex justify-between items-center">
-                <label>Data sessão 1:</label>
+                <label htmlFor="dtSessao1">Data sessão 1:</label>
                 <Controller
                   control={control}
                   name="dtSessao1"
                   render={({ field }) => (
                     <DatePicker
+                      id="dtSessao1"
                       className="shadow-rosa/50 focus:shadow-rosa block h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
                       placeholderText="Data da Sessão"
                       selected={field.value}
@@ -300,12 +314,13 @@ export function NovaSessaoModal() {
                     />
                   )}
                 />
-                <label>Data sessão 2:</label>
+                <label htmlFor="dtSessao2">Data sessão 2:</label>
                 <Controller
                   control={control}
                   name="dtSessao2"
                   render={({ field }) => (
                     <DatePicker
+                      id="dtSessao2"
                       className="shadow-rosa/50 focus:shadow-rosa block h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
                       placeholderText="Data da Sessão"
                       selected={field.value}
@@ -321,12 +336,13 @@ export function NovaSessaoModal() {
                 />
               </div>
               <div className="flex justify-between items-center">
-                <label>Data sessão 3:</label>
+                <label htmlFor="dtSessao3">Data sessão 3:</label>
                 <Controller
                   control={control}
                   name="dtSessao3"
                   render={({ field }) => (
                     <DatePicker
+                      id="dtSessao3"
                       className="shadow-rosa/50 focus:shadow-rosa block h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
                       placeholderText="Data da Sessão"
                       selected={field.value}
@@ -340,12 +356,13 @@ export function NovaSessaoModal() {
                     />
                   )}
                 />
-                <label>Data sessão 4:</label>
+                <label htmlFor="dtSessao4">Data sessão 4:</label>
                 <Controller
                   control={control}
                   name="dtSessao4"
                   render={({ field }) => (
                     <DatePicker
+                      id="dtSessao4"
                       className="shadow-rosa/50 focus:shadow-rosa block h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
                       placeholderText="Data da Sessão"
                       selected={field.value}
@@ -361,12 +378,13 @@ export function NovaSessaoModal() {
                 />
               </div>
               <div className="flex justify-between items-center">
-                <label>Data sessão 5:</label>
+                <label htmlFor="dtSessao5">Data sessão 5:</label>
                 <Controller
                   control={control}
                   name="dtSessao5"
                   render={({ field }) => (
                     <DatePicker
+                      id="dtSessao5"
                       className="shadow-rosa/50 focus:shadow-rosa block h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
                       placeholderText="Data da Sessão"
                       selected={field.value}
@@ -380,12 +398,13 @@ export function NovaSessaoModal() {
                     />
                   )}
                 />
-                <label>Data sessão 6:</label>
+                <label htmlFor="dtSessao6">Data sessão 6:</label>
                 <Controller
                   control={control}
                   name="dtSessao6"
                   render={({ field }) => (
                     <DatePicker
+                      id="dtSessao6"
                       className="shadow-rosa/50 focus:shadow-rosa block h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
                       placeholderText="Data da Sessão"
                       selected={field.value}
@@ -411,9 +430,11 @@ export function NovaSessaoModal() {
             {isSubmitting ? 'Salvando...' : 'Salvar'}
           </button>
         </form>
+
         {mensagemSucesso && (
           <p className="text-green-500 text-sm mt-4">{mensagemSucesso}</p>
         )}
+
         {mensagemErro && (
           <p className="text-red-500 text-sm mt-4">{mensagemErro}</p>
         )}
@@ -421,6 +442,11 @@ export function NovaSessaoModal() {
         <Dialog.Close
           className="text-rosa hover:bg-rosa/50 focus:shadow-azul absolute top-[10px] right-[10px] inline-flex h-[25px] w-[25px] appearance-none items-center justify-center rounded-full focus:shadow-[0_0_0_2px] focus:outline-none"
           aria-label="Close"
+          onClick={() => {
+            onClose()
+            setMensagemSucesso('')
+            setMensagemErro('')
+          }}
         >
           <X />
         </Dialog.Close>
