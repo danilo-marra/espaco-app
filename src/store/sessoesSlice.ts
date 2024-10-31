@@ -6,6 +6,7 @@ import {
 import type { SessoesState } from './store'
 import type { Sessao } from '../tipos'
 import httpRequest, { API_URL } from '../utils/api'
+import axios from 'axios'
 
 const initialState: SessoesState = {
   data: [],
@@ -31,6 +32,40 @@ export const addSessao = createAsyncThunk<Sessao, Sessao>(
   },
 )
 
+// Thunk para editar sessao
+export const updateSessao = createAsyncThunk<
+  Sessao,
+  Sessao,
+  { rejectValue: string }
+>('sessoes/updateSessao', async (sessao, { rejectWithValue }) => {
+  try {
+    const updatedSessao = await httpRequest<Sessao>(
+      `${API_URL}/sessoes/${sessao.id}`,
+      'PUT',
+      sessao,
+    )
+    // Add any additional dispatches if necessary
+    // await dispatch(updateAgendaBySessao(updatedSessao))
+
+    return updatedSessao
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error('Erro ao atualizar sessão:', error.message)
+      return rejectWithValue(error.message)
+    }
+    return rejectWithValue('Erro desconhecido')
+  }
+})
+
+// Thunk para deletar sessao
+export const deleteSessao = createAsyncThunk<string, string>(
+  'sessoes/deleteSessao',
+  async (id) => {
+    await httpRequest(`${API_URL}/sessoes/${id}`, 'DELETE')
+    return id
+  },
+)
+
 const sessoesSlice = createSlice({
   name: 'sessoes',
   initialState,
@@ -51,6 +86,22 @@ const sessoesSlice = createSlice({
       .addCase(addSessao.fulfilled, (state, action: PayloadAction<Sessao>) => {
         state.data.push(action.payload)
       })
+      .addCase(
+        updateSessao.fulfilled,
+        (state, action: PayloadAction<Sessao>) => {
+          state.data = state.data.map((sessao) =>
+            sessao.id === action.payload.id ? action.payload : sessao,
+          )
+        },
+      )
+      .addCase(
+        deleteSessao.fulfilled,
+        (state, action: PayloadAction<string>) => {
+          state.data = state.data.filter(
+            (sessao) => sessao.id !== action.payload,
+          )
+        },
+      )
   },
 })
 

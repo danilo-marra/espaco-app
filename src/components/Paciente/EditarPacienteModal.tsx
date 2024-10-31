@@ -18,7 +18,7 @@ const EditarPacienteFormSchema = z.object({
   dtNascimento: z.date().refine((data) => data <= new Date(), {
     message: 'Data de entrada não pode ser maior que a data atual',
   }),
-  nomeTerapeuta: z.string().min(1, 'Selecione um(a) terapeuta'),
+  terapeutaId: z.string().min(1, 'Selecione um(a) terapeuta'), // Alterado aqui
   nomeResponsavel: z.string(),
   telefoneResponsavel: z.string(),
   emailResponsavel: z.string(),
@@ -62,7 +62,7 @@ export function EditarPacienteModal({
         id: paciente.id,
         nomePaciente: paciente.nomePaciente,
         dtNascimento: new Date(paciente.dtNascimento),
-        nomeTerapeuta: paciente.terapeutaInfo.nomeTerapeuta,
+        terapeutaId: paciente.terapeutaInfo.id,
         nomeResponsavel: paciente.nomeResponsavel,
         telefoneResponsavel: paciente.telefoneResponsavel,
         emailResponsavel: paciente.emailResponsavel,
@@ -78,7 +78,7 @@ export function EditarPacienteModal({
       await new Promise((resolve) => setTimeout(resolve, 2000))
 
       const terapeutaInfo = terapeutas.find(
-        (terapeuta) => terapeuta.nomeTerapeuta === data.nomeTerapeuta,
+        (terapeuta) => terapeuta.id === data.terapeutaId,
       )
 
       if (!terapeutaInfo) {
@@ -143,7 +143,7 @@ export function EditarPacienteModal({
               <input
                 type="text"
                 className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
-                id="nome"
+                id="nomePaciente"
                 placeholder="Nome do paciente"
                 {...register('nomePaciente')}
                 onFocus={handleFocus}
@@ -173,17 +173,20 @@ export function EditarPacienteModal({
               )}
               <select
                 className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
-                id="nomeTerapeuta"
-                {...register('nomeTerapeuta')}
+                id="terapeutaId"
+                {...register('terapeutaId')}
                 onFocus={handleFocus}
               >
                 <option value="">Selecione o terapeuta</option>
                 {terapeutas.map((terapeuta) => (
-                  <option key={terapeuta.id} value={terapeuta.nomeTerapeuta}>
+                  <option key={terapeuta.id} value={terapeuta.id}>
                     {terapeuta.nomeTerapeuta}
                   </option>
                 ))}
               </select>
+              {errors.terapeutaId && (
+                <p className="text-red-500">{errors.terapeutaId.message}</p>
+              )}
             </div>
 
             <h3 className="font-medium text-azul text-xl mt-6">

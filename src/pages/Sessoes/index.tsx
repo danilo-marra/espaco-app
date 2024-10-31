@@ -22,9 +22,12 @@ import * as Dialog from '@radix-ui/react-dialog'
 import Pagination from '../../components/Pagination'
 import { useSelector, useDispatch } from 'react-redux'
 import type { RootState, AppDispatch } from '../../store/store'
-import { fetchSessoes } from '../../store/sessoesSlice'
+import { deleteSessao, fetchSessoes } from '../../store/sessoesSlice'
 import { fetchTerapeutas } from '../../store/terapeutasSlice'
 import { NovaSessaoModal } from '../../components/Sessao/NovaSessaoModal'
+import { useModal } from '../../hooks/useModal'
+import { ExcluirModal } from '../../components/ExcluirModal'
+import { EditarSessaoModal } from '../../components/Sessao/EditarSessaoModal'
 
 interface SessaoCalculations {
   totalValue: number
@@ -83,16 +86,37 @@ export function Sessoes() {
   const dispatch = useDispatch<AppDispatch>()
   const terapeutas = useSelector((state: RootState) => state.terapeutas.data)
   const sessoes = useSelector((state: RootState) => state.sessoes.data)
+  const statusStyles: { [key: string]: string } = {
+    'Pagamento Pendente': 'bg-red-200 text-red-900',
+    'Pagamento Realizado': 'bg-orange-200 text-orange-900',
+    'Nota Fiscal Emitida': 'bg-yellow-200 text-yellow-900',
+    'Nota Fiscal Enviada': 'bg-green-200 text-green-900',
+  }
 
   // Estados
   const [currentDate, setCurrentDate] = useState<Date>(new Date())
-  const [isModalOpen, setIsModalOpen] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedTerapeuta, setSelectedTerapeuta] = useState('Todos')
+  const [isSuccess, setIsSuccess] = useState(false)
+  const [sessaoParaExcluir, setSessaoParaExcluir] = useState<string | null>(
+    null,
+  )
+  const [sessaoEditando, setSessaoEditando] = useState<Sessao | null>(null)
 
   // Constantes
   const SESSIONS_PER_PAGE = 10
+
+  // Modal
+  const {
+    isModalOpen,
+    modalMessage,
+    isEditModalOpen,
+    openModal,
+    closeModal,
+    openEditModal,
+    closeEditModal,
+  } = useModal()
 
   // Handlers para mudanças de estado
   const handleTerapeutaChange = (value: string) => {
@@ -120,6 +144,32 @@ export function Sessoes() {
     )
     setCurrentDate(newDate)
     setCurrentPage(1)
+  }
+
+  const handleDeleteSessao = async () => {
+    if (!sessaoParaExcluir) return
+
+    try {
+      await dispatch(deleteSessao(sessaoParaExcluir)).unwrap()
+      openModal('Sessão excluída com sucesso!')
+      setIsSuccess(true)
+    } catch (error) {
+      openModal('Erro ao excluir sessão!')
+      console.error('Erro ao excluir sessão:', error)
+    } finally {
+      setSessaoParaExcluir(null)
+    }
+  }
+
+  const openModalExcluir = (message: string, sessaoId: string) => {
+    openModal(message)
+    setSessaoParaExcluir(sessaoId)
+    setIsSuccess(false)
+  }
+
+  const handleEditSessao = (sessao: Sessao) => {
+    setSessaoEditando(sessao)
+    openEditModal()
   }
 
   // Dados filtrados e cálculos usando useMemo
@@ -160,10 +210,7 @@ export function Sessoes() {
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-2xl font-bold">Sessões</h1>
-          <Dialog.Root
-            open={isModalOpen}
-            onOpenChange={(isOpen) => setIsModalOpen(isOpen)}
-          >
+          <Dialog.Root>
             <Dialog.Trigger asChild>
               <button
                 type="button"
@@ -173,7 +220,7 @@ export function Sessoes() {
                 Nova Sessão
               </button>
             </Dialog.Trigger>
-            <NovaSessaoModal onClose={() => setIsModalOpen(false)} />
+            <NovaSessaoModal />
           </Dialog.Root>
         </div>
 
@@ -210,13 +257,14 @@ export function Sessoes() {
           <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
             <Money size={24} />
             <span className="text-xl font-semibold">
-              Total Paciente: {priceFormatter.format(totals.totalValue)}
+              Total pacientes: {priceFormatter.format(totals.totalValue)}
             </span>
           </div>
           <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
             <HandCoins size={24} />
             <span className="text-xl font-semibold">
-              Total para PSI: {priceFormatter.format(totals.totalRepasse)}
+              Total para terapeutas:{' '}
+              {priceFormatter.format(totals.totalRepasse)}
             </span>
           </div>
           <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
@@ -235,7 +283,10 @@ export function Sessoes() {
           </button>
           <div className="flex items-center space-x-2">
             <h2 className="text-xl font-semibold">
-              {format(currentDate, 'MMMM yyyy', { locale: ptBR })}
+              {format(currentDate, 'MMMM yyyy', { locale: ptBR }).replace(
+                /^\w/,
+                (c) => c.toUpperCase(),
+              )}
             </h2>
             <DatePicker
               selected={currentDate}
@@ -286,7 +337,16 @@ export function Sessoes() {
                     <td className="p-4">
                       {sessao.pacienteInfo.nomeResponsavel}
                     </td>
-                    <td className="p-4">{sessao.statusSessao}</td>
+                    <td className="p-4">
+                      <span
+                        className={`p-2 rounded-full text-sm ${
+                          statusStyles[sessao.statusSessao ?? ''] ||
+                          'bg-gray-200 text-gray-900'
+                        }`}
+                      >
+                        {sessao.statusSessao}
+                      </span>
+                    </td>
                     <td className="p-4">
                       {priceFormatter.format(sessao.valorSessao)}
                     </td>
@@ -312,13 +372,22 @@ export function Sessoes() {
                     <td className="p-2 space-x-2">
                       <button
                         type="button"
+                        title="Editar sessão"
                         className="text-green-500 hover:text-green-700"
+                        onClick={() => handleEditSessao(sessao)}
                       >
                         <PencilSimple size={20} weight="bold" />
                       </button>
                       <button
-                        className="text-red-500 hover:text-red-700"
                         type="button"
+                        title="Excluir sessão"
+                        className="text-red-500 hover:text-red-700"
+                        onClick={() =>
+                          openModalExcluir(
+                            'Deseja realmente excluir esta sessão?',
+                            sessao.id,
+                          )
+                        }
                       >
                         <TrashSimple size={20} weight="bold" />
                       </button>
@@ -336,6 +405,24 @@ export function Sessoes() {
           totalPages={totalPages}
           onPageChange={setCurrentPage}
         />
+
+        {/* Modals */}
+        <ExcluirModal
+          isOpen={isModalOpen}
+          onOpenChange={closeModal}
+          title="Excluir Sessão"
+          message={modalMessage}
+          onConfirm={handleDeleteSessao}
+          isSuccess={isSuccess}
+        />
+
+        {sessaoEditando && (
+          <EditarSessaoModal
+            sessaoId={sessaoEditando.id}
+            open={isEditModalOpen}
+            onClose={closeEditModal}
+          />
+        )}
       </main>
     </div>
   )

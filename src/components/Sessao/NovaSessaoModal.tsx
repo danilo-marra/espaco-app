@@ -14,10 +14,10 @@ import { ptBR } from 'date-fns/locale'
 import DatePicker from 'react-datepicker'
 import { addSessao } from '../../store/sessoesSlice'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
+import { isSameMonth } from 'date-fns'
 
 // Schema de validação
-// TODO Verificar se a sessão criada para o terapauta já existe no mês atual
-const novaSessaoFormSchema = z.object({
+const NovaSessaoFormSchema = z.object({
   terapeutaId: z.string().min(1, 'Selecione um terapeuta'),
   pacienteId: z.string().min(1, 'Selecione um paciente'),
   statusSessao: z.enum([
@@ -37,16 +37,17 @@ const novaSessaoFormSchema = z.object({
   dtSessao6: z.date().optional(),
 })
 
-type NovaSessaoFormInputs = z.infer<typeof novaSessaoFormSchema>
+type NovaSessaoFormInputs = z.infer<typeof NovaSessaoFormSchema>
 
-interface NovaSessaoModalProps {
-  onClose: () => void
-}
-
-export function NovaSessaoModal({ onClose }: NovaSessaoModalProps) {
+export function NovaSessaoModal() {
   const dispatch = useDispatch<AppDispatch>()
+  const [mensagemSucesso, setMensagemSucesso] = useState('')
+  const [mensagemErro, setMensagemErro] = useState('')
   const terapeutas = useSelector((state: RootState) => state.terapeutas.data)
   const pacientes = useSelector((state: RootState) => state.pacientes.data)
+  const sessoes = useSelector((state: RootState) => state.sessoes.data)
+  const [mensagemAlerta, setMensagemAlerta] = useState('')
+
   const {
     control,
     register,
@@ -55,15 +56,16 @@ export function NovaSessaoModal({ onClose }: NovaSessaoModalProps) {
     formState: { errors, isSubmitting },
     reset,
   } = useForm<NovaSessaoFormInputs>({
-    resolver: zodResolver(novaSessaoFormSchema),
+    resolver: zodResolver(NovaSessaoFormSchema),
     defaultValues: {
       statusSessao: 'Pagamento Pendente',
     },
   })
-  const [mensagemSucesso, setMensagemSucesso] = useState('')
-  const [mensagemErro, setMensagemErro] = useState('')
+
   const pacienteId = watch('pacienteId')
   const terapeutaId = watch('terapeutaId')
+  const isButtonDisabled =
+    isSubmitting || Object.keys(errors).length > 0 || mensagemAlerta !== ''
   const pacienteSelecionado = useMemo(
     () => pacientes.find((paciente) => paciente.id === pacienteId),
     [pacienteId, pacientes],
@@ -72,11 +74,41 @@ export function NovaSessaoModal({ onClose }: NovaSessaoModalProps) {
   useEffect(() => {
     dispatch(fetchPacientes())
     dispatch(fetchTerapeutas())
-  }, [dispatch])
+
+    if (terapeutaId) {
+      const dataAtual = new Date()
+
+      const existeSessaoNoMes = sessoes.some((sessao) => {
+        if (sessao.terapeutaInfo.id === terapeutaId) {
+          // Verifica todas as datas de sessão
+          const datasSessao = [
+            sessao.dtSessao1,
+            sessao.dtSessao2,
+            sessao.dtSessao3,
+            sessao.dtSessao4,
+            sessao.dtSessao5,
+            sessao.dtSessao6,
+          ]
+
+          return datasSessao.some(
+            (data) => data && isSameMonth(data, dataAtual),
+          )
+        }
+        return false
+      })
+
+      if (existeSessaoNoMes) {
+        setMensagemAlerta(
+          `Já existe uma sessão criada para este terapeuta neste mês de ${dataAtual.toLocaleString('pt-BR', { month: 'long' })}`,
+        )
+      } else {
+        setMensagemAlerta('')
+      }
+    }
+  }, [dispatch, terapeutaId, sessoes])
 
   async function handleCreateNewSessao(data: NovaSessaoFormInputs) {
     try {
-      // Aqui você implementaria a lógica de criar a sessão
       await new Promise((resolve) => setTimeout(resolve, 2000))
 
       const terapeutaSelecionado = terapeutas.find(
@@ -112,19 +144,19 @@ export function NovaSessaoModal({ onClose }: NovaSessaoModalProps) {
       // Faz o dispatch do thunk addSessao
       dispatch(addSessao(novaSessao)).unwrap()
 
-      reset() // Limpa o formulário após sucesso
+      reset()
       setMensagemSucesso('Sessão criada com sucesso!')
-
-      console.log('Nova sessão criada:', {
-        ...data,
-        terapeutaInfo: terapeutaSelecionado,
-        pacienteInfo: pacienteSelecionado,
-      })
+      setMensagemErro('')
     } catch (error) {
       console.error('Erro ao criar nova sessão:', error)
-      // Adicionar notificação de erro
       setMensagemErro('Erro ao criar sessão. Tente novamente.')
+      setMensagemSucesso('')
     }
+  }
+
+  function handleFocus() {
+    setMensagemSucesso('')
+    setMensagemErro('')
   }
 
   return (
@@ -148,6 +180,7 @@ export function NovaSessaoModal({ onClose }: NovaSessaoModalProps) {
                 errors.terapeutaId ? 'border-red-500' : ''
               }`}
               {...register('terapeutaId')}
+              onFocus={handleFocus}
             >
               <option value="">Selecione um terapeuta</option>
               {terapeutas.map((terapeuta) => (
@@ -160,6 +193,9 @@ export function NovaSessaoModal({ onClose }: NovaSessaoModalProps) {
               <p className="text-red-500 text-sm">
                 {errors.terapeutaId.message}
               </p>
+            )}
+            {mensagemAlerta && (
+              <p className="text-red-500 text-sm">{mensagemAlerta}</p>
             )}
           </div>
 
@@ -311,6 +347,7 @@ export function NovaSessaoModal({ onClose }: NovaSessaoModalProps) {
                       showMonthDropdown
                       showYearDropdown
                       dropdownMode="select"
+                      maxDate={new Date()}
                     />
                   )}
                 />
@@ -331,6 +368,7 @@ export function NovaSessaoModal({ onClose }: NovaSessaoModalProps) {
                       showMonthDropdown
                       showYearDropdown
                       dropdownMode="select"
+                      maxDate={new Date()}
                     />
                   )}
                 />
@@ -353,6 +391,7 @@ export function NovaSessaoModal({ onClose }: NovaSessaoModalProps) {
                       showMonthDropdown
                       showYearDropdown
                       dropdownMode="select"
+                      maxDate={new Date()}
                     />
                   )}
                 />
@@ -373,6 +412,7 @@ export function NovaSessaoModal({ onClose }: NovaSessaoModalProps) {
                       showMonthDropdown
                       showYearDropdown
                       dropdownMode="select"
+                      maxDate={new Date()}
                     />
                   )}
                 />
@@ -395,6 +435,7 @@ export function NovaSessaoModal({ onClose }: NovaSessaoModalProps) {
                       showMonthDropdown
                       showYearDropdown
                       dropdownMode="select"
+                      maxDate={new Date()}
                     />
                   )}
                 />
@@ -415,6 +456,7 @@ export function NovaSessaoModal({ onClose }: NovaSessaoModalProps) {
                       showMonthDropdown
                       showYearDropdown
                       dropdownMode="select"
+                      maxDate={new Date()}
                     />
                   )}
                 />
@@ -424,8 +466,10 @@ export function NovaSessaoModal({ onClose }: NovaSessaoModalProps) {
 
           <button
             type="submit"
-            disabled={isSubmitting}
-            className="w-full bg-rosa hover:bg-rosa/90 text-white font-medium py-2 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isButtonDisabled}
+            className={`w-full bg-rosa hover:bg-rosa/90 text-white font-medium py-2 px-4 rounded-md transition-colors ${
+              isButtonDisabled ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
           >
             {isSubmitting ? 'Salvando...' : 'Salvar'}
           </button>
@@ -442,11 +486,6 @@ export function NovaSessaoModal({ onClose }: NovaSessaoModalProps) {
         <Dialog.Close
           className="text-rosa hover:bg-rosa/50 focus:shadow-azul absolute top-[10px] right-[10px] inline-flex h-[25px] w-[25px] appearance-none items-center justify-center rounded-full focus:shadow-[0_0_0_2px] focus:outline-none"
           aria-label="Close"
-          onClick={() => {
-            onClose()
-            setMensagemSucesso('')
-            setMensagemErro('')
-          }}
         >
           <X />
         </Dialog.Close>
