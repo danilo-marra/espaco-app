@@ -4,8 +4,14 @@ import pacientesReducer from './pacientesSlice'
 import terapeutasReducer from './terapeutasSlice'
 import transacoesReducer from './transacoesSlice'
 import sessoesReducer from './sessoesSlice'
+import totalsReducer from './totalsSlice'
 
 import type { Paciente, Sessao, Terapeuta, Transacao } from '../tipos'
+
+export interface TotalsState {
+  totalValue: number
+  totalRepasse: number
+}
 
 export interface PacientesState {
   data: Paciente[]
@@ -36,6 +42,7 @@ interface RootState {
   terapeutas: TerapeutasState
   transacoes: TransacoesState
   sessoes: SessoesState
+  totals: TotalsState
 }
 
 export const store = configureStore({
@@ -44,6 +51,7 @@ export const store = configureStore({
     terapeutas: terapeutasReducer,
     transacoes: transacoesReducer,
     sessoes: sessoesReducer,
+    totals: totalsReducer,
   },
 })
 

@@ -1,3 +1,10 @@
+import { useEffect, useMemo, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { format } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
+import DatePicker from 'react-datepicker'
+import 'react-datepicker/dist/react-datepicker.css'
+import * as Dialog from '@radix-ui/react-dialog'
 import {
   ArrowCircleDown,
   ArrowCircleUp,
@@ -10,22 +17,19 @@ import {
   Plus,
   TrashSimple,
 } from '@phosphor-icons/react'
-import { useEffect, useState } from 'react'
+
 import { useModal } from '../../hooks/useModal'
-import { useDispatch, useSelector } from 'react-redux'
 import { NovaTransacaoModal } from '../../components/Transacao/NovaTransacaoModal'
 import { EditarTransacaoModal } from '../../components/Transacao/EditarTransacaoModal'
 import { ExcluirModal } from '../../components/ExcluirModal'
-import type { Transacao } from '../../tipos'
-import { format } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
-import DatePicker from 'react-datepicker'
-import 'react-datepicker/dist/react-datepicker.css'
-import { dateFormatter, priceFormatter } from '../../utils/formatter'
 import Pagination from '../../components/Pagination'
-import * as Dialog from '@radix-ui/react-dialog'
+import { dateFormatter, priceFormatter } from '../../utils/formatter'
+import { calculateRepasseInfo } from '../../utils/calculateRepasseInfo'
 import type { AppDispatch, RootState } from '../../store/store'
+import type { Transacao } from '../../tipos'
 import { deleteTransacao, fetchTransacoes } from '../../store/transacoesSlice'
+import { fetchSessoes } from '../../store/sessoesSlice'
+import { calculateTotals } from '../../store/totalsSlice'
 
 export function Transacoes() {
   const dispatch = useDispatch<AppDispatch>()
@@ -34,13 +38,13 @@ export function Transacoes() {
     loading,
     error,
   } = useSelector((state: RootState) => state.transacoes)
+  const { data: sessoes } = useSelector((state: RootState) => state.sessoes)
   const [dataAtual, setDataAtual] = useState<Date>(new Date())
   const [summary, setSummary] = useState({ entrada: 0, saida: 0, total: 0 })
   const [searchValue, setSearchValue] = useState<string>('')
   const [currentPage, setCurrentPage] = useState(1)
   const transacoesPorPagina = 10
-  const [transacoesVisiveis, setTransacoesVisiveis] = useState<Transacao[]>([])
-  const [totalPages, settotalPages] = useState<number>(0)
+  const [totalPages, setTotalPages] = useState<number>(0)
   const {
     isModalOpen,
     modalMessage,
@@ -58,26 +62,71 @@ export function Transacoes() {
   >(null)
   const [isSuccess, setIsSuccess] = useState(false)
 
-  useEffect(() => {
-    dispatch(fetchTransacoes()) // Chamar a ação de buscar transações no Redux
-  }, [dispatch])
-
-  useEffect(() => {
-    if (loading || error) return // Evitar atualização se estiver carregando ou com erro
-
-    const filteredBySearch = transacoes.filter((transacao) =>
-      transacao.descricao.toLowerCase().includes(searchValue.toLowerCase()),
-    )
-
-    const filteredByDate = filteredBySearch.filter((transacao) => {
-      const dataTransacao = new Date(transacao.dtCriacao)
+  const enhancedTransacoes = useMemo(() => {
+    const sessoesDoMes = sessoes.filter((sessao) => {
+      const dataSessao = new Date(sessao.dtSessao1)
       return (
-        dataTransacao.getMonth() === dataAtual.getMonth() &&
-        dataTransacao.getFullYear() === dataAtual.getFullYear()
+        dataSessao.getMonth() === dataAtual.getMonth() &&
+        dataSessao.getFullYear() === dataAtual.getFullYear()
       )
     })
 
-    const newSummary = filteredByDate.reduce(
+    const totaisMesAtual = sessoesDoMes.reduce(
+      (acc, sessao) => {
+        const calculations = calculateRepasseInfo(sessao)
+        return {
+          totalValue: acc.totalValue + calculations.totalValue,
+          totalRepasse: acc.totalRepasse + calculations.repasseValue,
+        }
+      },
+      { totalValue: 0, totalRepasse: 0 },
+    )
+
+    const mesAtual = format(dataAtual, 'MMMM', { locale: ptBR }).replace(
+      /^\w/,
+      (c) => c.toUpperCase(),
+    )
+
+    const totalSessoes: Transacao = {
+      id: 'total-sessoes',
+      descricao: `Sessões (${mesAtual})`,
+      tipo: 'entrada',
+      valor: totaisMesAtual.totalValue,
+      dtCriacao: new Date(),
+    }
+
+    const totalRepasse: Transacao = {
+      id: 'total-repasses',
+      descricao: `Repasses (${mesAtual})`,
+      tipo: 'saida',
+      valor: totaisMesAtual.totalRepasse,
+      dtCriacao: new Date(),
+    }
+
+    return [...transacoes, totalSessoes, totalRepasse]
+  }, [transacoes, sessoes, dataAtual])
+
+  useEffect(() => {
+    dispatch(fetchTransacoes())
+    dispatch(fetchSessoes()).then(() => {
+      dispatch(calculateTotals())
+    })
+  }, [dispatch])
+
+  useEffect(() => {
+    if (loading || error) return
+
+    const filteredTransacoes = enhancedTransacoes.filter((transacao) => {
+      if (transacao.id.startsWith('total-')) return true
+      const dataTransacao = new Date(transacao.dtCriacao)
+      return (
+        dataTransacao.getMonth() === dataAtual.getMonth() &&
+        dataTransacao.getFullYear() === dataAtual.getFullYear() &&
+        transacao.descricao.toLowerCase().includes(searchValue.toLowerCase())
+      )
+    })
+
+    const newSummary = filteredTransacoes.reduce(
       (acc, transacao) => {
         if (transacao.tipo === 'entrada') {
           acc.entrada += transacao.valor
@@ -92,46 +141,39 @@ export function Transacoes() {
     )
 
     setSummary(newSummary)
+    setTotalPages(Math.ceil(filteredTransacoes.length / transacoesPorPagina))
+  }, [enhancedTransacoes, searchValue, dataAtual, loading, error])
 
-    const offset = (currentPage - 1) * transacoesPorPagina
-    setTransacoesVisiveis(
-      filteredByDate.slice(offset, offset + transacoesPorPagina),
+  const handleMonthChange = (increment: number) => {
+    setDataAtual(
+      new Date(dataAtual.getFullYear(), dataAtual.getMonth() + increment, 1),
     )
-    settotalPages(Math.ceil(filteredByDate.length / transacoesPorPagina))
-  }, [transacoes, searchValue, dataAtual, currentPage, loading, error])
-
-  function handleMonthPrev() {
-    setDataAtual(new Date(dataAtual.getFullYear(), dataAtual.getMonth() - 1, 1))
   }
 
-  function handleMonthNext() {
-    setDataAtual(new Date(dataAtual.getFullYear(), dataAtual.getMonth() + 1, 1))
-  }
-
-  function handleSearchChange(event: React.ChangeEvent<HTMLInputElement>) {
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchValue(event.target.value)
+    setCurrentPage(1)
   }
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage)
   }
 
-  function handleEditTransacao(transacao: Transacao) {
+  const handleEditTransacao = (transacao: Transacao) => {
     setTransacaoEditando(transacao)
     openEditModal()
   }
 
-  async function handleDeleteTransacao() {
+  const handleDeleteTransacao = async () => {
     if (!transacaoParaExcluir) return
 
     try {
       await dispatch(deleteTransacao(transacaoParaExcluir)).unwrap()
-      openModal('Transacao excluída com sucesso!')
+      openModal('Transação excluída com sucesso!')
       setIsSuccess(true)
-      console.log('transacao excluída:', transacaoParaExcluir)
     } catch (error) {
-      openModal('Erro ao excluir transacao!')
-      console.error('Erro ao excluir transacao:', error)
+      openModal('Erro ao excluir transação!')
+      console.error('Erro ao excluir transação:', error)
     } finally {
       setTransacaoParaExcluir(null)
     }
@@ -143,13 +185,27 @@ export function Transacoes() {
     setIsSuccess(false)
   }
 
+  const paginatedTransacoes = useMemo(() => {
+    const startIndex = (currentPage - 1) * transacoesPorPagina
+    return enhancedTransacoes
+      .filter((transacao) => {
+        if (transacao.id.startsWith('total-')) return true
+        const dataTransacao = new Date(transacao.dtCriacao)
+        return (
+          dataTransacao.getMonth() === dataAtual.getMonth() &&
+          dataTransacao.getFullYear() === dataAtual.getFullYear() &&
+          transacao.descricao.toLowerCase().includes(searchValue.toLowerCase())
+        )
+      })
+      .slice(startIndex, startIndex + transacoesPorPagina)
+  }, [enhancedTransacoes, currentPage, dataAtual, searchValue])
+
   return (
     <div className="flex min-h-screen">
       <main className="flex-1 bg-gray-100 p-8">
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-2xl font-bold">Transacoes</h1>
-
+            <h1 className="text-2xl font-bold">Transações</h1>
             <Dialog.Root>
               <Dialog.Trigger asChild>
                 <button
@@ -164,33 +220,32 @@ export function Transacoes() {
             </Dialog.Root>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <div className="flex items-center space-x-4 p-4 bg-white rounded shadow ">
+            <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
               <CashRegister size={24} />
               <input
-                className="text-xl w-full  text-gray-800 focus:outline-none"
+                className="text-xl w-full text-gray-800 focus:outline-none"
                 type="text"
                 placeholder="Buscar transações..."
                 value={searchValue}
                 onChange={handleSearchChange}
               />
             </div>
-
-            <div className="flex items-center space-x-1 p-4 bg-white rounded text-green-500 ">
+            <div className="flex items-center space-x-1 p-4 bg-white rounded text-green-500">
               <ArrowCircleUp size={24} weight="fill" />
               <span className="text-xl">
                 Entradas: <span>{priceFormatter.format(summary.entrada)}</span>
               </span>
             </div>
-
-            <div className="flex items-center space-x-1 p-4 bg-white rounded shadow text-red-500 ">
+            <div className="flex items-center space-x-1 p-4 bg-white rounded shadow text-red-500">
               <ArrowCircleDown size={24} weight="fill" />
               <span className="text-xl">
                 Saídas: <span>{priceFormatter.format(summary.saida)}</span>
               </span>
             </div>
-
             <div
-              className={`flex items-center space-x-1 p-4 bg-white rounded shadow font-bold ${summary.total >= 0 ? 'text-green-500' : 'text-red-500'}`}
+              className={`flex items-center space-x-1 p-4 bg-white rounded shadow font-bold ${
+                summary.total >= 0 ? 'text-green-500' : 'text-red-500'
+              }`}
             >
               <CurrencyDollar size={24} />
               <span className="text-xl">
@@ -198,117 +253,119 @@ export function Transacoes() {
               </span>
             </div>
           </div>
-
-          <div className="flex items-center justify-between p-4 bg-white rounded shadow">
-            <button type="button">
-              <CaretLeft onClick={handleMonthPrev} size={24} weight="fill" />
+          <div className="flex items-center justify-between p-4 bg-white rounded shadow mb-4">
+            <button
+              type="button"
+              onClick={() => handleMonthChange(-1)}
+              aria-label="Mês anterior"
+            >
+              <CaretLeft size={24} weight="fill" />
             </button>
             <div className="flex items-center space-x-2">
-              <div>
-                <h2 className="text-xl font-semibold">
-                  {format(dataAtual, 'MMMM yyyy', { locale: ptBR })}
-                </h2>
-              </div>
-              <div>
-                <div>
-                  <DatePicker
-                    locale={ptBR}
-                    selected={dataAtual}
-                    onChange={(date) => date && setDataAtual(date)}
-                    renderMonthContent={(
-                      _month,
-                      shortMonth,
-                      longMonth,
-                      day,
-                    ) => {
-                      const fullYear = new Date(day).getFullYear()
-                      const tooltipText = `${longMonth} de ${fullYear}`
-                      return <span title={tooltipText}>{shortMonth}</span>
-                    }}
-                    showMonthYearPicker
-                    dateFormat="MMMM yyyy"
-                    customInput={
-                      <Calendar size={28} className="text-gray-500 mt-2" />
-                    }
-                  />
-                </div>
-              </div>
+              <h2 className="text-xl font-semibold">
+                {format(dataAtual, 'MMMM yyyy', { locale: ptBR }).replace(
+                  /^\w/,
+                  (c) => c.toUpperCase(),
+                )}
+              </h2>
+              <DatePicker
+                selected={dataAtual}
+                onChange={(date) => date && setDataAtual(date)}
+                showMonthYearPicker
+                dateFormat="MMMM yyyy"
+                locale={ptBR}
+                customInput={
+                  <button type="button" aria-label="Selecionar mês e ano">
+                    <Calendar size={28} className="text-gray-500 mt-2" />
+                  </button>
+                }
+              />
             </div>
-
-            <button type="button">
-              <CaretRight onClick={handleMonthNext} size={24} weight="fill" />
+            <button
+              type="button"
+              onClick={() => handleMonthChange(1)}
+              aria-label="Próximo mês"
+            >
+              <CaretRight size={24} weight="fill" />
             </button>
           </div>
-
-          <table className="w-full bg-white rounded shadow">
-            <thead className="bg-rosa text-white">
-              <tr>
-                <th className="p-4 text-left">Descrição</th>
-                <th className="p-4 text-left">Valor</th>
-                <th className="p-4 text-left">Data</th>
-                <th className="p-4 text-left">Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {transacoesVisiveis.map((transacao) => {
-                return (
-                  <tr key={transacao.id}>
-                    <td className="p-4">{transacao.descricao}</td>
-
-                    <td
-                      className={`p-4 d-flex ${transacao.tipo === 'entrada' ? 'text-green-500' : 'text-red-500'}`}
+          <div className="bg-white rounded shadow overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-rosa text-white">
+                <tr>
+                  <th className="p-4 text-left">Descrição</th>
+                  <th className="p-4 text-left">Valor</th>
+                  <th className="p-4 text-left">Data</th>
+                  <th className="p-4 text-left">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedTransacoes.map((transacao) => {
+                  const isTotal = transacao.id.startsWith('total-')
+                  return (
+                    <tr
+                      key={transacao.id}
+                      className={isTotal ? 'bg-gray-100' : ''}
                     >
-                      {transacao.tipo === 'entrada' ? (
+                      <td className="p-4">{transacao.descricao}</td>
+                      <td
+                        className={`p-4 ${transacao.tipo === 'entrada' ? 'text-green-500' : 'text-red-500'}`}
+                      >
                         <div className="flex items-center space-x-1">
-                          <ArrowCircleUp
-                            size={24}
-                            color="rgb(34 197 94)"
-                            weight="fill"
-                          />
+                          {transacao.tipo === 'entrada' ? (
+                            <ArrowCircleUp
+                              size={24}
+                              color="rgb(34 197 94)"
+                              weight="fill"
+                            />
+                          ) : (
+                            <ArrowCircleDown
+                              size={24}
+                              color="rgb(239 68 68)"
+                              weight="fill"
+                            />
+                          )}
                           <span>{priceFormatter.format(transacao.valor)}</span>
                         </div>
-                      ) : (
-                        <div className="flex items-center space-x-1">
-                          <ArrowCircleDown
-                            size={24}
-                            color="rgb(239 68 68)"
-                            weight="fill"
-                          />
-                          <span>{priceFormatter.format(transacao.valor)}</span>
-                        </div>
-                      )}
-                    </td>
-                    <td className="p-4">
-                      {dateFormatter.format(new Date(transacao.dtCriacao))}
-                    </td>
-                    <td className="p-2 space-x-2">
-                      <button
-                        title="Editar Transação"
-                        className="text-green-500 hover:text-green-700"
-                        type="button"
-                        onClick={() => handleEditTransacao(transacao)}
-                      >
-                        <PencilSimple size={20} weight="bold" />
-                      </button>
-                      <button
-                        title="Excluir Transação"
-                        className="text-red-500 hover:text-red-700"
-                        type="button"
-                        onClick={() =>
-                          openModalExcluir(
-                            'Deseja realmente excluir esta transação?',
-                            transacao.id,
-                          )
-                        }
-                      >
-                        <TrashSimple size={20} weight="bold" />
-                      </button>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
+                      </td>
+                      <td className="p-4">
+                        {isTotal
+                          ? '-'
+                          : dateFormatter.format(new Date(transacao.dtCriacao))}
+                      </td>
+                      <td className="p-2 space-x-2">
+                        {!isTotal && (
+                          <>
+                            <button
+                              type="button"
+                              title="Editar Transação"
+                              className="text-green-500 hover:text-green-700"
+                              onClick={() => handleEditTransacao(transacao)}
+                            >
+                              <PencilSimple size={20} weight="bold" />
+                            </button>
+                            <button
+                              type="button"
+                              title="Excluir Transação"
+                              className="text-red-500 hover:text-red-700"
+                              onClick={() =>
+                                openModalExcluir(
+                                  'Deseja realmente excluir esta transação?',
+                                  transacao.id,
+                                )
+                              }
+                            >
+                              <TrashSimple size={20} weight="bold" />
+                            </button>
+                          </>
+                        )}
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
@@ -319,7 +376,7 @@ export function Transacoes() {
       <ExcluirModal
         isOpen={isModalOpen}
         onOpenChange={closeModal}
-        title="Excluir Transacao"
+        title="Excluir  Transação"
         message={modalMessage}
         onConfirm={handleDeleteTransacao}
         isSuccess={isSuccess}

@@ -7,6 +7,7 @@ import type { SessoesState } from './store'
 import type { Sessao } from '../tipos'
 import httpRequest, { API_URL } from '../utils/api'
 import axios from 'axios'
+import { calculateTotals } from './totalsSlice'
 
 const initialState: SessoesState = {
   data: [],
@@ -16,18 +17,22 @@ const initialState: SessoesState = {
 
 export const fetchSessoes = createAsyncThunk<Sessao[]>(
   'sessoes/fetchSessoes',
-  async () => httpRequest<Sessao[]>(`${API_URL}/sessoes`, 'GET'),
+  async (_, { dispatch }) => {
+    const response = await httpRequest<Sessao[]>(`${API_URL}/sessoes`, 'GET')
+    dispatch(calculateTotals())
+    return response
+  },
 )
 
 export const addSessao = createAsyncThunk<Sessao, Sessao>(
   'sessoes/addSessao',
-  async (sessao) => {
+  async (sessao, { dispatch }) => {
     const response = await httpRequest<Sessao>(
       `${API_URL}/sessoes`,
       'POST',
       sessao,
     )
-    // console.log('Sessao adicionada:', sessao)
+    dispatch(calculateTotals())
     return response
   },
 )
@@ -37,13 +42,14 @@ export const updateSessao = createAsyncThunk<
   Sessao,
   Sessao,
   { rejectValue: string }
->('sessoes/updateSessao', async (sessao, { rejectWithValue }) => {
+>('sessoes/updateSessao', async (sessao, { rejectWithValue, dispatch }) => {
   try {
     const updatedSessao = await httpRequest<Sessao>(
       `${API_URL}/sessoes/${sessao.id}`,
       'PUT',
       sessao,
     )
+    dispatch(calculateTotals())
     // Add any additional dispatches if necessary
     // await dispatch(updateAgendaBySessao(updatedSessao))
 
@@ -60,8 +66,9 @@ export const updateSessao = createAsyncThunk<
 // Thunk para deletar sessao
 export const deleteSessao = createAsyncThunk<string, string>(
   'sessoes/deleteSessao',
-  async (id) => {
+  async (id, { dispatch }) => {
     await httpRequest(`${API_URL}/sessoes/${id}`, 'DELETE')
+    dispatch(calculateTotals())
     return id
   },
 )

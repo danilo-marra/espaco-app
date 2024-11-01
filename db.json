@@ -34,6 +34,13 @@
       "tipo": "saida",
       "valor": 19.89,
       "dtCriacao": "2024-10-15T03:00:00.000Z"
+    },
+    {
+      "id": "b5b3e1d6-607f-4a26-a78f-036b34dcb787",
+      "descricao": "Sofá",
+      "tipo": "saida",
+      "valor": 300,
+      "dtCriacao": "2024-11-01T03:00:00.000Z"
     }
   ],
   "pacientes": [
@@ -1395,6 +1402,41 @@
       "statusSessao": "Nota Fiscal Enviada",
       "valorSessao": 120,
       "dtSessao1": "2024-10-01T03:00:00.000Z"
+    },
+    {
+      "id": "ac441dac-f903-4d85-845c-013a5ea3d93c",
+      "terapeutaInfo": {
+        "id": "5b306851-c6d3-45c3-8f95-8f2d713e6e83",
+        "nomeTerapeuta": "Bia",
+        "telefoneTerapeuta": "6192095674",
+        "emailTerapeuta": "thaismarra@gmail.com",
+        "enderecoTerapeuta": "SHCES Quadra 801 Bloco A",
+        "dtEntrada": "2024-09-04T00:00:00.000Z",
+        "chavePix": "098098098098"
+      },
+      "pacienteInfo": {
+        "id": "2cbe0b2b-bb1a-4187-8123-efc2a10c4cc4",
+        "nomePaciente": "Enzo",
+        "dtNascimento": "2024-10-18T03:00:00.000Z",
+        "terapeutaInfo": {
+          "id": "5b306851-c6d3-45c3-8f95-8f2d713e6e83",
+          "nomeTerapeuta": "Bia",
+          "telefoneTerapeuta": "6192095674",
+          "emailTerapeuta": "thaismarra@gmail.com",
+          "enderecoTerapeuta": "SHCES Quadra 801 Bloco A",
+          "curriculo": "teste curriculo",
+          "chavePix": "098098098098"
+        },
+        "nomeResponsavel": "Thais Marra",
+        "telefoneResponsavel": "6192095674",
+        "emailResponsavel": "thaismarra@gmail.com",
+        "cpfResponsavel": "024.818.181-54",
+        "enderecoResponsavel": "SHCES Quadra 801 Bloco A",
+        "origem": "Instagram"
+      },
+      "statusSessao": "Pagamento Pendente",
+      "valorSessao": 400,
+      "dtSessao1": "2024-11-01T03:00:00.000Z"
     }
   ]
 }

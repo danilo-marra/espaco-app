@@ -1,3 +1,15 @@
+import { useEffect, useMemo, useState } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
+import type { RootState, AppDispatch } from '../../store/store'
+import { deleteSessao, fetchSessoes } from '../../store/sessoesSlice'
+import { fetchTerapeutas } from '../../store/terapeutasSlice'
+import { useModal } from '../../hooks/useModal'
+import { dateFormatter, priceFormatter } from '../../utils/formatter'
+import { format } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
+import DatePicker from 'react-datepicker'
+import 'react-datepicker/dist/react-datepicker.css'
+import * as Dialog from '@radix-ui/react-dialog'
 import {
   Calendar,
   CaretLeft,
@@ -11,21 +23,9 @@ import {
   User,
   Users,
 } from '@phosphor-icons/react'
-import { useEffect, useMemo, useState } from 'react'
-import { dateFormatter, priceFormatter } from '../../utils/formatter'
-import { format } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
-import DatePicker from 'react-datepicker'
-import 'react-datepicker/dist/react-datepicker.css'
 import type { Sessao } from '../../tipos'
-import * as Dialog from '@radix-ui/react-dialog'
 import Pagination from '../../components/Pagination'
-import { useSelector, useDispatch } from 'react-redux'
-import type { RootState, AppDispatch } from '../../store/store'
-import { deleteSessao, fetchSessoes } from '../../store/sessoesSlice'
-import { fetchTerapeutas } from '../../store/terapeutasSlice'
 import { NovaSessaoModal } from '../../components/Sessao/NovaSessaoModal'
-import { useModal } from '../../hooks/useModal'
 import { ExcluirModal } from '../../components/ExcluirModal'
 import { EditarSessaoModal } from '../../components/Sessao/EditarSessaoModal'
 
@@ -242,6 +242,7 @@ export function Sessoes() {
               Terapeuta:
             </label>
             <select
+              id="terapeutas"
               className="text-xl"
               value={selectedTerapeuta}
               onChange={(e) => handleTerapeutaChange(e.target.value)}
@@ -278,7 +279,11 @@ export function Sessoes() {
 
         {/* Date Navigation */}
         <div className="flex items-center justify-between p-4 bg-white rounded shadow mb-4">
-          <button type="button" onClick={() => handleMonthChange(-1)}>
+          <button
+            type="button"
+            onClick={() => handleMonthChange(-1)}
+            aria-label="Previous month"
+          >
             <CaretLeft size={24} weight="fill" />
           </button>
           <div className="flex items-center space-x-2">
@@ -295,11 +300,17 @@ export function Sessoes() {
               dateFormat="MMMM yyyy"
               locale={ptBR}
               customInput={
-                <Calendar size={28} className="text-gray-500 mt-2" />
+                <button type="button" aria-label="Select month and year">
+                  <Calendar size={28} className="text-gray-500 mt-2" />
+                </button>
               }
             />
           </div>
-          <button type="button" onClick={() => handleMonthChange(1)}>
+          <button
+            type="button"
+            onClick={() => handleMonthChange(1)}
+            aria-label="Next month"
+          >
             <CaretRight size={24} weight="fill" />
           </button>
         </div>
