@@ -1,3 +1,5 @@
+import { Button } from '@/components/ui/button'
+
 export function Agendas() {
   // const { pacientes } = usePacientesContext()
 
@@ -7,6 +9,9 @@ export function Agendas() {
         <tr>
           <th>Nome do Paciente</th>
           <th>Nome do Terapeuta</th>
+          <th>
+            <Button>teste</Button>
+          </th>
         </tr>
       </thead>
       {/* <tbody>
