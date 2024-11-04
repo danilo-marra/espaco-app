@@ -4,10 +4,12 @@ import {
   Calendar,
   CaretLeft,
   CaretRight,
+  Door,
   Plus,
   User,
 } from '@phosphor-icons/react'
 import {
+  addDays,
   addMonths,
   eachDayOfInterval,
   endOfMonth,
@@ -15,6 +17,7 @@ import {
   isSameDay,
   isSameMonth,
   startOfMonth,
+  startOfWeek,
   subMonths,
 } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
@@ -22,13 +25,13 @@ import { useEffect, useMemo, useState } from 'react'
 import DatePicker from 'react-datepicker'
 import { useDispatch, useSelector } from 'react-redux'
 
-// TODO: fetch dos dias da semana do mês atual
-// TODO: fetch dos agendamentos do terapeuta selecionado
-// TODO: Preencher os dias do mês com os agendamentos
-
 export function Agendas() {
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [selectedTerapeuta, setSelectedTerapeuta] = useState('Todos')
+  const [chosedRoom, setChosedRoom] = useState({
+    salaVerde: true,
+    salaAzul: true,
+  })
   const dispatch: AppDispatch = useDispatch()
   const agendamentos = useSelector(
     (state: RootState) => state.agendamentos.data,
@@ -52,7 +55,7 @@ export function Agendas() {
     return [{ id: 'Todos', nome: 'Todos' }, ...therapists]
   }, [agendamentos, selectedDate])
 
-  // Filter appointments by selected therapist and date
+  // Filter appointments by selected therapist, date and needs room
   const filteredAgendamentos = useMemo(() => {
     return agendamentos.filter((agendamento) => {
       const isSameMonthFilter = isSameMonth(
@@ -64,18 +67,45 @@ export function Agendas() {
         selectedTerapeuta ===
           agendamento.pacienteInfo.terapeutaInfo.nomeTerapeuta
 
-      return isSameMonthFilter && isSameTerapeuta
+      const isChosedRoom =
+        (chosedRoom.salaVerde &&
+          agendamento.localAgendamento === 'Sala Verde') ||
+        (chosedRoom.salaAzul && agendamento.localAgendamento === 'Sala Azul')
+
+      const needsRoom =
+        agendamento.localAgendamento === 'Sala Verde' ||
+        agendamento.localAgendamento === 'Sala Azul'
+
+      return isSameMonthFilter && isSameTerapeuta && needsRoom && isChosedRoom
     })
-  }, [agendamentos, selectedDate, selectedTerapeuta])
+  }, [agendamentos, selectedDate, selectedTerapeuta, chosedRoom])
 
   // Get all days of current month
   const getDaysInMonth = (date: Date) => {
     const start = startOfMonth(date)
     const end = endOfMonth(date)
-    return eachDayOfInterval({ start, end })
+    const days = eachDayOfInterval({ start, end })
+
+    // Get the start of the week for the first day
+    const firstDayOfMonth = startOfMonth(date)
+    const startDate = startOfWeek(firstDayOfMonth)
+
+    // Create array for padding days
+    const paddingDays = []
+    let currentDate = startDate
+
+    // Add padding days before the first of month
+    while (currentDate < firstDayOfMonth) {
+      paddingDays.push(currentDate)
+      currentDate = addDays(currentDate, 1)
+    }
+
+    return [...paddingDays, ...days]
   }
 
   const days = getDaysInMonth(selectedDate)
+
+  // Handlers
 
   const handlePreviousMonth = () => {
     setSelectedDate(subMonths(selectedDate, 1))
@@ -83,6 +113,13 @@ export function Agendas() {
 
   const handleNextMonth = () => {
     setSelectedDate(addMonths(selectedDate, 1))
+  }
+
+  const handleRoomChange = (room: 'salaVerde' | 'salaAzul') => {
+    setChosedRoom((prev) => ({
+      ...prev,
+      [room]: !prev[room],
+    }))
   }
 
   useEffect(() => {
@@ -104,7 +141,7 @@ export function Agendas() {
           </button>
         </div>
         {/* Filters and Summary */}
-        <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
           <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
             <User size={24} />
             <label htmlFor="terapeutas" className="text-xl font-semibold">
@@ -123,6 +160,32 @@ export function Agendas() {
               ))}
             </select>
           </div>
+          <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
+            <Door size={24} />
+            <label htmlFor="localAgendamento" className="text-xl font-semibold">
+              Sala:
+            </label>
+            <div className="flex items-center space-x-4 mt-1">
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  className="form-checkbox h-4 w-4 text-azul"
+                  checked={chosedRoom.salaVerde}
+                  onChange={() => handleRoomChange('salaVerde')}
+                />
+                <span className="ml-2">Sala Verde</span>
+              </label>
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  className="form-checkbox h-4 w-4 text-azul"
+                  checked={chosedRoom.salaAzul}
+                  onChange={() => handleRoomChange('salaAzul')}
+                />
+                <span className="ml-2">Sala Azul</span>
+              </label>
+            </div>
+          </div>
         </div>
         {/* Date Navigation */}
         <div className="flex items-center justify-between p-4 bg-white rounded shadow mb-4">
@@ -135,7 +198,10 @@ export function Agendas() {
           </button>
           <div className="flex items-center space-x-2">
             <h2 className="text-xl font-semibold">
-              {format(selectedDate, 'MMMM yyyy', { locale: ptBR })}
+              {format(selectedDate, 'MMMM yyyy', { locale: ptBR }).replace(
+                /^\w/,
+                (c) => c.toUpperCase(),
+              )}
             </h2>
             <DatePicker
               selected={selectedDate}
@@ -159,10 +225,18 @@ export function Agendas() {
           </button>
         </div>
         {/* Calendar Grid */}
+        <div className="bg-white text-center">
+          <h3 className="text-lg font-semibold p-2">
+            Agendamentos que precisam de sala
+          </h3>
+        </div>
         <div className="bg-white rounded shadow">
-          <div className="grid grid-cols-7 gap-px bg-gray-200">
+          <div className="grid grid-cols-7 gap-px bg-rosa">
             {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((day) => (
-              <div key={day} className="p-4 text-center font-semibold">
+              <div
+                key={day}
+                className="p-4 text-center font-semibold text-branco"
+              >
                 {day}
               </div>
             ))}
@@ -173,13 +247,22 @@ export function Agendas() {
                 (agendamento) =>
                   isSameDay(new Date(agendamento.dataAgendamento), day),
               )
+              const isCurrentMonth = isSameMonth(day, selectedDate)
 
               return (
                 <div
                   key={day.toISOString()}
-                  className="min-h-[120px] p-2 bg-white"
+                  className={`min-h-[120px] p-2 ${
+                    isCurrentMonth ? 'bg-white' : 'bg-gray-200'
+                  }`}
                 >
-                  <div className="font-semibold mb-1">{format(day, 'd')}</div>
+                  <div
+                    className={`font-semibold mb-1 ${
+                      !isCurrentMonth && 'text-gray-200'
+                    }`}
+                  >
+                    {format(day, 'd')}
+                  </div>
                   <div className="space-y-1">
                     {dayAgendamentos.map((agendamento) => (
                       <div
@@ -187,18 +270,15 @@ export function Agendas() {
                         className={`text-xs p-1 rounded ${
                           agendamento.localAgendamento === 'Sala Verde'
                             ? 'bg-green-100 text-green-800'
-                            : agendamento.localAgendamento === 'Sala Azul'
-                              ? 'bg-blue-100 text-blue-800'
-                              : 'bg-yellow-100 text-yellow-800'
+                            : 'bg-blue-100 text-blue-800'
                         }`}
                       >
-                        <div>{agendamento.horarioAgendamento}</div>
                         <div className="font-semibold">
-                          {agendamento.pacienteInfo.terapeutaInfo.nomeTerapeuta}{' '}
-                          - {agendamento.pacienteInfo.nomePaciente}
+                          {agendamento.horarioAgendamento} -{' '}
+                          {agendamento.pacienteInfo.terapeutaInfo.nomeTerapeuta}
                         </div>
+                        <div>{agendamento.pacienteInfo.nomePaciente}</div>
                         <div className="italic">
-                          {agendamento.localAgendamento} -{' '}
                           {agendamento.tipoAgendamento}
                         </div>
                       </div>
@@ -208,6 +288,11 @@ export function Agendas() {
               )
             })}
           </div>
+        </div>
+        <div className="bg-white text-center">
+          <h3 className="text-lg font-semibold mt-4 p-2">
+            Agendamentos que não precisam de sala
+          </h3>
         </div>
       </main>
     </div>

@@ -53,7 +53,8 @@ export interface Agendamento {
   pacienteInfo: Paciente
   dataAgendamento: Date
   horarioAgendamento: string
-  localAgendamento: 'Sala Verde' | 'Sala Azul' | 'Casa do Terapeuta'
+  localAgendamento: 'Sala Verde' | 'Sala Azul' | 'Não Precisa de Sala'
+  modalidadeAgendamento: 'Presencial' | 'Online'
   tipoAgendamento:
     | 'Sessão'
     | 'Orientação Parental'
@@ -61,7 +62,6 @@ export interface Agendamento {
     | 'Reunião Escolar '
     | 'Supervisão'
     | 'Outros'
-  modalidadeAgendamento: 'Presencial' | 'Online'
   statusAgendamento: 'Confirmado' | 'Remarcado' | 'Cancelado'
   observacoesAgendamento: string
 }
