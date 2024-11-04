@@ -323,6 +323,7 @@ export function Sessoes() {
                 <th className="p-4">Terapeuta</th>
                 <th className="p-4">Paciente</th>
                 <th className="p-4">Responsável</th>
+                {/* TODO Incluir tipoAgendamento do componente Agendamento */}
                 <th className="p-4">Status</th>
                 <th className="p-4">Valor da Sessão</th>
                 <th className="p-4">Sessão 1</th>

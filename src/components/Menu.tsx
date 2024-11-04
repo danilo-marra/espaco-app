@@ -34,7 +34,7 @@ export function Menu() {
           <hr />
           <li className="hover:text-blue-300 cursor-pointer flex items-center space-x-2">
             <CalendarBlank size={24} />
-            <NavLink to={'/agenda'}>Agenda</NavLink>
+            <NavLink to={'/agendas'}>Agenda</NavLink>
           </li>
           <hr />
           <li className="hover:text-blue-300 cursor-pointer flex items-center space-x-2">

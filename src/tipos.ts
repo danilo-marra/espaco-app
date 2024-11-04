@@ -47,7 +47,21 @@ export interface Transacao {
   dtCriacao: Date
 }
 
-export interface Agenda {
+export interface Agendamento {
   id: string
   terapeutaInfo: Terapeuta
+  pacienteInfo: Paciente
+  dataAgendamento: Date
+  horarioAgendamento: string
+  localAgendamento: 'Sala Verde' | 'Sala Azul' | 'Casa do Terapeuta'
+  tipoAgendamento:
+    | 'Sessão'
+    | 'Orientação Parental'
+    | 'Visita Escolar'
+    | 'Reunião Escolar '
+    | 'Supervisão'
+    | 'Outros'
+  modalidadeAgendamento: 'Presencial' | 'Online'
+  statusAgendamento: 'Confirmado' | 'Remarcado' | 'Cancelado'
+  observacoesAgendamento: string
 }
