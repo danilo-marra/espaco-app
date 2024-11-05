@@ -80,6 +80,23 @@ export function Agendas() {
     })
   }, [agendamentos, selectedDate, selectedTerapeuta, chosedRoom])
 
+  const filteredAgendamentosNoRoom = useMemo(() => {
+    return agendamentos.filter((agendamento) => {
+      const isSameMonthFilter = isSameMonth(
+        new Date(agendamento.dataAgendamento),
+        selectedDate,
+      )
+      const isSameTerapeuta =
+        selectedTerapeuta === 'Todos' ||
+        selectedTerapeuta ===
+          agendamento.pacienteInfo.terapeutaInfo.nomeTerapeuta
+
+      const isNoRoom = agendamento.localAgendamento === 'Não Precisa de Sala'
+
+      return isSameMonthFilter && isSameTerapeuta && isNoRoom
+    })
+  }, [agendamentos, selectedDate, selectedTerapeuta])
+
   // Get all days of current month
   const getDaysInMonth = (date: Date) => {
     const start = startOfMonth(date)
@@ -263,22 +280,24 @@ export function Agendas() {
                   >
                     {format(day, 'd')}
                   </div>
-                  <div className="space-y-1">
+                  <div className="space-y-2">
                     {dayAgendamentos.map((agendamento) => (
                       <div
                         key={agendamento.id}
-                        className={`text-xs p-1 rounded ${
+                        className={`text-xs p-1 rounded cursor-pointer transition-colors duration-200 group ${
                           agendamento.localAgendamento === 'Sala Verde'
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-blue-100 text-blue-800'
+                            ? 'bg-green-100 text-green-800 hover:bg-green-600'
+                            : 'bg-blue-100 text-blue-800 hover:bg-blue-600'
                         }`}
                       >
-                        <div className="font-semibold">
+                        <div className="font-semibold group-hover:text-white text-base">
                           {agendamento.horarioAgendamento} -{' '}
                           {agendamento.pacienteInfo.terapeutaInfo.nomeTerapeuta}
                         </div>
-                        <div>{agendamento.pacienteInfo.nomePaciente}</div>
-                        <div className="italic">
+                        <div className="group-hover:text-white/90">
+                          {agendamento.pacienteInfo.nomePaciente}
+                        </div>
+                        <div className="italic group-hover:text-white/70">
                           {agendamento.tipoAgendamento}
                         </div>
                       </div>
@@ -293,6 +312,42 @@ export function Agendas() {
           <h3 className="text-lg font-semibold mt-4 p-2">
             Agendamentos que não precisam de sala
           </h3>
+        </div>
+
+        <div className="grid grid-cols-2 xl:grid-cols-4 2xl:grid-cols-6 gap-4">
+          {filteredAgendamentosNoRoom.map((agendamento) => (
+            <div
+              key={agendamento.id}
+              className="mt-4 p-4 rounded-lg bg-yellow-100 cursor-pointer transition-colors duration-200 group hover:bg-yellow-600 shadow-md"
+            >
+              <div className="mb-2">
+                <div className="font-semibold text-slate-500 group-hover:text-white/90 text-sm">
+                  {format(new Date(agendamento.dataAgendamento), 'dd/MM/yyyy')}{' '}
+                  (
+                  {format(new Date(agendamento.dataAgendamento), 'EEEE', {
+                    locale: ptBR,
+                  }).replace(/^\w/, (c) => c.toUpperCase())}
+                  )
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <div className="font-medium text-slate-900 group-hover:text-white">
+                  {agendamento.horarioAgendamento} -{' '}
+                  {agendamento.pacienteInfo.terapeutaInfo.nomeTerapeuta}
+                </div>
+
+                <div className="text-slate-500 group-hover:text-white/90">
+                  {agendamento.pacienteInfo.nomePaciente}
+                </div>
+
+                <div className="text-sm italic text-slate-500 group-hover:text-white/70">
+                  {agendamento.tipoAgendamento} -{' '}
+                  {agendamento.modalidadeAgendamento}
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </main>
     </div>
