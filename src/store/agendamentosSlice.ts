@@ -1,7 +1,11 @@
 import httpRequest, { API_URL } from '@/utils/api'
 import type { AgendamentosState } from './store'
 import type { Agendamento } from '@/tipos'
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
+import {
+  createAsyncThunk,
+  createSlice,
+  type PayloadAction,
+} from '@reduxjs/toolkit'
 
 const initialState: AgendamentosState = {
   data: [],
@@ -12,6 +16,12 @@ const initialState: AgendamentosState = {
 export const fetchAgendamentos = createAsyncThunk<Agendamento[]>(
   'agendamentos/fetchAgendamentos',
   async () => httpRequest<Agendamento[]>(`${API_URL}/agendamentos`, 'GET'),
+)
+
+export const addAgendamento = createAsyncThunk<Agendamento, Agendamento>(
+  'agendamentos/addAgendamento',
+  async (agendamento) =>
+    httpRequest<Agendamento>(`${API_URL}/agendamentos`, 'POST', agendamento),
 )
 
 const agendamentosSlice = createSlice({
@@ -31,6 +41,12 @@ const agendamentosSlice = createSlice({
         state.loading = false
         state.error = 'Erro ao buscar agendamentos'
       })
+      .addCase(
+        addAgendamento.fulfilled,
+        (state, action: PayloadAction<Agendamento>) => {
+          state.data.push(action.payload)
+        },
+      )
   },
 })
 

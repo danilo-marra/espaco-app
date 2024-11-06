@@ -24,6 +24,8 @@ import { ptBR } from 'date-fns/locale'
 import { useEffect, useMemo, useState } from 'react'
 import DatePicker from 'react-datepicker'
 import { useDispatch, useSelector } from 'react-redux'
+import * as Dialog from '@radix-ui/react-dialog'
+import { NovaAgendaModal } from '@/components/Agenda/NovaAgendaModal'
 
 export function Agendas() {
   const [selectedDate, setSelectedDate] = useState(new Date())
@@ -148,14 +150,19 @@ export function Agendas() {
       <main className="flex-1 bg-gray-100 p-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl font-semibold">Terapeutas</h1>
-          <button
-            type="button"
-            className="flex items-center bg-azul text-white px-4 py-2 rounded hover:bg-sky-600"
-          >
-            <Plus size={20} weight="bold" className="mr-2" />
-            Nova Agenda
-          </button>
+          <h1 className="text-2xl font-semibold">Agendas das Terapeutas</h1>
+          <Dialog.Root>
+            <Dialog.Trigger asChild>
+              <button
+                type="button"
+                className="flex items-center bg-azul text-white px-4 py-2 rounded hover:bg-sky-600"
+              >
+                <Plus size={20} weight="bold" className="mr-2" />
+                Novo Agendamento
+              </button>
+            </Dialog.Trigger>
+            <NovaAgendaModal />
+          </Dialog.Root>
         </div>
         {/* Filters and Summary */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
