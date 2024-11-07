@@ -16,6 +16,8 @@ import { addSessao } from '../../store/sessoesSlice'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import { isSameMonth } from 'date-fns'
 
+// TODO utilizar register em  todos os campos do formulário
+
 // Schema de validação
 const NovaSessaoFormSchema = z.object({
   terapeutaId: z.string().min(1, 'Selecione um terapeuta'),

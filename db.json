@@ -643,6 +643,26 @@
       "cpfResponsavel": "876.876.876-87",
       "enderecoResponsavel": "SHCES 301 BLOCO C apt 202",
       "origem": "Indicação"
+    },
+    {
+      "id": "aea24010-f88f-4b50-be02-f97d3496a796",
+      "nomePaciente": "Pedro Silva",
+      "dtNascimento": "1993-07-06T03:00:00.000Z",
+      "terapeutaInfo": {
+        "id": "6319090b-0f6d-4808-b6b2-872156bccd65",
+        "nomeTerapeuta": "Afonso Gonzales",
+        "telefoneTerapeuta": "61981593923",
+        "emailTerapeuta": "danilo2311@gmail.com",
+        "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
+        "dtEntrada": "2022-06-28T03:00:00.000Z",
+        "chavePix": "098098098098"
+      },
+      "nomeResponsavel": "Mãe do Pedro Silva",
+      "telefoneResponsavel": "98987987987",
+      "emailResponsavel": "email@pedrosilva",
+      "cpfResponsavel": "02481818156",
+      "enderecoResponsavel": "301",
+      "origem": "Busca no Google"
     }
   ],
   "terapeutas": [
@@ -1560,19 +1580,6 @@
     {
       "id": "c3d4e5f6-g7h8-9012-ijkl-345678901def",
       "terapeutaInfo": {
-      "id": "772cf569-5487-407f-975b-200e1dc7ea6c",
-      "nomeTerapeuta": "Samara",
-      "telefoneTerapeuta": "61981593923",
-      "emailTerapeuta": "danilo2311@gmail.com",
-      "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
-      "dtEntrada": "2024-07-29T03:00:00.000Z",
-      "chavePix": "098098098098"
-      },
-      "pacienteInfo": {
-      "id": "18c3d920-d996-4e79-9324-750d92d6fd4e",
-      "nomePaciente": "Dara",
-      "dtNascimento": "2014-03-11T03:00:00.000Z",
-      "terapeutaInfo": {
         "id": "772cf569-5487-407f-975b-200e1dc7ea6c",
         "nomeTerapeuta": "Samara",
         "telefoneTerapeuta": "61981593923",
@@ -1581,20 +1588,111 @@
         "dtEntrada": "2024-07-29T03:00:00.000Z",
         "chavePix": "098098098098"
       },
-      "nomeResponsavel": "Ricardo Calembo",
-      "telefoneResponsavel": "61981593923",
-      "emailResponsavel": "ricardo@gmail.com",
-      "cpfResponsavel": "024.818.181-54",
-      "enderecoResponsavel": "SHCES 301 BLOCO C apt 202",
-      "origem": "Outros"
+      "pacienteInfo": {
+        "id": "18c3d920-d996-4e79-9324-750d92d6fd4e",
+        "nomePaciente": "Dara",
+        "dtNascimento": "2014-03-11T03:00:00.000Z",
+        "terapeutaInfo": {
+          "id": "772cf569-5487-407f-975b-200e1dc7ea6c",
+          "nomeTerapeuta": "Samara",
+          "telefoneTerapeuta": "61981593923",
+          "emailTerapeuta": "danilo2311@gmail.com",
+          "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
+          "dtEntrada": "2024-07-29T03:00:00.000Z",
+          "chavePix": "098098098098"
+        },
+        "nomeResponsavel": "Ricardo Calembo",
+        "telefoneResponsavel": "61981593923",
+        "emailResponsavel": "ricardo@gmail.com",
+        "cpfResponsavel": "024.818.181-54",
+        "enderecoResponsavel": "SHCES 301 BLOCO C apt 202",
+        "origem": "Outros"
       },
       "dataAgendamento": "2024-11-10T13:00:00.000Z",
       "horarioAgendamento": "13:00",
       "localAgendamento": "Não Precisa de Sala",
       "tipoAgendamento": "Visita Escolar",
       "modalidadeAgendamento": "Presencial",
-      "statusAgendamento": "Confirmado", 
+      "statusAgendamento": "Confirmado",
       "observacoesAgendamento": "Visita à escola do paciente para avaliação."
+    },
+    {
+      "id": "fc28b70f-5156-4422-b7fe-f86fd16c7446",
+      "terapeutaInfo": {
+        "id": "6319090b-0f6d-4808-b6b2-872156bccd65",
+        "nomeTerapeuta": "Afonso Gonzales",
+        "telefoneTerapeuta": "61981593923",
+        "emailTerapeuta": "danilo2311@gmail.com",
+        "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
+        "dtEntrada": "2022-06-28T03:00:00.000Z",
+        "chavePix": "098098098098"
+      },
+      "pacienteInfo": {
+        "id": "aea24010-f88f-4b50-be02-f97d3496a796",
+        "nomePaciente": "Pedro Silva",
+        "dtNascimento": "1993-07-06T03:00:00.000Z",
+        "terapeutaInfo": {
+          "id": "6319090b-0f6d-4808-b6b2-872156bccd65",
+          "nomeTerapeuta": "Afonso Gonzales",
+          "telefoneTerapeuta": "61981593923",
+          "emailTerapeuta": "danilo2311@gmail.com",
+          "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
+          "dtEntrada": "2022-06-28T03:00:00.000Z",
+          "chavePix": "098098098098"
+        },
+        "nomeResponsavel": "Mãe do Pedro Silva",
+        "telefoneResponsavel": "98987987987",
+        "emailResponsavel": "email@pedrosilva",
+        "cpfResponsavel": "02481818156",
+        "enderecoResponsavel": "301",
+        "origem": "Busca no Google"
+      },
+      "dataAgendamento": "2024-11-05T03:00:00.000Z",
+      "horarioAgendamento": "09:00",
+      "localAgendamento": "Sala Verde",
+      "modalidadeAgendamento": "Presencial",
+      "tipoAgendamento": "Sessão",
+      "statusAgendamento": "Confirmado",
+      "observacoesAgendamento": ""
+    },
+    {
+      "id": "46a3ced8-2d7c-4255-9751-a8e16fb28897",
+      "terapeutaInfo": {
+        "id": "6319090b-0f6d-4808-b6b2-872156bccd65",
+        "nomeTerapeuta": "Afonso Gonzales",
+        "telefoneTerapeuta": "61981593923",
+        "emailTerapeuta": "danilo2311@gmail.com",
+        "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
+        "dtEntrada": "2022-06-28T03:00:00.000Z",
+        "chavePix": "098098098098"
+      },
+      "pacienteInfo": {
+        "id": "8541b835-d0d0-467b-a95b-a27e4297e451",
+        "nomePaciente": "Juquinha",
+        "dtNascimento": "2024-10-15T03:00:00.000Z",
+        "terapeutaInfo": {
+          "id": "6319090b-0f6d-4808-b6b2-872156bccd65",
+          "nomeTerapeuta": "Afonso Gonzales",
+          "telefoneTerapeuta": "61981593923",
+          "emailTerapeuta": "danilo2311@gmail.com",
+          "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
+          "dtEntrada": "2022-06-28T03:00:00.000Z",
+          "chavePix": "098098098098"
+        },
+        "nomeResponsavel": "Pai do Juca",
+        "telefoneResponsavel": "61981593923",
+        "emailResponsavel": "danilo2311@gmail.com",
+        "cpfResponsavel": "876.876.876-87",
+        "enderecoResponsavel": "SHCES 301 BLOCO C apt 202",
+        "origem": "Indicação"
+      },
+      "dataAgendamento": "2024-11-21T03:00:00.000Z",
+      "horarioAgendamento": "09:00",
+      "localAgendamento": "Sala Azul",
+      "modalidadeAgendamento": "Online",
+      "tipoAgendamento": "Sessão",
+      "statusAgendamento": "Confirmado",
+      "observacoesAgendamento": ""
     }
   ]
 }

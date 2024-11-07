@@ -1,18 +1,28 @@
 import { fetchAgendamentos } from '@/store/agendamentosSlice'
 import type { RootState, AppDispatch } from '@/store/store'
-import { CaretLeft, CaretRight, Door, Plus, User } from '@phosphor-icons/react'
+import {
+  Calendar,
+  CaretLeft,
+  CaretRight,
+  Door,
+  Plus,
+  User,
+} from '@phosphor-icons/react'
 import {
   addDays,
-  addWeeks,
+  addMonths,
+  eachDayOfInterval,
+  endOfMonth,
   format,
   isSameDay,
   isSameMonth,
-  isSameWeek,
+  startOfMonth,
   startOfWeek,
-  subWeeks,
+  subMonths,
 } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { useEffect, useMemo, useState } from 'react'
+import DatePicker from 'react-datepicker'
 import { useDispatch, useSelector } from 'react-redux'
 import { NovaAgendaModal } from '@/components/Agenda/NovaAgendaModal'
 import { Dialog, DialogTrigger } from '@/components/ui/dialog'
@@ -27,14 +37,6 @@ export function Agendas() {
   const dispatch: AppDispatch = useDispatch()
   const agendamentos = useSelector(
     (state: RootState) => state.agendamentos.data,
-  )
-
-  // Obter o início da semana da data selecionada
-  const startOfSelectedWeek = startOfWeek(selectedDate, { weekStartsOn: 0 })
-
-  // Obter todos os dias da semana
-  const daysOfWeek = Array.from({ length: 7 }).map((_, index) =>
-    addDays(startOfSelectedWeek, index),
   )
 
   // Get unique therapists that have appointments in selected month
@@ -58,11 +60,10 @@ export function Agendas() {
   // Filter appointments by selected therapist, date and needs room
   const filteredAgendamentos = useMemo(() => {
     return agendamentos.filter((agendamento) => {
-      const agendamentoDate = new Date(agendamento.dataAgendamento)
-      const isInSelectedWeek = daysOfWeek.some((day) =>
-        isSameDay(agendamentoDate, day),
+      const isSameMonthFilter = isSameMonth(
+        new Date(agendamento.dataAgendamento),
+        selectedDate,
       )
-      // Aplicar outros filtros (terapeuta, sala, etc.)
       const isSameTerapeuta =
         selectedTerapeuta === 'Todos' ||
         selectedTerapeuta ===
@@ -77,13 +78,13 @@ export function Agendas() {
         agendamento.localAgendamento === 'Sala Verde' ||
         agendamento.localAgendamento === 'Sala Azul'
 
-      return isInSelectedWeek && isSameTerapeuta && needsRoom && isChosedRoom
+      return isSameMonthFilter && isSameTerapeuta && needsRoom && isChosedRoom
     })
-  }, [agendamentos, daysOfWeek, selectedTerapeuta, chosedRoom])
+  }, [agendamentos, selectedDate, selectedTerapeuta, chosedRoom])
 
   const filteredAgendamentosNoRoom = useMemo(() => {
     return agendamentos.filter((agendamento) => {
-      const isSameWeekFilter = isSameWeek(
+      const isSameMonthFilter = isSameMonth(
         new Date(agendamento.dataAgendamento),
         selectedDate,
       )
@@ -94,26 +95,50 @@ export function Agendas() {
 
       const isNoRoom = agendamento.localAgendamento === 'Não Precisa de Sala'
 
-      return isSameWeekFilter && isSameTerapeuta && isNoRoom
+      return isSameMonthFilter && isSameTerapeuta && isNoRoom
     })
   }, [agendamentos, selectedDate, selectedTerapeuta])
 
+  // Get all days of current month
+  const getDaysInMonth = (date: Date) => {
+    const start = startOfMonth(date)
+    const end = endOfMonth(date)
+    const days = eachDayOfInterval({ start, end })
+
+    // Get the start of the week for the first day
+    const firstDayOfMonth = startOfMonth(date)
+    const startDate = startOfWeek(firstDayOfMonth)
+
+    // Create array for padding days
+    const paddingDays = []
+    let currentDate = startDate
+
+    // Add padding days before the first of month
+    while (currentDate < firstDayOfMonth) {
+      paddingDays.push(currentDate)
+      currentDate = addDays(currentDate, 1)
+    }
+
+    return [...paddingDays, ...days]
+  }
+
+  const days = getDaysInMonth(selectedDate)
+
   // Handlers
+
+  const handlePreviousMonth = () => {
+    setSelectedDate(subMonths(selectedDate, 1))
+  }
+
+  const handleNextMonth = () => {
+    setSelectedDate(addMonths(selectedDate, 1))
+  }
 
   const handleRoomChange = (room: 'salaVerde' | 'salaAzul') => {
     setChosedRoom((prev) => ({
       ...prev,
       [room]: !prev[room],
     }))
-  }
-
-  // Navegação entre semanas
-  const handlePreviousWeek = () => {
-    setSelectedDate(subWeeks(selectedDate, 1))
-  }
-
-  const handleNextWeek = () => {
-    setSelectedDate(addWeeks(selectedDate, 1))
   }
 
   useEffect(() => {
@@ -186,77 +211,110 @@ export function Agendas() {
             </div>
           </div>
         </div>
-        {/* Navegação da Semana */}
+        {/* Date Navigation */}
         <div className="flex items-center justify-between p-4 bg-white rounded shadow mb-4">
           <button
             type="button"
-            aria-label="Semana Anterior"
-            onClick={handlePreviousWeek}
+            aria-label="Previous month"
+            onClick={handlePreviousMonth}
           >
             <CaretLeft size={24} weight="fill" />
           </button>
-          <div className="text-xl font-semibold">
-            Semana de {format(startOfSelectedWeek, 'dd/MM/yyyy')}
+          <div className="flex items-center space-x-2">
+            <h2 className="text-xl font-semibold">
+              {format(selectedDate, 'MMMM yyyy', { locale: ptBR }).replace(
+                /^\w/,
+                (c) => c.toUpperCase(),
+              )}
+            </h2>
+            <DatePicker
+              selected={selectedDate}
+              onChange={(date) => setSelectedDate(date || new Date())}
+              showMonthYearPicker
+              dateFormat="MMMM yyyy"
+              locale={ptBR}
+              customInput={
+                <button type="button" aria-label="Selecione o mês e o ano">
+                  <Calendar size={28} className="text-gray-500 mt-2" />
+                </button>
+              }
+            />
           </div>
           <button
             type="button"
-            aria-label="Próxima Semana"
-            onClick={handleNextWeek}
+            aria-label="Next month"
+            onClick={handleNextMonth}
           >
             <CaretRight size={24} weight="fill" />
           </button>
         </div>
-        {/* Cabeçalho dos Dias da Semana */}
-        <div className="grid grid-cols-7 gap-px bg-rosa">
-          {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((day) => (
-            <div
-              key={day}
-              className="p-4 text-center font-semibold text-branco"
-            >
-              {day}
-            </div>
-          ))}
+        {/* Calendar Grid */}
+        <div className="bg-white text-center">
+          <h3 className="text-lg font-semibold p-2">
+            Agendamentos que precisam de sala
+          </h3>
         </div>
-        {/* Grid de Agendamentos da Semana */}
-        <div className="grid grid-cols-7 gap-px bg-gray-200">
-          {daysOfWeek.map((day) => {
-            const dayAgendamentos = filteredAgendamentos.filter((agendamento) =>
-              isSameDay(new Date(agendamento.dataAgendamento), day),
-            )
-
-            return (
+        <div className="bg-white rounded shadow">
+          <div className="grid grid-cols-7 gap-px bg-rosa">
+            {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((day) => (
               <div
-                key={day.toISOString()}
-                className="min-h-[120px] p-2 bg-white"
+                key={day}
+                className="p-4 text-center font-semibold text-branco"
               >
-                <div className="font-semibold mb-1">{format(day, 'dd/MM')}</div>
-                <div className="space-y-2">
-                  {dayAgendamentos.map((agendamento) => (
-                    <div
-                      key={agendamento.id}
-                      className={`text-xs p-1 space-y-1 rounded cursor-pointer transition-colors duration-200 group ${
-                        agendamento.localAgendamento === 'Sala Verde'
-                          ? 'bg-green-100 text-green-800 hover:bg-green-600'
-                          : 'bg-blue-100 text-blue-800 hover:bg-blue-600'
-                      }`}
-                    >
-                      <div className="font-semibold group-hover:text-white text-base">
-                        {agendamento.horarioAgendamento} -{' '}
-                        {agendamento.pacienteInfo.terapeutaInfo.nomeTerapeuta}
-                      </div>
-                      <div className="group-hover:text-white/90">
-                        {agendamento.pacienteInfo.nomePaciente}
-                      </div>
-                      <div className="italic group-hover:text-white/70">
-                        {agendamento.tipoAgendamento} -{' '}
-                        {agendamento.modalidadeAgendamento}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                {day}
               </div>
-            )
-          })}
+            ))}
+          </div>
+          <div className="grid grid-cols-7 gap-px bg-gray-200">
+            {days.map((day) => {
+              const dayAgendamentos = filteredAgendamentos.filter(
+                (agendamento) =>
+                  isSameDay(new Date(agendamento.dataAgendamento), day),
+              )
+              const isCurrentMonth = isSameMonth(day, selectedDate)
+
+              return (
+                <div
+                  key={day.toISOString()}
+                  className={`min-h-[120px] p-2 ${
+                    isCurrentMonth ? 'bg-white' : 'bg-gray-200'
+                  }`}
+                >
+                  <div
+                    className={`font-semibold mb-1 ${
+                      !isCurrentMonth && 'text-gray-200'
+                    }`}
+                  >
+                    {format(day, 'd')}
+                  </div>
+                  <div className="space-y-2">
+                    {dayAgendamentos.map((agendamento) => (
+                      <div
+                        key={agendamento.id}
+                        className={`text-xs p-1 space-y-1 rounded cursor-pointer transition-colors duration-200 group ${
+                          agendamento.localAgendamento === 'Sala Verde'
+                            ? 'bg-green-100 text-green-800 hover:bg-green-600'
+                            : 'bg-blue-100 text-blue-800 hover:bg-blue-600'
+                        }`}
+                      >
+                        <div className="font-semibold group-hover:text-white text-base">
+                          {agendamento.horarioAgendamento} -{' '}
+                          {agendamento.pacienteInfo.terapeutaInfo.nomeTerapeuta}
+                        </div>
+                        <div className="group-hover:text-white/90">
+                          {agendamento.pacienteInfo.nomePaciente}
+                        </div>
+                        <div className="italic group-hover:text-white/70">
+                          {agendamento.tipoAgendamento} -{' '}
+                          {agendamento.modalidadeAgendamento}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
         </div>
         <div className="bg-white text-center">
           <h3 className="text-lg font-semibold mt-4 p-2">

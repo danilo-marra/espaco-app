@@ -59,7 +59,7 @@ export interface Agendamento {
     | 'Sessão'
     | 'Orientação Parental'
     | 'Visita Escolar'
-    | 'Reunião Escolar '
+    | 'Reunião Escolar'
     | 'Supervisão'
     | 'Outros'
   statusAgendamento: 'Confirmado' | 'Remarcado' | 'Cancelado'
