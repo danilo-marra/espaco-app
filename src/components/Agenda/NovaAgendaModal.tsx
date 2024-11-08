@@ -94,12 +94,16 @@ const maskTime = (value: string) => {
 export function NovaAgendaModal() {
   const dispatch = useDispatch<AppDispatch>()
   const pacientes = useSelector((state: RootState) => state.pacientes.data)
+  const agendamentos = useSelector(
+    (state: RootState) => state.agendamentos.data,
+  )
   const [mensagemSucesso, setMensagemSucesso] = useState('')
   const [mensagemErro, setMensagemErro] = useState('')
-  // const terapeutas = useSelector((state: RootState) => state.terapeutas.data)
   const [date, setDate] = useState<Date>()
   const calendarTriggerRef = useRef<HTMLButtonElement>(null)
-  const [mensagemAlerta] = useState('')
+  const [mensagemAlerta, setMensagemAlerta] = useState('')
+  const [conflito, setConflito] = useState(false)
+  const [mensagemConflito, setMensagemConflito] = useState('')
   const {
     register,
     watch,
@@ -111,16 +115,101 @@ export function NovaAgendaModal() {
     resolver: zodResolver(NovaAgendaFormSchema),
   })
   const pacienteId = watch('pacienteId')
+  const watchDataAgendamento = watch('dataAgendamento')
+  const watchHorarioAgendamento = watch('horarioAgendamento')
+  const watchLocalAgendamento = watch('localAgendamento')
+
   const isButtonDisabled =
-    isSubmitting || Object.keys(errors).length > 0 || mensagemAlerta !== ''
+    isSubmitting || Object.keys(errors).length > 0 || conflito
+
   const pacienteSelecionado = useMemo(
     () => pacientes.find((paciente) => paciente.id === pacienteId),
     [pacienteId, pacientes],
   )
 
+  // Função para calcular a diferença de minutos entre dois horários
+  const getMinutesDifference = (time1: string, time2: string) => {
+    const [hours1, minutes1] = time1.split(':').map(Number)
+    const [hours2, minutes2] = time2.split(':').map(Number)
+    return Math.abs(hours1 * 60 + minutes1 - (hours2 * 60 + minutes2))
+  }
+
   useEffect(() => {
     dispatch(fetchPacientes())
   }, [dispatch, errors])
+
+  // Check for conflicts when these fields change
+  useEffect(() => {
+    if (
+      watchDataAgendamento &&
+      watchHorarioAgendamento &&
+      watchLocalAgendamento
+    ) {
+      const agendamentosProximos = agendamentos.filter((agendamento) => {
+        const mesmaData =
+          format(new Date(agendamento.dataAgendamento), 'yyyy-MM-dd') ===
+          format(new Date(watchDataAgendamento), 'yyyy-MM-dd')
+        const mesmoLocal =
+          agendamento.localAgendamento === watchLocalAgendamento
+
+        if (watchLocalAgendamento === 'Não Precisa de Sala') {
+          return false
+        }
+
+        if (agendamento.localAgendamento === 'Não Precisa de Sala') {
+          return false
+        }
+
+        if (mesmaData && mesmoLocal) {
+          const minutesDiff = getMinutesDifference(
+            agendamento.horarioAgendamento,
+            watchHorarioAgendamento,
+          )
+          return minutesDiff < 50
+        }
+
+        return false
+      })
+
+      // Check for conflicts first
+      const conflitos = agendamentosProximos.filter(
+        (agendamento) =>
+          agendamento.horarioAgendamento === watchHorarioAgendamento,
+      )
+
+      if (conflitos.length > 0) {
+        const conflito = conflitos[0]
+        setConflito(true)
+        setMensagemConflito(
+          `Já existe um agendamento para ${conflito.pacienteInfo.nomePaciente} com ${conflito.pacienteInfo.terapeutaInfo.nomeTerapeuta} neste horário e local.`,
+        )
+        setMensagemAlerta('')
+      } else {
+        setConflito(false)
+        setMensagemConflito('')
+
+        // Check for near appointments
+        const agendamentosProximosSemConflito = agendamentosProximos.filter(
+          (agendamento) =>
+            agendamento.horarioAgendamento !== watchHorarioAgendamento,
+        )
+
+        if (agendamentosProximosSemConflito.length > 0) {
+          const agendamentoProximo = agendamentosProximosSemConflito[0]
+          setMensagemAlerta(
+            `Atenção: Existe um agendamento para ${agendamentoProximo.pacienteInfo.nomePaciente} às ${agendamentoProximo.horarioAgendamento} (menos de 50 minutos de diferença)`,
+          )
+        } else {
+          setMensagemAlerta('')
+        }
+      }
+    }
+  }, [
+    watchDataAgendamento,
+    watchHorarioAgendamento,
+    watchLocalAgendamento,
+    agendamentos,
+  ])
 
   // Função pra evitar o erro de aria-hidden
   const handleDateSelect = (selectedDate: Date | undefined) => {
@@ -161,11 +250,13 @@ export function NovaAgendaModal() {
       dispatch(addAgendamento(novoAgendamento)).unwrap()
 
       reset()
-      setMensagemSucesso('Sessão criada com sucesso!')
+      setDate(undefined)
+      setMensagemSucesso('Agendamento criado com sucesso!')
       setMensagemErro('')
+      setMensagemAlerta('')
     } catch (error) {
-      console.error('Erro ao criar nova sessão:', error)
-      setMensagemErro('Erro ao criar sessão. Tente novamente.')
+      console.error('Erro ao criar novo agendamento:', error)
+      setMensagemErro('Erro ao criar novo agendamento. Tente novamente.')
       setMensagemSucesso('')
     }
   }
@@ -521,6 +612,18 @@ export function NovaAgendaModal() {
               />
             </div>
           </div>
+
+          {mensagemAlerta && (
+            <p className="text-yellow-950 text-sm mt-4 bg-orange-100 text-center p-2">
+              {mensagemAlerta}
+            </p>
+          )}
+
+          {conflito && (
+            <p className="text-red-800 text-sm mt-4 bg-red-100 text-center p-2">
+              {mensagemConflito}
+            </p>
+          )}
           <button
             type="submit"
             disabled={isButtonDisabled}
@@ -530,14 +633,14 @@ export function NovaAgendaModal() {
           >
             {isSubmitting ? 'Salvando...' : 'Salvar'}
           </button>
-        </form>
-        {mensagemSucesso && (
-          <p className="text-green-500 text-sm mt-4">{mensagemSucesso}</p>
-        )}
+          {mensagemSucesso && (
+            <p className="text-green-500 text-sm mt-4">{mensagemSucesso}</p>
+          )}
 
-        {mensagemErro && (
-          <p className="text-red-500 text-sm mt-4">{mensagemErro}</p>
-        )}
+          {mensagemErro && (
+            <p className="text-red-500 text-sm mt-4">{mensagemErro}</p>
+          )}
+        </form>
       </DialogContent>
     </DialogPortal>
   )

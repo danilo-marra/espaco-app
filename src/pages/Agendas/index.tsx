@@ -16,6 +16,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { NovaAgendaModal } from '@/components/Agenda/NovaAgendaModal'
 import { Dialog, DialogTrigger } from '@/components/ui/dialog'
+import type { Agendamento } from '@/tipos'
 
 export function Agendas() {
   const [selectedDate, setSelectedDate] = useState(new Date())
@@ -28,6 +29,11 @@ export function Agendas() {
   const agendamentos = useSelector(
     (state: RootState) => state.agendamentos.data,
   )
+
+  // Ordenar agenda por horário
+  const sortByTime = (a: Agendamento, b: Agendamento) => {
+    return a.horarioAgendamento.localeCompare(b.horarioAgendamento)
+  }
 
   // Obter o início da semana da data selecionada
   const startOfSelectedWeek = startOfWeek(selectedDate, { weekStartsOn: 0 })
@@ -220,9 +226,11 @@ export function Agendas() {
         {/* Grid de Agendamentos da Semana */}
         <div className="grid grid-cols-7 gap-px bg-gray-200">
           {daysOfWeek.map((day) => {
-            const dayAgendamentos = filteredAgendamentos.filter((agendamento) =>
-              isSameDay(new Date(agendamento.dataAgendamento), day),
-            )
+            const dayAgendamentos = filteredAgendamentos
+              .filter((agendamento) =>
+                isSameDay(new Date(agendamento.dataAgendamento), day),
+              )
+              .sort(sortByTime)
 
             return (
               <div
@@ -244,7 +252,7 @@ export function Agendas() {
                         {agendamento.horarioAgendamento} -{' '}
                         {agendamento.pacienteInfo.terapeutaInfo.nomeTerapeuta}
                       </div>
-                      <div className="group-hover:text-white/90">
+                      <div className="group-hover:text-white/90 text-base">
                         {agendamento.pacienteInfo.nomePaciente}
                       </div>
                       <div className="italic group-hover:text-white/70">
@@ -265,7 +273,7 @@ export function Agendas() {
         </div>
 
         <div className="grid grid-cols-2 xl:grid-cols-4 2xl:grid-cols-6 gap-4">
-          {filteredAgendamentosNoRoom.map((agendamento) => (
+          {filteredAgendamentosNoRoom.sort(sortByTime).map((agendamento) => (
             <div
               key={agendamento.id}
               className="mt-4 p-4 rounded-lg bg-yellow-100 cursor-pointer transition-colors duration-200 group hover:bg-yellow-600 shadow-md"
