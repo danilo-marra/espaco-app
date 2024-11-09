@@ -12,6 +12,7 @@ import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import { useDispatch, useSelector } from 'react-redux'
 import { updateTransacao } from '../../store/transacoesSlice'
 import type { AppDispatch, RootState } from '../../store/store'
+import type { Transacao } from '@/tipos'
 
 const EditarTransacaoFormSchema = z.object({
   id: z.string(),
@@ -34,11 +35,6 @@ export function EditarTransacaoModal({
   open,
   onClose,
 }: EditarTransacaoModalProps) {
-  const dispatch = useDispatch<AppDispatch>()
-  const transacoes = useSelector((state: RootState) => state.transacoes.data)
-  const [mensagemSucesso, setMensagemSucesso] = useState('')
-  const [mensagemErro, setMensagemErro] = useState('')
-
   const {
     control,
     register,
@@ -48,6 +44,11 @@ export function EditarTransacaoModal({
   } = useForm<EditarTransacaoFormInputs>({
     resolver: zodResolver(EditarTransacaoFormSchema),
   })
+
+  const dispatch = useDispatch<AppDispatch>()
+  const transacoes = useSelector((state: RootState) => state.transacoes.data)
+  const [mensagemSucesso, setMensagemSucesso] = useState('')
+  const [mensagemErro, setMensagemErro] = useState('')
 
   useEffect(() => {
     const transacao = transacoes.find((t) => t.id === transacaoId)
@@ -67,7 +68,7 @@ export function EditarTransacaoModal({
       // Simula um atraso de 2 segundos
       await new Promise((resolve) => setTimeout(resolve, 2000))
 
-      const transacaoEditada = {
+      const transacaoEditada: Transacao = {
         id: data.id,
         descricao: data.descricao,
         tipo: data.tipo,
@@ -84,7 +85,6 @@ export function EditarTransacaoModal({
       // Define a mensagem de sucesso
       setMensagemSucesso('Transação editada com sucesso!')
       setMensagemErro('') // Limpa a mensagem de erro, se houver
-
       console.log('Transação editada:', data)
       onClose() // Fecha o modal após a edição
     } catch (error) {

@@ -1,6 +1,13 @@
 import { fetchAgendamentos } from '@/store/agendamentosSlice'
 import type { RootState, AppDispatch } from '@/store/store'
-import { CaretLeft, CaretRight, Door, Plus, User } from '@phosphor-icons/react'
+import {
+  CalendarCheck,
+  CaretLeft,
+  CaretRight,
+  Door,
+  Plus,
+  User,
+} from '@phosphor-icons/react'
 import {
   addDays,
   addWeeks,
@@ -17,6 +24,8 @@ import { useDispatch, useSelector } from 'react-redux'
 import { NovaAgendaModal } from '@/components/Agenda/NovaAgendaModal'
 import { Dialog, DialogTrigger } from '@/components/ui/dialog'
 import type { Agendamento } from '@/tipos'
+import { useModal } from '@/hooks/useModal'
+import { EditarAgendaModal } from '@/components/Agenda/EditarAgendaModal'
 
 export function Agendas() {
   const [selectedDate, setSelectedDate] = useState(new Date())
@@ -29,6 +38,17 @@ export function Agendas() {
   const agendamentos = useSelector(
     (state: RootState) => state.agendamentos.data,
   )
+
+  const [selectedStatus, setSelectedStatus] = useState({
+    confirmado: true,
+    remarcado: true,
+    cancelado: true,
+  })
+
+  const [agendaEditando, setAgendaEditando] = useState<Agendamento | null>(null)
+
+  // Modal
+  const { isEditModalOpen, openEditModal, closeEditModal } = useModal()
 
   // Ordenar agenda por horário
   const sortByTime = (a: Agendamento, b: Agendamento) => {
@@ -83,9 +103,23 @@ export function Agendas() {
         agendamento.localAgendamento === 'Sala Verde' ||
         agendamento.localAgendamento === 'Sala Azul'
 
-      return isInSelectedWeek && isSameTerapeuta && needsRoom && isChosedRoom
+      const isSelectedStatus =
+        (selectedStatus.confirmado &&
+          agendamento.statusAgendamento === 'Confirmado') ||
+        (selectedStatus.remarcado &&
+          agendamento.statusAgendamento === 'Remarcado') ||
+        (selectedStatus.cancelado &&
+          agendamento.statusAgendamento === 'Cancelado')
+
+      return (
+        isInSelectedWeek &&
+        isSameTerapeuta &&
+        needsRoom &&
+        isChosedRoom &&
+        isSelectedStatus
+      )
     })
-  }, [agendamentos, daysOfWeek, selectedTerapeuta, chosedRoom])
+  }, [agendamentos, daysOfWeek, selectedTerapeuta, chosedRoom, selectedStatus])
 
   const filteredAgendamentosNoRoom = useMemo(() => {
     return agendamentos.filter((agendamento) => {
@@ -111,6 +145,20 @@ export function Agendas() {
       ...prev,
       [room]: !prev[room],
     }))
+  }
+
+  const handleStatusChange = (
+    status: 'confirmado' | 'remarcado' | 'cancelado',
+  ) => {
+    setSelectedStatus((prev) => ({
+      ...prev,
+      [status]: !prev[status],
+    }))
+  }
+
+  const handleEditAgenda = (agenda: Agendamento) => {
+    setAgendaEditando(agenda)
+    openEditModal()
   }
 
   // Navegação entre semanas
@@ -146,7 +194,7 @@ export function Agendas() {
           </Dialog>
         </div>
         {/* Filters and Summary */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
             <User size={24} />
             <label htmlFor="terapeutas" className="text-xl font-semibold">
@@ -191,6 +239,44 @@ export function Agendas() {
               </label>
             </div>
           </div>
+          <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
+            <CalendarCheck size={24} />
+            <label
+              htmlFor="statusAgendamento"
+              className="text-xl font-semibold"
+            >
+              Status:
+            </label>
+            <div className="flex items-center space-x-4 mt-1">
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  className="form-checkbox h-4 w-4 text-green-500"
+                  checked={selectedStatus.confirmado}
+                  onChange={() => handleStatusChange('confirmado')}
+                />
+                <span className="ml-2">Confirmado</span>
+              </label>
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  className="form-checkbox h-4 w-4 text-yellow-500"
+                  checked={selectedStatus.remarcado}
+                  onChange={() => handleStatusChange('remarcado')}
+                />
+                <span className="ml-2">Remarcado</span>
+              </label>
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  className="form-checkbox h-4 w-4 text-red-500"
+                  checked={selectedStatus.cancelado}
+                  onChange={() => handleStatusChange('cancelado')}
+                />
+                <span className="ml-2">Cancelado</span>
+              </label>
+            </div>
+          </div>
         </div>
         {/* Navegação da Semana */}
         <div className="flex items-center justify-between p-4 bg-white rounded shadow mb-4">
@@ -202,7 +288,8 @@ export function Agendas() {
             <CaretLeft size={24} weight="fill" />
           </button>
           <div className="text-xl font-semibold">
-            Semana de {format(startOfSelectedWeek, 'dd/MM/yyyy')}
+            Semana de {format(startOfSelectedWeek, 'dd/MM/yyyy')} a{' '}
+            {format(addDays(startOfSelectedWeek, 6), 'dd/MM/yyyy')}
           </div>
           <button
             type="button"
@@ -247,6 +334,8 @@ export function Agendas() {
                           ? 'bg-green-100 text-green-800 hover:bg-green-600'
                           : 'bg-blue-100 text-blue-800 hover:bg-blue-600'
                       }`}
+                      onClick={() => handleEditAgenda(agendamento)}
+                      onKeyDown={() => handleEditAgenda(agendamento)}
                     >
                       <div className="font-semibold group-hover:text-white text-base">
                         {agendamento.horarioAgendamento} -{' '}
@@ -277,6 +366,8 @@ export function Agendas() {
             <div
               key={agendamento.id}
               className="mt-4 p-4 rounded-lg bg-yellow-100 cursor-pointer transition-colors duration-200 group hover:bg-yellow-600 shadow-md"
+              onClick={() => handleEditAgenda(agendamento)}
+              onKeyDown={() => handleEditAgenda(agendamento)}
             >
               <div className="mb-2">
                 <div className="font-semibold text-slate-500 group-hover:text-white/90 text-sm">
@@ -307,6 +398,13 @@ export function Agendas() {
             </div>
           ))}
         </div>
+        {agendaEditando && (
+          <EditarAgendaModal
+            agendamentoId={agendaEditando.id}
+            open={isEditModalOpen}
+            onClose={closeEditModal}
+          />
+        )}
       </main>
     </div>
   )

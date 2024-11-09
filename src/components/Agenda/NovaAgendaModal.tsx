@@ -19,10 +19,19 @@ import { useDispatch, useSelector } from 'react-redux'
 import type { AppDispatch, RootState } from '@/store/store'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import { fetchPacientes } from '@/store/pacientesSlice'
 import { v4 as uuidv4 } from 'uuid'
 import { addAgendamento } from '@/store/agendamentosSlice'
+import { maskTime } from '@/utils/formatter'
+import type { Agendamento } from '@/tipos'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../ui/select'
 
 // Schema de validação
 const NovaAgendaFormSchema = z.object({
@@ -60,36 +69,10 @@ const NovaAgendaFormSchema = z.object({
     required_error: 'Selecione um status',
     invalid_type_error: 'Selecione um status válido',
   }),
-  observacoesAgendamento: z.string(),
+  observacoesAgendamento: z.string().optional(),
 })
 
 type NovaAgendaFormInputs = z.infer<typeof NovaAgendaFormSchema>
-
-// Função para formatar a máscara de hora
-const maskTime = (value: string) => {
-  // Remove all non-digits
-  value = value.replace(/\D/g, '')
-
-  // Format as HH:MM
-  if (value.length >= 2) {
-    const hours = value.slice(0, 2)
-    const minutes = value.slice(2, 4)
-
-    // Validate hours
-    if (parseInt(hours) > 23) {
-      value = '23' + value.slice(2)
-    }
-
-    // Validate minutes
-    if (parseInt(minutes) > 59) {
-      value = value.slice(0, 2) + '59'
-    }
-
-    return value.slice(0, 2) + (value.length > 2 ? ':' + value.slice(2, 4) : '')
-  }
-
-  return value
-}
 
 export function NovaAgendaModal() {
   const dispatch = useDispatch<AppDispatch>()
@@ -99,20 +82,29 @@ export function NovaAgendaModal() {
   )
   const [mensagemSucesso, setMensagemSucesso] = useState('')
   const [mensagemErro, setMensagemErro] = useState('')
-  const [date, setDate] = useState<Date>()
   const calendarTriggerRef = useRef<HTMLButtonElement>(null)
   const [mensagemAlerta, setMensagemAlerta] = useState('')
   const [conflito, setConflito] = useState(false)
   const [mensagemConflito, setMensagemConflito] = useState('')
   const {
+    control,
     register,
     watch,
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
-    setValue,
   } = useForm<NovaAgendaFormInputs>({
     resolver: zodResolver(NovaAgendaFormSchema),
+    defaultValues: {
+      pacienteId: '',
+      dataAgendamento: undefined,
+      horarioAgendamento: '',
+      localAgendamento: undefined,
+      modalidadeAgendamento: undefined,
+      tipoAgendamento: undefined,
+      statusAgendamento: undefined,
+      observacoesAgendamento: '',
+    },
   })
   const pacienteId = watch('pacienteId')
   const watchDataAgendamento = watch('dataAgendamento')
@@ -127,19 +119,18 @@ export function NovaAgendaModal() {
     [pacienteId, pacientes],
   )
 
-  // Função para calcular a diferença de minutos entre dois horários
-  const getMinutesDifference = (time1: string, time2: string) => {
-    const [hours1, minutes1] = time1.split(':').map(Number)
-    const [hours2, minutes2] = time2.split(':').map(Number)
-    return Math.abs(hours1 * 60 + minutes1 - (hours2 * 60 + minutes2))
-  }
-
   useEffect(() => {
     dispatch(fetchPacientes())
-  }, [dispatch, errors])
+  }, [dispatch])
 
   // Check for conflicts when these fields change
   useEffect(() => {
+    const getMinutesDifference = (time1: string, time2: string) => {
+      const [hours1, minutes1] = time1.split(':').map(Number)
+      const [hours2, minutes2] = time2.split(':').map(Number)
+      return Math.abs(hours1 * 60 + minutes1 - (hours2 * 60 + minutes2))
+    }
+
     if (
       watchDataAgendamento &&
       watchHorarioAgendamento &&
@@ -211,16 +202,6 @@ export function NovaAgendaModal() {
     agendamentos,
   ])
 
-  // Função pra evitar o erro de aria-hidden
-  const handleDateSelect = (selectedDate: Date | undefined) => {
-    setDate(selectedDate)
-    if (selectedDate) {
-      setValue('dataAgendamento', selectedDate)
-    }
-    calendarTriggerRef.current?.click()
-    calendarTriggerRef.current?.focus()
-  }
-
   // Função para criar um novo agendamento
   async function handleCreateNewAgendamento(data: NovaAgendaFormInputs) {
     try {
@@ -234,7 +215,7 @@ export function NovaAgendaModal() {
         throw new Error('Paciente não encontrado')
       }
 
-      const novoAgendamento = {
+      const novoAgendamento: Agendamento = {
         id: uuidv4(),
         terapeutaInfo: pacienteSelecionado.terapeutaInfo,
         pacienteInfo: pacienteSelecionado,
@@ -244,19 +225,24 @@ export function NovaAgendaModal() {
         modalidadeAgendamento: data.modalidadeAgendamento,
         tipoAgendamento: data.tipoAgendamento,
         statusAgendamento: data.statusAgendamento,
-        observacoesAgendamento: data.observacoesAgendamento,
+        observacoesAgendamento: data.observacoesAgendamento || '',
       }
 
-      dispatch(addAgendamento(novoAgendamento)).unwrap()
+      await dispatch(addAgendamento(novoAgendamento)).unwrap()
 
       reset()
-      setDate(undefined)
-      setMensagemSucesso('Agendamento criado com sucesso!')
+      setConflito(false)
+      setMensagemConflito('')
       setMensagemErro('')
       setMensagemAlerta('')
+      setMensagemSucesso('Agendamento criado com sucesso!')
     } catch (error) {
       console.error('Erro ao criar novo agendamento:', error)
-      setMensagemErro('Erro ao criar novo agendamento. Tente novamente.')
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'Erro ao criar novo agendamento. Tente novamente.'
+      setMensagemErro(errorMessage)
       setMensagemSucesso('')
     }
   }
@@ -280,22 +266,44 @@ export function NovaAgendaModal() {
           onSubmit={handleSubmit(handleCreateNewAgendamento)}
           className="space-y-6 bg-white rounded-lg"
         >
-          <h3 className="font-medium text-azul text-xl mb-4">Paciente</h3>
+          <label
+            className="font-medium text-azul text-xl mb-4"
+            htmlFor="pacienteId"
+          >
+            Paciente
+          </label>
           <div className="space-y-2">
-            <select
-              {...register('pacienteId')}
-              onFocus={handleFocus}
-              className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
-            >
-              <option value="">Selecione o paciente</option>
-              {pacientes.map((paciente) => (
-                <option key={paciente.id} value={paciente.id}>
-                  {paciente.nomePaciente}
-                </option>
-              ))}
-            </select>
+            <label className="text-sm text-slate-500" htmlFor="pacienteId">
+              Paciente
+            </label>
+            <Controller
+              control={control}
+              name="pacienteId"
+              render={({ field: { onChange, value } }) => (
+                <Select
+                  value={value || ''}
+                  onValueChange={(val) => {
+                    onChange(val)
+                    handleFocus()
+                  }}
+                >
+                  <SelectTrigger className="shadow-rosa/50 focus:shadow-rosa w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]">
+                    <SelectValue placeholder="Selecione um paciente" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {pacientes.map((paciente) => (
+                      <SelectItem key={paciente.id} value={paciente.id}>
+                        {paciente.nomePaciente}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
             {errors.pacienteId && (
-              <p className="text-red-500">{errors.pacienteId.message}</p>
+              <p className="text-red-500 text-sm">
+                {errors.pacienteId.message}
+              </p>
             )}
           </div>
           <h3 className="font-medium text-azul text-xl mb-4">Terapeuta</h3>
@@ -311,7 +319,6 @@ export function NovaAgendaModal() {
           <h3 className="font-medium text-azul text-xl mb-4">
             Dados do Agendamento
           </h3>
-          <div></div>
           <div className="space-y-6">
             {/* Date and Time */}
             <div className="grid grid-cols-2 gap-4">
@@ -322,36 +329,47 @@ export function NovaAgendaModal() {
                 >
                   Data do Agendamento
                 </label>
-
-                <Popover modal={true}>
-                  <PopoverTrigger asChild>
-                    <button
-                      type="button"
-                      id="dataAgendamento"
-                      ref={calendarTriggerRef}
-                      className={cn(
-                        'shadow-rosa/50 focus:shadow-rosa w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px] text-left flex items-center',
-                        !date && 'text-slate-400',
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {date ? format(date, 'dd/MM/yyyy') : 'Selecione uma data'}
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={date}
-                      onSelect={handleDateSelect}
-                      initialFocus
-                      locale={ptBR}
-                      classNames={{
-                        day_selected: 'bg-rosa text-white',
-                        month: 'capitalize',
-                      }}
-                    />
-                  </PopoverContent>
-                </Popover>
+                <Controller
+                  control={control}
+                  name="dataAgendamento"
+                  render={({ field }) => (
+                    <Popover modal={true}>
+                      <PopoverTrigger asChild>
+                        <button
+                          type="button"
+                          id="dataAgendamento"
+                          ref={calendarTriggerRef}
+                          className={cn(
+                            'shadow-rosa/50 focus:shadow-rosa w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px] text-left flex items-center',
+                            !field.value && 'text-slate-400',
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {field.value
+                            ? format(field.value, 'dd/MM/yyyy')
+                            : 'Selecione uma data'}
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={(date) => {
+                            field.onChange(date)
+                            calendarTriggerRef.current?.click()
+                            calendarTriggerRef.current?.focus()
+                          }}
+                          initialFocus
+                          locale={ptBR}
+                          classNames={{
+                            day_selected: 'bg-rosa text-white',
+                            month: 'capitalize',
+                          }}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  )}
+                />
                 {errors.dataAgendamento && (
                   <span className="text-red-500 text-sm">
                     {errors.dataAgendamento.message}
@@ -394,63 +412,66 @@ export function NovaAgendaModal() {
               >
                 Local do Agendamento
               </Label>
-              <RadioGroup.Root
-                className="flex items-center gap-x-6"
-                onValueChange={(value) => {
-                  setValue(
-                    'localAgendamento',
-                    value as NovaAgendaFormInputs['localAgendamento'],
-                  )
-                  handleFocus()
-                }}
-                {...register('localAgendamento')}
-              >
-                <div className="flex items-center gap-2">
-                  <RadioGroup.Item
-                    value="Sala Verde"
-                    className="w-[20px] h-[20px] border border-rosa rounded-full flex items-center justify-center"
-                    id="sala-verde"
+              <Controller
+                control={control}
+                name="localAgendamento"
+                render={({ field }) => (
+                  <RadioGroup.Root
+                    className="flex items-center gap-x-6"
+                    value={field.value || ''}
+                    onValueChange={(value) => {
+                      field.onChange(value)
+                      handleFocus()
+                    }}
                   >
-                    <RadioGroup.Indicator className="w-[10px] h-[10px] bg-green-600 rounded-full" />
-                  </RadioGroup.Item>
-                  <label
-                    className="text-black text-[17px] leading-none"
-                    htmlFor="sala-verde"
-                  >
-                    Sala Verde
-                  </label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <RadioGroup.Item
-                    value="Sala Azul"
-                    className="w-[20px] h-[20px] border border-rosa rounded-full flex items-center justify-center"
-                    id="sala-azul"
-                  >
-                    <RadioGroup.Indicator className="w-[10px] h-[10px] bg-blue-500 rounded-full" />
-                  </RadioGroup.Item>
-                  <label
-                    className="text-black text-[17px] leading-none"
-                    htmlFor="sala-azul"
-                  >
-                    Sala Azul
-                  </label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <RadioGroup.Item
-                    value="Não Precisa de Sala"
-                    className="w-[20px] h-[20px] border border-rosa rounded-full flex items-center justify-center"
-                    id="nao-precisa-sala"
-                  >
-                    <RadioGroup.Indicator className="w-[10px] h-[10px] bg-yellow-500 rounded-full" />
-                  </RadioGroup.Item>
-                  <label
-                    className="text-black text-[17px] leading-none"
-                    htmlFor="nao-precisa-sala"
-                  >
-                    Não Precisa de Sala
-                  </label>
-                </div>
-              </RadioGroup.Root>
+                    <div className="flex items-center gap-2">
+                      <RadioGroup.Item
+                        value="Sala Verde"
+                        className="w-[20px] h-[20px] border border-rosa rounded-full flex items-center justify-center"
+                        id="sala-verde"
+                      >
+                        <RadioGroup.Indicator className="w-[10px] h-[10px] bg-green-600 rounded-full" />
+                      </RadioGroup.Item>
+                      <label
+                        className="text-black text-[17px] leading-none"
+                        htmlFor="sala-verde"
+                      >
+                        Sala Verde
+                      </label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <RadioGroup.Item
+                        value="Sala Azul"
+                        className="w-[20px] h-[20px] border border-rosa rounded-full flex items-center justify-center"
+                        id="sala-azul"
+                      >
+                        <RadioGroup.Indicator className="w-[10px] h-[10px] bg-blue-500 rounded-full" />
+                      </RadioGroup.Item>
+                      <label
+                        className="text-black text-[17px] leading-none"
+                        htmlFor="sala-azul"
+                      >
+                        Sala Azul
+                      </label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <RadioGroup.Item
+                        value="Não Precisa de Sala"
+                        className="w-[20px] h-[20px] border border-rosa rounded-full flex items-center justify-center"
+                        id="nao-precisa-sala"
+                      >
+                        <RadioGroup.Indicator className="w-[10px] h-[10px] bg-yellow-500 rounded-full" />
+                      </RadioGroup.Item>
+                      <label
+                        className="text-black text-[17px] leading-none"
+                        htmlFor="nao-precisa-sala"
+                      >
+                        Não Precisa de Sala
+                      </label>
+                    </div>
+                  </RadioGroup.Root>
+                )}
+              />
               {errors.localAgendamento && (
                 <p className="text-red-500 text-sm mt-1">
                   {errors.localAgendamento.message}
@@ -458,49 +479,58 @@ export function NovaAgendaModal() {
               )}
             </div>
             <div className="space-y-2">
-              <label className="text-sm text-slate-500">Modalidade</label>
-              <RadioGroup.Root
-                onValueChange={(value) => {
-                  setValue(
-                    'modalidadeAgendamento',
-                    value as NovaAgendaFormInputs['modalidadeAgendamento'],
-                  )
-                  handleFocus()
-                }}
-                {...register('modalidadeAgendamento')}
-                className="flex items-center gap-x-6"
+              <label
+                htmlFor="modalidadeAgendamento"
+                className="text-sm text-slate-500"
               >
-                <div className="flex items-center gap-2">
-                  <RadioGroup.Item
-                    value="Presencial"
-                    className="w-[20px] h-[20px] border border-rosa rounded-full flex items-center justify-center"
-                    id="presencial"
+                Modalidade
+              </label>
+              <Controller
+                control={control}
+                name="modalidadeAgendamento"
+                render={({ field }) => (
+                  <RadioGroup.Root
+                    id="modalidadeAgendamento"
+                    value={field.value || ''}
+                    onValueChange={(value) => {
+                      field.onChange(value)
+                      handleFocus()
+                    }}
+                    className="flex items-center gap-x-6"
                   >
-                    <RadioGroup.Indicator className="w-[10px] h-[10px] bg-rosa rounded-full" />
-                  </RadioGroup.Item>
-                  <label
-                    className="text-black text-[17px] leading-none"
-                    htmlFor="presencial"
-                  >
-                    Presencial
-                  </label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <RadioGroup.Item
-                    value="Online"
-                    className="w-[20px] h-[20px] border border-rosa rounded-full flex items-center justify-center"
-                    id="online"
-                  >
-                    <RadioGroup.Indicator className="w-[10px] h-[10px] bg-rosa rounded-full" />
-                  </RadioGroup.Item>
-                  <label
-                    className="text-black text-[17px] leading-none"
-                    htmlFor="online"
-                  >
-                    Online
-                  </label>
-                </div>
-              </RadioGroup.Root>
+                    <div className="flex items-center gap-2">
+                      <RadioGroup.Item
+                        value="Presencial"
+                        className="w-[20px] h-[20px] border border-rosa rounded-full flex items-center justify-center"
+                        id="presencial"
+                      >
+                        <RadioGroup.Indicator className="w-[10px] h-[10px] bg-rosa rounded-full" />
+                      </RadioGroup.Item>
+                      <label
+                        className="text-black text-[17px] leading-none"
+                        htmlFor="presencial"
+                      >
+                        Presencial
+                      </label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <RadioGroup.Item
+                        value="Online"
+                        className="w-[20px] h-[20px] border border-rosa rounded-full flex items-center justify-center"
+                        id="online"
+                      >
+                        <RadioGroup.Indicator className="w-[10px] h-[10px] bg-rosa rounded-full" />
+                      </RadioGroup.Item>
+                      <label
+                        className="text-black text-[17px] leading-none"
+                        htmlFor="online"
+                      >
+                        Online
+                      </label>
+                    </div>
+                  </RadioGroup.Root>
+                )}
+              />
               {errors.modalidadeAgendamento && (
                 <p className="text-red-500 text-sm mt-1">
                   {errors.modalidadeAgendamento.message}
@@ -514,18 +544,34 @@ export function NovaAgendaModal() {
               >
                 Tipo de Agendamento
               </label>
-              <select
-                className="shadow-rosa/50 focus:shadow-rosa w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
-                id="tipoAgendamento"
-                {...register('tipoAgendamento')}
-              >
-                <option value="">Selecione o tipo</option>
-                <option value="Sessão">Sessão</option>
-                <option value="Orientação Parental">Orientação Parental</option>
-                <option value="Visita Escolar">Visita Escolar</option>
-                <option value="Supervisão">Supervisão</option>
-                <option value="Outros">Outros</option>
-              </select>
+              <Controller
+                control={control}
+                name="tipoAgendamento"
+                render={({ field: { onChange, value } }) => (
+                  <Select
+                    value={value}
+                    onValueChange={(val) => {
+                      onChange(val)
+                      handleFocus()
+                    }}
+                  >
+                    <SelectTrigger className="shadow-rosa/50 focus:shadow-rosa w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]">
+                      <SelectValue placeholder="Selecione o tipo de agendamento" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Sessão">Sessão</SelectItem>
+                      <SelectItem value="Orientação Parental">
+                        Orientação Parental
+                      </SelectItem>
+                      <SelectItem value="Visita Escolar">
+                        Visita Escolar
+                      </SelectItem>
+                      <SelectItem value="Supervisão">Supervisão</SelectItem>
+                      <SelectItem value="Outros">Outros</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
             </div>
             {errors.tipoAgendamento && (
               <p className="text-red-500 text-sm">
@@ -533,64 +579,83 @@ export function NovaAgendaModal() {
               </p>
             )}
             <div className="space-y-2">
-              <label className="text-sm text-slate-500">Status</label>
-              <RadioGroup.Root
-                onValueChange={(value) => {
-                  setValue(
-                    'statusAgendamento',
-                    value as NovaAgendaFormInputs['statusAgendamento'],
-                  )
-                  handleFocus()
-                }}
-                {...register('statusAgendamento')}
-                className="flex items-center gap-x-6"
+              <label
+                className="text-sm text-slate-500"
+                htmlFor="statusAgendamento"
               >
-                <div className="flex items-center gap-2">
-                  <RadioGroup.Item
-                    value="Confirmado"
-                    className="w-[20px] h-[20px] border border-rosa rounded-full flex items-center justify-center"
-                    id="confirmado"
+                Status do Agendamento
+              </label>
+              <Controller
+                control={control}
+                name="statusAgendamento"
+                render={({ field: { onChange, value } }) => (
+                  <RadioGroup.Root
+                    id="statusAgendamento"
+                    className="flex items-center gap-x-6"
+                    value={value || ''}
+                    onValueChange={(val) => {
+                      onChange(val)
+                      handleFocus()
+                    }}
                   >
-                    <RadioGroup.Indicator className="w-[10px] h-[10px] bg-green-600 rounded-full" />
-                  </RadioGroup.Item>
-                  <label
-                    className="text-black text-[17px] leading-none"
-                    htmlFor="confirmado"
-                  >
-                    Confirmado
-                  </label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <RadioGroup.Item
-                    value="Remarcado"
-                    className="w-[20px] h-[20px] border border-rosa rounded-full flex items-center justify-center"
-                    id="remarcado"
-                  >
-                    <RadioGroup.Indicator className="w-[10px] h-[10px] bg-yellow-500 rounded-full" />
-                  </RadioGroup.Item>
-                  <label
-                    className="text-black text-[17px] leading-none"
-                    htmlFor="remarcado"
-                  >
-                    Remarcado
-                  </label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <RadioGroup.Item
-                    value="Cancelado"
-                    className="w-[20px] h-[20px] border border-rosa rounded-full flex items-center justify-center"
-                    id="cancelado"
-                  >
-                    <RadioGroup.Indicator className="w-[10px] h-[10px] bg-red-500 rounded-full" />
-                  </RadioGroup.Item>
-                  <label
-                    className="text-black text-[17px] leading-none"
-                    htmlFor="cancelado"
-                  >
-                    Cancelado
-                  </label>
-                </div>
-              </RadioGroup.Root>
+                    {/* Confirmado */}
+                    <div className="flex items-center gap-2">
+                      <RadioGroup.Item
+                        value="Confirmado"
+                        className="w-[20px] h-[20px] border border-rosa rounded-full flex items-center justify-center"
+                        id="confirmado"
+                      >
+                        <RadioGroup.Indicator className="w-[10px] h-[10px] bg-green-600 rounded-full" />
+                      </RadioGroup.Item>
+                      <label
+                        className="text-black text-[17px] leading-none"
+                        htmlFor="confirmado"
+                      >
+                        Confirmado
+                      </label>
+                    </div>
+
+                    {/* Remarcado */}
+                    <div className="flex items-center gap-2">
+                      <RadioGroup.Item
+                        value="Remarcado"
+                        className="w-[20px] h-[20px] border border-rosa rounded-full flex items-center justify-center"
+                        id="remarcado"
+                      >
+                        <RadioGroup.Indicator className="w-[10px] h-[10px] bg-yellow-500 rounded-full" />
+                      </RadioGroup.Item>
+                      <label
+                        className="text-black text-[17px] leading-none"
+                        htmlFor="remarcado"
+                      >
+                        Remarcado
+                      </label>
+                    </div>
+
+                    {/* Cancelado */}
+                    <div className="flex items-center gap-2">
+                      <RadioGroup.Item
+                        value="Cancelado"
+                        className="w-[20px] h-[20px] border border-rosa rounded-full flex items-center justify-center"
+                        id="cancelado"
+                      >
+                        <RadioGroup.Indicator className="w-[10px] h-[10px] bg-red-500 rounded-full" />
+                      </RadioGroup.Item>
+                      <label
+                        className="text-black text-[17px] leading-none"
+                        htmlFor="cancelado"
+                      >
+                        Cancelado
+                      </label>
+                    </div>
+                  </RadioGroup.Root>
+                )}
+              />
+              {errors.statusAgendamento && (
+                <p className="text-red-500 text-sm">
+                  {errors.statusAgendamento.message}
+                </p>
+              )}
             </div>
             {errors.statusAgendamento && (
               <p className="text-red-500 text-sm">

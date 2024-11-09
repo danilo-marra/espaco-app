@@ -6,6 +6,7 @@ import {
   createSlice,
   type PayloadAction,
 } from '@reduxjs/toolkit'
+import axios from 'axios'
 
 const initialState: AgendamentosState = {
   data: [],
@@ -22,6 +23,31 @@ export const addAgendamento = createAsyncThunk<Agendamento, Agendamento>(
   'agendamentos/addAgendamento',
   async (agendamento) =>
     httpRequest<Agendamento>(`${API_URL}/agendamentos`, 'POST', agendamento),
+)
+
+export const updateAgendamento = createAsyncThunk<
+  Agendamento,
+  Agendamento,
+  { rejectValue: string }
+>(
+  'agendamentos/updateAgendamento',
+  async (agendamento, { rejectWithValue }) => {
+    try {
+      const updatedAgendamento = await httpRequest<Agendamento>(
+        `${API_URL}/agendamentos/${agendamento.id}`,
+        'PUT',
+        agendamento,
+      )
+
+      return updatedAgendamento
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error('Erro ao atualizar agendamento:', error.message)
+        return rejectWithValue(error.message)
+      }
+      return rejectWithValue('Erro desconhecido')
+    }
+  },
 )
 
 const agendamentosSlice = createSlice({
@@ -45,6 +71,14 @@ const agendamentosSlice = createSlice({
         addAgendamento.fulfilled,
         (state, action: PayloadAction<Agendamento>) => {
           state.data.push(action.payload)
+        },
+      )
+      .addCase(
+        updateAgendamento.fulfilled,
+        (state, action: PayloadAction<Agendamento>) => {
+          state.data = state.data.map((agendamento) =>
+            agendamento.id === action.payload.id ? action.payload : agendamento,
+          )
         },
       )
   },
