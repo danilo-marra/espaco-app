@@ -134,9 +134,17 @@ export function Agendas() {
 
       const isNoRoom = agendamento.localAgendamento === 'Não Precisa de Sala'
 
-      return isSameWeekFilter && isSameTerapeuta && isNoRoom
+      const isSelectedStatus =
+        (selectedStatus.confirmado &&
+          agendamento.statusAgendamento === 'Confirmado') ||
+        (selectedStatus.remarcado &&
+          agendamento.statusAgendamento === 'Remarcado') ||
+        (selectedStatus.cancelado &&
+          agendamento.statusAgendamento === 'Cancelado')
+
+      return isSameWeekFilter && isSameTerapeuta && isNoRoom && isSelectedStatus
     })
-  }, [agendamentos, selectedDate, selectedTerapeuta])
+  }, [agendamentos, selectedDate, selectedTerapeuta, selectedStatus])
 
   // Handlers
 
@@ -329,25 +337,36 @@ export function Agendas() {
                   {dayAgendamentos.map((agendamento) => (
                     <div
                       key={agendamento.id}
-                      className={`text-xs p-1 space-y-1 rounded cursor-pointer transition-colors duration-200 group ${
+                      className={`text-xs leading-none p-1 space-y-1 rounded cursor-pointer transition-colors duration-200 group ${
                         agendamento.localAgendamento === 'Sala Verde'
-                          ? 'bg-green-100 text-green-800 hover:bg-green-600'
-                          : 'bg-blue-100 text-blue-800 hover:bg-blue-600'
-                      }`}
+                          ? 'text-green-600 hover:bg-slate-50'
+                          : 'text-blue-600 hover:bg-slate-50'
+                      } ${agendamento.statusAgendamento === 'Cancelado' || agendamento.statusAgendamento === 'Remarcado' ? 'bg-red-100' : 'bg-slate-100'}`}
                       onClick={() => handleEditAgenda(agendamento)}
                       onKeyDown={() => handleEditAgenda(agendamento)}
                     >
-                      <div className="font-semibold group-hover:text-white text-base">
+                      <div
+                        className={`font-semibold group-hover:text-zinc-500 text-base ${agendamento.statusAgendamento === 'Cancelado' || agendamento.statusAgendamento === 'Remarcado' ? 'line-through' : ''}`}
+                      >
                         {agendamento.horarioAgendamento} -{' '}
                         {agendamento.pacienteInfo.terapeutaInfo.nomeTerapeuta}
                       </div>
-                      <div className="group-hover:text-white/90 text-base">
+                      <hr
+                        className={`border-2 ${agendamento.localAgendamento === 'Sala Verde' ? 'border-green-500' : 'border-blue-500'}`}
+                      />
+                      <div className="group-hover:text-zinc/90 text-base">
                         {agendamento.pacienteInfo.nomePaciente}
                       </div>
-                      <div className="italic group-hover:text-white/70">
+                      <div className="italic group-hover:text-zinc/70">
                         {agendamento.tipoAgendamento} -{' '}
-                        {agendamento.modalidadeAgendamento}
+                        {agendamento.modalidadeAgendamento} -{' '}
+                        {agendamento.localAgendamento}
                       </div>
+                      {agendamento.statusAgendamento !== 'Confirmado' && (
+                        <div className="text-base font-semibold text-orange-500 group-hover:text-orange-600">
+                          {agendamento.statusAgendamento}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -365,7 +384,7 @@ export function Agendas() {
           {filteredAgendamentosNoRoom.sort(sortByTime).map((agendamento) => (
             <div
               key={agendamento.id}
-              className="mt-4 p-4 rounded-lg bg-yellow-100 cursor-pointer transition-colors duration-200 group hover:bg-yellow-600 shadow-md"
+              className="mt-4 p-4 rounded-lg bg-yellow-100 cursor-pointer transition-colors duration-200 group hover:bg-yellow-600 shadow-md leading-2"
               onClick={() => handleEditAgenda(agendamento)}
               onKeyDown={() => handleEditAgenda(agendamento)}
             >
@@ -379,13 +398,14 @@ export function Agendas() {
                   )
                 </div>
               </div>
-
               <div className="space-y-1">
-                <div className="font-medium text-slate-900 group-hover:text-white">
+                <div
+                  className={`font-medium text-slate-900 group-hover:text-white ${agendamento.statusAgendamento === 'Cancelado' || agendamento.statusAgendamento === 'Remarcado' ? 'line-through' : ''}`}
+                >
                   {agendamento.horarioAgendamento} -{' '}
                   {agendamento.pacienteInfo.terapeutaInfo.nomeTerapeuta}
                 </div>
-
+                <hr className="border-2 border-yellow-400" />
                 <div className="text-slate-500 group-hover:text-white/90">
                   {agendamento.pacienteInfo.nomePaciente}
                 </div>
@@ -394,6 +414,11 @@ export function Agendas() {
                   {agendamento.tipoAgendamento} -{' '}
                   {agendamento.modalidadeAgendamento}
                 </div>
+                {agendamento.statusAgendamento !== 'Confirmado' && (
+                  <div className="text-base font-semibold text-orange-500 group-hover:text-orange-100">
+                    {agendamento.statusAgendamento}
+                  </div>
+                )}
               </div>
             </div>
           ))}

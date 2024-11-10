@@ -1769,7 +1769,7 @@
       "localAgendamento": "Não Precisa de Sala",
       "modalidadeAgendamento": "Presencial",
       "tipoAgendamento": "Visita Escolar",
-      "statusAgendamento": "Confirmado",
+      "statusAgendamento": "Cancelado",
       "observacoesAgendamento": ""
     },
     {
@@ -1808,7 +1808,7 @@
       "localAgendamento": "Sala Azul",
       "modalidadeAgendamento": "Presencial",
       "tipoAgendamento": "Sessão",
-      "statusAgendamento": "Confirmado",
+      "statusAgendamento": "Remarcado",
       "observacoesAgendamento": ""
     },
     {
