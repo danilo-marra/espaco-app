@@ -50,6 +50,14 @@ export const updateAgendamento = createAsyncThunk<
   },
 )
 
+export const deleteAgendamento = createAsyncThunk<string, string>(
+  'agendamentos/deleteAgendamento',
+  async (id) => {
+    await httpRequest(`${API_URL}/agendamentos/${id}`, 'DELETE')
+    return id
+  },
+)
+
 const agendamentosSlice = createSlice({
   name: 'agendamentos',
   initialState,
@@ -78,6 +86,14 @@ const agendamentosSlice = createSlice({
         (state, action: PayloadAction<Agendamento>) => {
           state.data = state.data.map((agendamento) =>
             agendamento.id === action.payload.id ? action.payload : agendamento,
+          )
+        },
+      )
+      .addCase(
+        deleteAgendamento.fulfilled,
+        (state, action: PayloadAction<string>) => {
+          state.data = state.data.filter(
+            (agendamento) => agendamento.id !== action.payload,
           )
         },
       )

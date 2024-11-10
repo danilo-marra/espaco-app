@@ -5,7 +5,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import { ptBR } from 'date-fns/locale'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { format } from 'date-fns'
+import { addDays, addMonths, format } from 'date-fns'
 import { Label } from '../ui/label'
 import * as RadioGroup from '@radix-ui/react-radio-group'
 import {
@@ -32,6 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../ui/select'
+import { Checkbox } from '../ui/checkbox'
 
 // Schema de validação
 const NovaAgendaFormSchema = z.object({
@@ -47,6 +48,23 @@ const NovaAgendaFormSchema = z.object({
     required_error: 'Selecione uma sala',
     invalid_type_error: 'Selecione uma sala válida',
   }),
+  periodicidade: z
+    .enum(['Não repetir', 'Diária', 'Semanal', 'Mensal'])
+    .optional(),
+  diasDaSemana: z
+    .array(
+      z.enum([
+        'Domingo',
+        'Segunda-feira',
+        'Terça-feira',
+        'Quarta-feira',
+        'Quinta-feira',
+        'Sexta-feira',
+        'Sábado',
+      ]),
+    )
+    .optional(),
+  dataFimRecorrencia: z.date().optional(),
   modalidadeAgendamento: z.enum(['Presencial', 'Online'], {
     required_error: 'Selecione uma modalidade',
     invalid_type_error: 'Selecione uma modalidade válida',
@@ -215,20 +233,69 @@ export function NovaAgendaModal() {
         throw new Error('Paciente não encontrado')
       }
 
-      const novoAgendamento: Agendamento = {
-        id: uuidv4(),
-        terapeutaInfo: pacienteSelecionado.terapeutaInfo,
-        pacienteInfo: pacienteSelecionado,
-        dataAgendamento: data.dataAgendamento,
-        horarioAgendamento: data.horarioAgendamento,
-        localAgendamento: data.localAgendamento,
-        modalidadeAgendamento: data.modalidadeAgendamento,
-        tipoAgendamento: data.tipoAgendamento,
-        statusAgendamento: data.statusAgendamento,
-        observacoesAgendamento: data.observacoesAgendamento || '',
+      const agendamentosParaCriar: Agendamento[] = []
+
+      if (data.periodicidade === 'Não repetir' || !data.periodicidade) {
+        const novoAgendamento: Agendamento = {
+          id: uuidv4(),
+          terapeutaInfo: pacienteSelecionado.terapeutaInfo,
+          pacienteInfo: pacienteSelecionado,
+          dataAgendamento: data.dataAgendamento,
+          horarioAgendamento: data.horarioAgendamento,
+          localAgendamento: data.localAgendamento,
+          modalidadeAgendamento: data.modalidadeAgendamento,
+          tipoAgendamento: data.tipoAgendamento,
+          statusAgendamento: data.statusAgendamento,
+          observacoesAgendamento: data.observacoesAgendamento || '',
+        }
+        agendamentosParaCriar.push(novoAgendamento)
+      } else {
+        // Calcular as datas de acordo com a periodicidade
+        let dataAtual = data.dataAgendamento
+        const dataFim = data.dataFimRecorrencia
+        while (dataAtual <= dataFim!) {
+          if (
+            data.periodicidade !== 'Semanal' ||
+            data.diasDaSemana?.includes(
+              format(dataAtual, 'EEEE', { locale: ptBR }) as
+                | 'Domingo'
+                | 'Segunda-feira'
+                | 'Terça-feira'
+                | 'Quarta-feira'
+                | 'Quinta-feira'
+                | 'Sexta-feira'
+                | 'Sábado',
+            )
+          ) {
+            const novoAgendamento: Agendamento = {
+              id: uuidv4(),
+              terapeutaInfo: pacienteSelecionado.terapeutaInfo,
+              pacienteInfo: pacienteSelecionado,
+              dataAgendamento: dataAtual,
+              horarioAgendamento: data.horarioAgendamento,
+              localAgendamento: data.localAgendamento,
+              modalidadeAgendamento: data.modalidadeAgendamento,
+              tipoAgendamento: data.tipoAgendamento,
+              statusAgendamento: data.statusAgendamento,
+              observacoesAgendamento: data.observacoesAgendamento || '',
+            }
+            agendamentosParaCriar.push(novoAgendamento)
+          }
+          // Incrementar dataAtual de acordo com a periodicidade
+          if (data.periodicidade === 'Diária') {
+            dataAtual = addDays(dataAtual, 1)
+          } else if (data.periodicidade === 'Semanal') {
+            dataAtual = addDays(dataAtual, 1)
+          } else if (data.periodicidade === 'Mensal') {
+            dataAtual = addMonths(dataAtual, 1)
+          }
+        }
       }
 
-      await dispatch(addAgendamento(novoAgendamento)).unwrap()
+      // Adicionar todos os agendamentos
+      for (const agendamento of agendamentosParaCriar) {
+        await dispatch(addAgendamento(agendamento)).unwrap()
+      }
 
       reset()
       setConflito(false)
@@ -255,7 +322,7 @@ export function NovaAgendaModal() {
   return (
     <DialogPortal>
       <DialogOverlay className="bg-gray-500/25 data-[state=open]:animate-overlayShow fixed inset-0" />
-      <DialogContent className="data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[768px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-[25px] shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none">
+      <DialogContent className="data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] w-[90vw] max-w-[1024px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-[25px] shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none">
         <DialogTitle className="text-2xl font-bold text-azul">
           Novo Agendamento
         </DialogTitle>
@@ -403,7 +470,132 @@ export function NovaAgendaModal() {
                 )}
               </div>
             </div>
-
+            <div className="space-y-2">
+              <label className="text-sm text-slate-500" htmlFor="periodicidade">
+                Periodicidade
+              </label>
+              <Controller
+                control={control}
+                name="periodicidade"
+                render={({ field: { onChange, value } }) => (
+                  <Select value={value} onValueChange={onChange}>
+                    <SelectTrigger className="shadow-rosa/50 focus:shadow-rosa w-full h-[40px] rounded-md px-4">
+                      <SelectValue placeholder="Selecione a periodicidade" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Não Repetir">Não Repetir</SelectItem>
+                      <SelectItem value="Diária">Diária</SelectItem>
+                      <SelectItem value="Semanal">Semanal</SelectItem>
+                      <SelectItem value="Mensal">Mensal</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </div>
+            {/* // Se a periodicidade for semanal, permitir selecionar os dias da
+            semana */}
+            {watch('periodicidade') === 'Semanal' && (
+              <div className="space-y-2">
+                <label
+                  htmlFor="diasDaSemana"
+                  className="text-sm text-slate-500"
+                >
+                  Dias da Semana
+                </label>
+                <Controller
+                  control={control}
+                  name="diasDaSemana"
+                  render={({ field: { onChange, value } }) => (
+                    <div className="flex flex-wrap gap-2">
+                      {[
+                        'Domingo',
+                        'Segunda-feira',
+                        'Terça-feira',
+                        'Quarta-feira',
+                        'Quinta-feira',
+                        'Sexta-feira',
+                        'Sábado',
+                      ].map((dia) => (
+                        <label
+                          key={dia}
+                          className="flex items-center space-x-2"
+                          htmlFor="diasDaSemana"
+                        >
+                          <Checkbox
+                            checked={value?.includes(
+                              dia as
+                                | 'Domingo'
+                                | 'Segunda-feira'
+                                | 'Terça-feira'
+                                | 'Quarta-feira'
+                                | 'Quinta-feira'
+                                | 'Sexta-feira'
+                                | 'Sábado',
+                            )}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                onChange([...(value || []), dia])
+                              } else {
+                                onChange((value || []).filter((d) => d !== dia))
+                              }
+                            }}
+                            className="w-4 h-4 border rounded"
+                          />
+                          <span>{dia}</span>
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                />
+              </div>
+            )}
+            {/* // Permitir selecionar a data de fim da recorrência */}
+            {watch('periodicidade') !== 'Não repetir' && (
+              <div className="space-y-2">
+                <label
+                  className="text-sm text-slate-500"
+                  htmlFor="dataFimRecorrencia"
+                >
+                  Data de Fim da Recorrência
+                </label>
+                <Controller
+                  control={control}
+                  name="dataFimRecorrencia"
+                  render={({ field }) => (
+                    <Popover modal={true}>
+                      <PopoverTrigger asChild>
+                        <button
+                          type="button"
+                          className={cn(
+                            'shadow-rosa/50 focus:shadow-rosa w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px] text-left flex items-center',
+                            !field.value && 'text-slate-400',
+                          )}
+                        >
+                          {field.value
+                            ? format(field.value, 'dd/MM/yyyy')
+                            : 'Selecione uma data'}
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={(date) => {
+                            field.onChange(date)
+                          }}
+                          initialFocus
+                          locale={ptBR}
+                          classNames={{
+                            day_selected: 'bg-rosa text-white',
+                            month: 'capitalize',
+                          }}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  )}
+                />
+              </div>
+            )}
             {/* Location */}
             <div className="space-y-2">
               <Label

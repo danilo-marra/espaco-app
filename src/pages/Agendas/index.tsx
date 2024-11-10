@@ -1,4 +1,4 @@
-import { fetchAgendamentos } from '@/store/agendamentosSlice'
+import { deleteAgendamento, fetchAgendamentos } from '@/store/agendamentosSlice'
 import type { RootState, AppDispatch } from '@/store/store'
 import {
   CalendarCheck,
@@ -6,6 +6,7 @@ import {
   CaretRight,
   Door,
   Plus,
+  Trash,
   User,
 } from '@phosphor-icons/react'
 import {
@@ -26,6 +27,8 @@ import { Dialog, DialogTrigger } from '@/components/ui/dialog'
 import type { Agendamento } from '@/tipos'
 import { useModal } from '@/hooks/useModal'
 import { EditarAgendaModal } from '@/components/Agenda/EditarAgendaModal'
+import { toast } from 'sonner'
+import { ExcluirAgendaModal } from '@/components/Agenda/ExcluirAgendaModal'
 
 export function Agendas() {
   const [selectedDate, setSelectedDate] = useState(new Date())
@@ -46,9 +49,16 @@ export function Agendas() {
   })
 
   const [agendaEditando, setAgendaEditando] = useState<Agendamento | null>(null)
+  const [agendamentoParaExcluir, setAgendamentoParaExcluir] =
+    useState<Agendamento | null>(null)
+  const [isExcluirModalOpen, setIsExcluirModalOpen] = useState(false)
 
   // Modal
   const { isEditModalOpen, openEditModal, closeEditModal } = useModal()
+  const openExcluirModal = (agendamento: Agendamento) => {
+    setAgendamentoParaExcluir(agendamento)
+    setIsExcluirModalOpen(true)
+  }
 
   // Ordenar agenda por horário
   const sortByTime = (a: Agendamento, b: Agendamento) => {
@@ -167,6 +177,20 @@ export function Agendas() {
   const handleEditAgenda = (agenda: Agendamento) => {
     setAgendaEditando(agenda)
     openEditModal()
+  }
+
+  const handleDeleteAgendamento = async () => {
+    if (!agendamentoParaExcluir) return
+    try {
+      await dispatch(deleteAgendamento(agendamentoParaExcluir.id)).unwrap()
+      toast.info('Agendamento excluído com sucesso!')
+    } catch (error) {
+      toast.error('Erro ao excluir agendamento!')
+      console.error('Erro ao excluir agendamento:', error)
+    } finally {
+      setIsExcluirModalOpen(false)
+      setAgendamentoParaExcluir(null)
+    }
   }
 
   // Navegação entre semanas
@@ -337,7 +361,7 @@ export function Agendas() {
                   {dayAgendamentos.map((agendamento) => (
                     <div
                       key={agendamento.id}
-                      className={`text-xs leading-none p-1 space-y-1 rounded cursor-pointer transition-colors duration-200 group ${
+                      className={`text-xs p-1 space-y-1 rounded cursor-pointer transition-colors duration-200 group ${
                         agendamento.localAgendamento === 'Sala Verde'
                           ? 'text-green-600 hover:bg-slate-50'
                           : 'text-blue-600 hover:bg-slate-50'
@@ -345,11 +369,30 @@ export function Agendas() {
                       onClick={() => handleEditAgenda(agendamento)}
                       onKeyDown={() => handleEditAgenda(agendamento)}
                     >
-                      <div
-                        className={`font-semibold group-hover:text-zinc-500 text-base ${agendamento.statusAgendamento === 'Cancelado' || agendamento.statusAgendamento === 'Remarcado' ? 'line-through' : ''}`}
-                      >
-                        {agendamento.horarioAgendamento} -{' '}
-                        {agendamento.pacienteInfo.terapeutaInfo.nomeTerapeuta}
+                      <div className="flex items-center justify-between">
+                        <div
+                          className={`font-semibold group-hover:text-zinc-500 text-base ${agendamento.statusAgendamento === 'Cancelado' || agendamento.statusAgendamento === 'Remarcado' ? 'line-through' : ''}`}
+                        >
+                          {agendamento.horarioAgendamento} -{' '}
+                          {agendamento.pacienteInfo.terapeutaInfo.nomeTerapeuta}
+                        </div>
+                        <div>
+                          <button
+                            type="button"
+                            title="Excluir agendamento"
+                            className="text-red-400 group-hover:text-red-600"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              openExcluirModal(agendamento)
+                            }}
+                            onKeyDown={(e) => {
+                              e.stopPropagation()
+                              openExcluirModal(agendamento)
+                            }}
+                          >
+                            <Trash size={20} weight="bold" />
+                          </button>
+                        </div>
                       </div>
                       <hr
                         className={`border-2 ${agendamento.localAgendamento === 'Sala Verde' ? 'border-green-500' : 'border-blue-500'}`}
@@ -389,13 +432,35 @@ export function Agendas() {
               onKeyDown={() => handleEditAgenda(agendamento)}
             >
               <div className="mb-2">
-                <div className="font-semibold text-slate-500 group-hover:text-white/90 text-sm">
-                  {format(new Date(agendamento.dataAgendamento), 'dd/MM/yyyy')}{' '}
-                  (
-                  {format(new Date(agendamento.dataAgendamento), 'EEEE', {
-                    locale: ptBR,
-                  }).replace(/^\w/, (c) => c.toUpperCase())}
-                  )
+                <div className="flex items-center justify-between">
+                  <div className="font-semibold text-slate-500 group-hover:text-white/90 text-sm">
+                    {format(
+                      new Date(agendamento.dataAgendamento),
+                      'dd/MM/yyyy',
+                    )}{' '}
+                    (
+                    {format(new Date(agendamento.dataAgendamento), 'EEEE', {
+                      locale: ptBR,
+                    }).replace(/^\w/, (c) => c.toUpperCase())}
+                    )
+                  </div>
+                  <div>
+                    <button
+                      type="button"
+                      title="Excluir agendamento"
+                      className="text-red-500 group-hover:text-white"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        openExcluirModal(agendamento)
+                      }}
+                      onKeyDown={(e) => {
+                        e.stopPropagation()
+                        openExcluirModal(agendamento)
+                      }}
+                    >
+                      <Trash size={20} weight="bold" />
+                    </button>
+                  </div>
                 </div>
               </div>
               <div className="space-y-1">
@@ -430,6 +495,13 @@ export function Agendas() {
             onClose={closeEditModal}
           />
         )}
+        <ExcluirAgendaModal
+          isOpen={isExcluirModalOpen}
+          onOpenChange={(isOpen) => setIsExcluirModalOpen(isOpen)}
+          title="Excluir Agendamento"
+          message="Deseja realmente excluir este agendamento?"
+          onConfirm={handleDeleteAgendamento}
+        />
       </main>
     </div>
   )
