@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '../ui/button'
 import { Checkbox } from '../ui/checkbox'
 import {
@@ -17,6 +17,7 @@ interface ExcluirAgendaModalProps {
   message: string
   messageAll: string
   onConfirm: (deleteAll: boolean) => void
+  checked?: boolean
 }
 
 export function ExcluirAgendaModal({
@@ -26,8 +27,15 @@ export function ExcluirAgendaModal({
   message,
   messageAll,
   onConfirm,
+  checked = false,
 }: ExcluirAgendaModalProps) {
   const [deleteAll, setDeleteAll] = useState(false)
+
+  useEffect(() => {
+    if (isOpen) {
+      setDeleteAll(checked)
+    }
+  }, [isOpen, checked])
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -37,21 +45,17 @@ export function ExcluirAgendaModal({
           <DialogTitle className="text-2xl font-bold text-azul">
             {title}
           </DialogTitle>
-          <DialogDescription className="text-gray-700 mb-6">
-            <div className="space-y-4">
-              <p>{message}</p>
-              <p>
-                <Checkbox
-                  className="mr-2 border-gray-400 data-[state=checked]:bg-rosa data-[state=checked]:border-rosa"
-                  id="deleteAll"
-                  checked={deleteAll}
-                  onCheckedChange={(checked) =>
-                    setDeleteAll(checked as boolean)
-                  }
-                />
-                <label htmlFor="deleteAll">{messageAll}</label>
-              </p>
-            </div>
+          <DialogDescription className="text-gray-700 mb-6 flex flex-wrap space-y-4">
+            <span>{message}</span>
+            <span>
+              <Checkbox
+                className="mr-2 border-gray-400 data-[state=checked]:bg-rosa data-[state=checked]:border-rosa"
+                id="deleteAll"
+                checked={deleteAll}
+                onCheckedChange={(checked) => setDeleteAll(checked as boolean)}
+              />
+              <label htmlFor="deleteAll">{messageAll}</label>
+            </span>
           </DialogDescription>
           <div className="flex justify-end space-x-4">
             <Button

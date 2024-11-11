@@ -5,7 +5,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import { ptBR } from 'date-fns/locale'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { addDays, addMonths, format } from 'date-fns'
+import { addMonths, addWeeks, format, isBefore, setDay } from 'date-fns'
 import { Label } from '../ui/label'
 import * as RadioGroup from '@radix-ui/react-radio-group'
 import {
@@ -49,7 +49,7 @@ const NovaAgendaFormSchema = z.object({
     invalid_type_error: 'Selecione uma sala válida',
   }),
   periodicidade: z
-    .enum(['Não repetir', 'Diária', 'Semanal', 'Mensal'])
+    .enum(['Não repetir', 'Semanal', 'Quinzenal', 'Mensal'])
     .optional(),
   diasDaSemana: z
     .array(
@@ -64,7 +64,10 @@ const NovaAgendaFormSchema = z.object({
       ]),
     )
     .optional(),
-  dataFimRecorrencia: z.date().optional(),
+  dataFimRecorrencia: z.date({
+    required_error: 'Selecione uma data de fim',
+    invalid_type_error: 'Selecione uma data válida',
+  }),
   modalidadeAgendamento: z.enum(['Presencial', 'Online'], {
     required_error: 'Selecione uma modalidade',
     invalid_type_error: 'Selecione uma modalidade válida',
@@ -220,9 +223,9 @@ export function NovaAgendaModal() {
     agendamentos,
   ])
 
-  // Função para criar um novo agendamento
   async function handleCreateNewAgendamento(data: NovaAgendaFormInputs) {
     try {
+      // Simula um atraso (pode ser removido)
       await new Promise((resolve) => setTimeout(resolve, 2000))
 
       const pacienteSelecionado = pacientes.find(
@@ -236,6 +239,7 @@ export function NovaAgendaModal() {
       const agendamentosParaCriar: Agendamento[] = []
 
       if (data.periodicidade === 'Não repetir' || !data.periodicidade) {
+        // Criar agendamento único
         const novoAgendamento: Agendamento = {
           id: uuidv4(),
           terapeutaInfo: pacienteSelecionado.terapeutaInfo,
@@ -250,28 +254,42 @@ export function NovaAgendaModal() {
         }
         agendamentosParaCriar.push(novoAgendamento)
       } else {
-        // Calcular as datas de acordo com a periodicidade
+        // Verificar se diasDaSemana foi fornecido
+        const diasSelecionados = data.diasDaSemana || []
+        if (diasSelecionados.length === 0) {
+          throw new Error('Selecione pelo menos um dia da semana')
+        }
+
         let dataAtual = data.dataAgendamento
-        const dataFim = data.dataFimRecorrencia
-        while (dataAtual <= dataFim!) {
-          if (
-            data.periodicidade !== 'Semanal' ||
-            data.diasDaSemana?.includes(
-              format(dataAtual, 'EEEE', { locale: ptBR }) as
-                | 'Domingo'
-                | 'Segunda-feira'
-                | 'Terça-feira'
-                | 'Quarta-feira'
-                | 'Quinta-feira'
-                | 'Sexta-feira'
-                | 'Sábado',
+
+        while (dataAtual <= data.dataFimRecorrencia!) {
+          for (const diaSemana of diasSelecionados) {
+            // Obter a próxima data que corresponda ao dia da semana selecionado
+            const proximaData = getNextDate(
+              dataAtual,
+              diaSemana,
+              data.periodicidade,
             )
-          ) {
+
+            // Verificar se a próxima data está dentro do intervalo desejado
+            if (proximaData > data.dataFimRecorrencia!) continue
+
+            // Evitar adicionar agendamentos duplicados
+            if (
+              agendamentosParaCriar.some(
+                (agendamento) =>
+                  agendamento.dataAgendamento.getTime() ===
+                  proximaData.getTime(),
+              )
+            ) {
+              continue
+            }
+
             const novoAgendamento: Agendamento = {
               id: uuidv4(),
               terapeutaInfo: pacienteSelecionado.terapeutaInfo,
               pacienteInfo: pacienteSelecionado,
-              dataAgendamento: dataAtual,
+              dataAgendamento: proximaData,
               horarioAgendamento: data.horarioAgendamento,
               localAgendamento: data.localAgendamento,
               modalidadeAgendamento: data.modalidadeAgendamento,
@@ -281,11 +299,12 @@ export function NovaAgendaModal() {
             }
             agendamentosParaCriar.push(novoAgendamento)
           }
+
           // Incrementar dataAtual de acordo com a periodicidade
-          if (data.periodicidade === 'Diária') {
-            dataAtual = addDays(dataAtual, 1)
-          } else if (data.periodicidade === 'Semanal') {
-            dataAtual = addDays(dataAtual, 1)
+          if (data.periodicidade === 'Semanal') {
+            dataAtual = addWeeks(dataAtual, 1)
+          } else if (data.periodicidade === 'Quinzenal') {
+            dataAtual = addWeeks(dataAtual, 2)
           } else if (data.periodicidade === 'Mensal') {
             dataAtual = addMonths(dataAtual, 1)
           }
@@ -312,6 +331,41 @@ export function NovaAgendaModal() {
       setMensagemErro(errorMessage)
       setMensagemSucesso('')
     }
+  }
+
+  // Função auxiliar para obter a próxima data com base no dia da semana e periodicidade
+  function getNextDate(
+    baseDate: Date,
+    diaSemana: string,
+    periodicidade: string,
+  ): Date {
+    const dayMap: { [key: string]: number } = {
+      Domingo: 0,
+      'Segunda-feira': 1,
+      'Terça-feira': 2,
+      'Quarta-feira': 3,
+      'Quinta-feira': 4,
+      'Sexta-feira': 5,
+      Sábado: 6,
+    }
+
+    const targetDay = dayMap[diaSemana]
+
+    let proximaData = setDay(baseDate, targetDay, { weekStartsOn: 0 })
+
+    if (isBefore(proximaData, baseDate)) {
+      if (periodicidade === 'Mensal') {
+        proximaData = addMonths(proximaData, 1)
+        proximaData = setDay(proximaData, targetDay, { weekStartsOn: 0 })
+      } else {
+        proximaData = addWeeks(
+          proximaData,
+          periodicidade === 'Quinzenal' ? 2 : 1,
+        )
+      }
+    }
+
+    return proximaData
   }
 
   function handleFocus() {
@@ -484,8 +538,8 @@ export function NovaAgendaModal() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="Não Repetir">Não Repetir</SelectItem>
-                      <SelectItem value="Diária">Diária</SelectItem>
                       <SelectItem value="Semanal">Semanal</SelectItem>
+                      <SelectItem value="Quinzenal">Quinzenal</SelectItem>
                       <SelectItem value="Mensal">Mensal</SelectItem>
                     </SelectContent>
                   </Select>
@@ -494,7 +548,9 @@ export function NovaAgendaModal() {
             </div>
             {/* // Se a periodicidade for semanal, permitir selecionar os dias da
             semana */}
-            {watch('periodicidade') === 'Semanal' && (
+            {(watch('periodicidade') === 'Semanal' ||
+              watch('periodicidade') === 'Quinzenal' ||
+              watch('periodicidade') === 'Mensal') && (
               <div className="space-y-2">
                 <label
                   htmlFor="diasDaSemana"
@@ -549,14 +605,17 @@ export function NovaAgendaModal() {
                 />
               </div>
             )}
+
             {/* // Permitir selecionar a data de fim da recorrência */}
-            {watch('periodicidade') !== 'Não repetir' && (
+            {(watch('periodicidade') === 'Semanal' ||
+              watch('periodicidade') === 'Quinzenal' ||
+              watch('periodicidade') === 'Mensal') && (
               <div className="space-y-2">
                 <label
                   className="text-sm text-slate-500"
                   htmlFor="dataFimRecorrencia"
                 >
-                  Data de Fim da Recorrência
+                  Data de fim da Recorrência
                 </label>
                 <Controller
                   control={control}
@@ -566,14 +625,17 @@ export function NovaAgendaModal() {
                       <PopoverTrigger asChild>
                         <button
                           type="button"
+                          id="dataFimRecorrencia"
+                          ref={calendarTriggerRef}
                           className={cn(
                             'shadow-rosa/50 focus:shadow-rosa w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px] text-left flex items-center',
                             !field.value && 'text-slate-400',
                           )}
                         >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
                           {field.value
                             ? format(field.value, 'dd/MM/yyyy')
-                            : 'Selecione uma data'}
+                            : 'Selecione uma data fim da recorrência'}
                         </button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
@@ -582,6 +644,8 @@ export function NovaAgendaModal() {
                           selected={field.value}
                           onSelect={(date) => {
                             field.onChange(date)
+                            calendarTriggerRef.current?.click()
+                            calendarTriggerRef.current?.focus()
                           }}
                           initialFocus
                           locale={ptBR}
@@ -594,6 +658,11 @@ export function NovaAgendaModal() {
                     </Popover>
                   )}
                 />
+                {errors.dataFimRecorrencia && (
+                  <span className="text-red-500 text-sm">
+                    {errors.dataFimRecorrencia.message}
+                  </span>
+                )}
               </div>
             )}
             {/* Location */}
