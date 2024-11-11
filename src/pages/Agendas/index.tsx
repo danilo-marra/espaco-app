@@ -179,11 +179,25 @@ export function Agendas() {
     openEditModal()
   }
 
-  const handleDeleteAgendamento = async () => {
+  const handleDeleteAgendamento = async (deleteAll: boolean) => {
     if (!agendamentoParaExcluir) return
     try {
-      await dispatch(deleteAgendamento(agendamentoParaExcluir.id)).unwrap()
-      toast.info('Agendamento excluído com sucesso!')
+      if (deleteAll) {
+        const agendamentosPaciente = agendamentos.filter(
+          (agendamento) =>
+            agendamento.pacienteInfo.id ===
+            agendamentoParaExcluir.pacienteInfo.id,
+        )
+        await Promise.all(
+          agendamentosPaciente.map((agendamento) =>
+            dispatch(deleteAgendamento(agendamento.id)).unwrap(),
+          ),
+        )
+        toast.info('Todos os agendamentos do paciente foram excluídos!')
+      } else {
+        await dispatch(deleteAgendamento(agendamentoParaExcluir.id)).unwrap()
+        toast.info('Agendamento excluído com sucesso!')
+      }
     } catch (error) {
       toast.error('Erro ao excluir agendamento!')
       console.error('Erro ao excluir agendamento:', error)
@@ -499,7 +513,8 @@ export function Agendas() {
           isOpen={isExcluirModalOpen}
           onOpenChange={(isOpen) => setIsExcluirModalOpen(isOpen)}
           title="Excluir Agendamento"
-          message="Deseja realmente excluir este agendamento?"
+          message="Deseja excluir este agendamento?"
+          messageAll="Excluir também todos os outros agendamentos deste paciente?"
           onConfirm={handleDeleteAgendamento}
         />
       </main>
