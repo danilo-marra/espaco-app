@@ -561,9 +561,9 @@ export function EditarAgendaModal({
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-rosa hover:bg-rosa/90 text-white font-medium py-2 px-4 rounded-md transition-colors"
+              className="bg-rosa w-full hover:bg-rosa/90 text-white font-medium py-2 px-4 rounded-md transition-colors"
             >
-              {isSubmitting ? 'Salvando...' : 'Salvar'}
+              <span>{isSubmitting ? 'Salvando...' : 'Editar'}</span>
             </button>
           </form>
         </DialogContent>

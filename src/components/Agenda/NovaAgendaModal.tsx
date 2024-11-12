@@ -96,9 +96,6 @@ type NovaAgendaFormInputs = z.infer<typeof NovaAgendaFormSchema>
 export function NovaAgendaModal() {
   const dispatch = useDispatch<AppDispatch>()
   const pacientes = useSelector((state: RootState) => state.pacientes.data)
-  const agendamentos = useSelector(
-    (state: RootState) => state.agendamentos.data,
-  )
   const [mensagemSucesso, setMensagemSucesso] = useState('')
   const [mensagemErro, setMensagemErro] = useState('')
   const calendarTriggerRef = useRef<HTMLButtonElement>(null)
@@ -126,9 +123,6 @@ export function NovaAgendaModal() {
     },
   })
   const pacienteId = watch('pacienteId')
-  const watchDataAgendamento = watch('dataAgendamento')
-  const watchHorarioAgendamento = watch('horarioAgendamento')
-  const watchLocalAgendamento = watch('localAgendamento')
 
   const isButtonDisabled =
     isSubmitting || Object.keys(errors).length > 0 || conflito
@@ -141,85 +135,6 @@ export function NovaAgendaModal() {
   useEffect(() => {
     dispatch(fetchPacientes())
   }, [dispatch])
-
-  // Check for conflicts when these fields change
-  useEffect(() => {
-    const getMinutesDifference = (time1: string, time2: string) => {
-      const [hours1, minutes1] = time1.split(':').map(Number)
-      const [hours2, minutes2] = time2.split(':').map(Number)
-      return Math.abs(hours1 * 60 + minutes1 - (hours2 * 60 + minutes2))
-    }
-
-    if (
-      watchDataAgendamento &&
-      watchHorarioAgendamento &&
-      watchLocalAgendamento
-    ) {
-      const agendamentosProximos = agendamentos.filter((agendamento) => {
-        const mesmaData =
-          format(new Date(agendamento.dataAgendamento), 'yyyy-MM-dd') ===
-          format(new Date(watchDataAgendamento), 'yyyy-MM-dd')
-        const mesmoLocal =
-          agendamento.localAgendamento === watchLocalAgendamento
-
-        if (watchLocalAgendamento === 'Não Precisa de Sala') {
-          return false
-        }
-
-        if (agendamento.localAgendamento === 'Não Precisa de Sala') {
-          return false
-        }
-
-        if (mesmaData && mesmoLocal) {
-          const minutesDiff = getMinutesDifference(
-            agendamento.horarioAgendamento,
-            watchHorarioAgendamento,
-          )
-          return minutesDiff < 50
-        }
-
-        return false
-      })
-
-      // Check for conflicts first
-      const conflitos = agendamentosProximos.filter(
-        (agendamento) =>
-          agendamento.horarioAgendamento === watchHorarioAgendamento,
-      )
-
-      if (conflitos.length > 0) {
-        const conflito = conflitos[0]
-        setConflito(true)
-        setMensagemConflito(
-          `Já existe um agendamento para ${conflito.pacienteInfo.nomePaciente} com ${conflito.pacienteInfo.terapeutaInfo.nomeTerapeuta} neste horário e local.`,
-        )
-        setMensagemAlerta('')
-      } else {
-        setConflito(false)
-        setMensagemConflito('')
-
-        // Check for near appointments
-        const agendamentosProximosSemConflito = agendamentosProximos.filter(
-          (agendamento) =>
-            agendamento.horarioAgendamento !== watchHorarioAgendamento,
-        )
-
-        if (agendamentosProximosSemConflito.length > 0) {
-          const agendamentoProximo = agendamentosProximosSemConflito[0]
-          setMensagemAlerta(
-            `Atenção: Existe um agendamento para ${agendamentoProximo.pacienteInfo.nomePaciente} às ${agendamentoProximo.horarioAgendamento} (menos de 50 minutos de diferença)`,
-          )
-        } else {
-          setMensagemAlerta('')
-        }
-      }
-    }
-  }, [
-    watchDataAgendamento,
-    watchHorarioAgendamento,
-    watchLocalAgendamento,
-    agendamentos,
-  ])
 
   async function handleCreateNewAgendamento(data: NovaAgendaFormInputs) {
     try {

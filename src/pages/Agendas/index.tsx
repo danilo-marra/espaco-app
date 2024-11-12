@@ -385,13 +385,12 @@ export function Agendas() {
           </button>
           <div className="flex items-center space-x-2">
             <h2 className="text-xl font-semibold">
-              {format(
-                selectedDate,
-                viewMode === 'semanal' ? "'Semana de' dd/MM/yyyy" : 'MMMM yyyy',
-                {
-                  locale: ptBR,
-                },
-              ).replace(/^\w/, (c) => c.toUpperCase())}
+              {viewMode === 'semanal'
+                ? `${format(selectedDate, 'MMMM', { locale: ptBR }).replace(/^\w/, (c) => c.toUpperCase())} - Semana de ${format(startOfSelectedWeek, 'dd/MM/yyyy')} até ${format(addDays(startOfSelectedWeek, 6), 'dd/MM/yyyy')}`
+                : format(selectedDate, 'MMMM yyyy', { locale: ptBR }).replace(
+                    /^\w/,
+                    (c) => c.toUpperCase(),
+                  )}
             </h2>
           </div>
           <button type="button" aria-label="Próximo" onClick={handleNext}>
@@ -433,18 +432,12 @@ export function Agendas() {
                       {dayAgendamentos.map((agendamento) => (
                         <div
                           key={agendamento.id}
-                          className={`text-xs p-1 space-y-1 rounded cursor-pointer transition-colors duration-200 group ${
-                            agendamento.localAgendamento === 'Sala Verde'
-                              ? 'text-green-600 hover:bg-slate-50'
-                              : 'text-blue-600 hover:bg-slate-50'
-                          } ${agendamento.statusAgendamento === 'Cancelado' || agendamento.statusAgendamento === 'Remarcado' ? 'bg-red-100' : 'bg-slate-100'}`}
+                          className={`text-sm p-1 space-y-1 rounded cursor-pointer transition-colors duration-200 hover:bg-slate-50 group ${agendamento.statusAgendamento === 'Cancelado' || agendamento.statusAgendamento === 'Remarcado' ? 'bg-red-100' : ''} ${agendamento.statusAgendamento === 'Cancelado' || agendamento.statusAgendamento === 'Remarcado' ? 'line-through' : ''}`}
                           onClick={() => handleEditAgenda(agendamento)}
                           onKeyDown={() => handleEditAgenda(agendamento)}
                         >
-                          <div className="flex items-center justify-between">
-                            <div
-                              className={`font-semibold group-hover:text-zinc-500 text-base ${agendamento.statusAgendamento === 'Cancelado' || agendamento.statusAgendamento === 'Remarcado' ? 'line-through' : ''}`}
-                            >
+                          <div className="flex justify-between">
+                            <div className="group-hover:text-zinc-500 font-semibold">
                               {agendamento.horarioAgendamento} -{' '}
                               {
                                 agendamento.pacienteInfo.terapeutaInfo
@@ -465,26 +458,23 @@ export function Agendas() {
                                   openExcluirModal(agendamento)
                                 }}
                               >
-                                <Trash size={18} weight="bold" />
+                                <Trash size={20} weight="bold">
+                                  Exluir
+                                </Trash>
                               </button>
                             </div>
                           </div>
+                          <div className="group-hover:text-zinc/90">
+                            {agendamento.pacienteInfo.nomePaciente}
+                          </div>
+                          <div className=" italic text-slate-500 group-hover:text-zinc-500">
+                            {agendamento.tipoAgendamento} -{' '}
+                            {agendamento.modalidadeAgendamento}
+                          </div>
+
                           <hr
                             className={`border-2 ${agendamento.localAgendamento === 'Sala Verde' ? 'border-green-500' : 'border-blue-500'}`}
                           />
-                          <div className="group-hover:text-zinc/90 text-base">
-                            {agendamento.pacienteInfo.nomePaciente}
-                          </div>
-                          <div className="italic group-hover:text-zinc/70">
-                            {agendamento.tipoAgendamento} -{' '}
-                            {agendamento.modalidadeAgendamento} -{' '}
-                            {agendamento.localAgendamento}
-                          </div>
-                          {agendamento.statusAgendamento !== 'Confirmado' && (
-                            <div className="text-base font-semibold text-orange-500 group-hover:text-orange-600">
-                              {agendamento.statusAgendamento}
-                            </div>
-                          )}
                         </div>
                       ))}
                     </div>
@@ -507,10 +497,11 @@ export function Agendas() {
             </div>
             <div className="grid grid-cols-7 gap-px bg-gray-200">
               {daysOfMonth.map((day) => {
-                const dayAgendamentos = filteredAgendamentos.filter(
-                  (agendamento) =>
+                const dayAgendamentos = filteredAgendamentos
+                  .filter((agendamento) =>
                     isSameDay(new Date(agendamento.dataAgendamento), day),
-                )
+                  )
+                  .sort(sortByTime)
                 const isCurrentMonth = isSameMonth(day, selectedDate)
                 return (
                   <div
@@ -525,12 +516,39 @@ export function Agendas() {
                     {dayAgendamentos.map((agendamento) => (
                       <div
                         key={agendamento.id}
-                        className="mt-1 text-xs cursor-pointer"
+                        className={`mt-1 p-1 text-xs cursor-pointer hover:bg-slate-100 transition-colors duration-200 ${agendamento.statusAgendamento === 'Cancelado' || agendamento.statusAgendamento === 'Remarcado' ? 'bg-red-100' : ''} ${agendamento.statusAgendamento === 'Cancelado' || agendamento.statusAgendamento === 'Remarcado' ? 'line-through' : ''}`}
                         onClick={() => handleEditAgenda(agendamento)}
                         onKeyDown={() => handleEditAgenda(agendamento)}
                       >
-                        {agendamento.horarioAgendamento} -{' '}
-                        {agendamento.pacienteInfo.nomePaciente}
+                        <div className="flex justify-between">
+                          <div>
+                            {agendamento.horarioAgendamento} -{' '}
+                            {
+                              agendamento.pacienteInfo.terapeutaInfo
+                                .nomeTerapeuta
+                            }
+                          </div>
+                          <div>
+                            <button
+                              type="button"
+                              title="Excluir agendamento"
+                              className="text-red-500"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                openExcluirModal(agendamento)
+                              }}
+                              onKeyDown={(e) => {
+                                e.stopPropagation()
+                                openExcluirModal(agendamento)
+                              }}
+                            >
+                              <Trash size={16} weight="bold" />
+                            </button>
+                          </div>
+                        </div>
+                        <hr
+                          className={`my-2 border-2 ${agendamento.localAgendamento === 'Sala Verde' ? 'border-green-500' : 'border-blue-500'} `}
+                        />
                       </div>
                     ))}
                   </div>
@@ -550,13 +568,13 @@ export function Agendas() {
           {filteredAgendamentosNoRoom.sort(sortByTime).map((agendamento) => (
             <div
               key={agendamento.id}
-              className="mt-4 p-4 rounded-lg bg-yellow-100 cursor-pointer transition-colors duration-200 group hover:bg-yellow-600 shadow-md leading-2"
+              className="mt-4 p-4 rounded-lg bg-yellow-100 cursor-pointer transition-colors duration-200 group hover:bg-yellow-200 shadow-md leading-2"
               onClick={() => handleEditAgenda(agendamento)}
               onKeyDown={() => handleEditAgenda(agendamento)}
             >
               <div className="mb-2">
                 <div className="flex items-center justify-between">
-                  <div className="font-semibold text-slate-500 group-hover:text-white/90 text-sm">
+                  <div className="font-semibold text-slate-500 group-hover:text-zinc-500 text-sm">
                     {format(
                       new Date(agendamento.dataAgendamento),
                       'dd/MM/yyyy',
@@ -571,7 +589,7 @@ export function Agendas() {
                     <button
                       type="button"
                       title="Excluir agendamento"
-                      className="text-red-500 group-hover:text-white"
+                      className="text-red-500"
                       onClick={(e) => {
                         e.stopPropagation()
                         openExcluirModal(agendamento)
@@ -588,22 +606,22 @@ export function Agendas() {
               </div>
               <div className="space-y-1">
                 <div
-                  className={`font-medium text-slate-900 group-hover:text-white ${agendamento.statusAgendamento === 'Cancelado' || agendamento.statusAgendamento === 'Remarcado' ? 'line-through' : ''}`}
+                  className={`font-medium text-slate-900 group-hover:text-zinc-500 ${agendamento.statusAgendamento === 'Cancelado' || agendamento.statusAgendamento === 'Remarcado' ? 'line-through' : ''}`}
                 >
                   {agendamento.horarioAgendamento} -{' '}
                   {agendamento.pacienteInfo.terapeutaInfo.nomeTerapeuta}
                 </div>
-                <hr className="border-2 border-yellow-400" />
-                <div className="text-slate-500 group-hover:text-white/90">
+                <div className="text-slate-500 group-hover:text-zinc-500">
                   {agendamento.pacienteInfo.nomePaciente}
                 </div>
-
-                <div className="text-sm italic text-slate-500 group-hover:text-white/70">
+                <div className="text-sm italic text-slate-500 group-hover:text-zinc-500">
                   {agendamento.tipoAgendamento} -{' '}
                   {agendamento.modalidadeAgendamento}
                 </div>
+                <hr className="border-2 border-yellow-400" />
+
                 {agendamento.statusAgendamento !== 'Confirmado' && (
-                  <div className="text-base font-semibold text-orange-500 group-hover:text-orange-100">
+                  <div className="text-base font-semibold text-orange-500 group-hover:text-orange-700">
                     {agendamento.statusAgendamento}
                   </div>
                 )}
