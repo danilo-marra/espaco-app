@@ -33,6 +33,9 @@ export const updateAgendamento = createAsyncThunk<
   'agendamentos/updateAgendamento',
   async (agendamento, { rejectWithValue }) => {
     try {
+      console.log('URL:', `${API_URL}/agendamentos/${agendamento.id}`)
+      console.log('Payload:', agendamento)
+
       const updatedAgendamento = await httpRequest<Agendamento>(
         `${API_URL}/agendamentos/${agendamento.id}`,
         'PUT',
@@ -42,7 +45,12 @@ export const updateAgendamento = createAsyncThunk<
       return updatedAgendamento
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        console.error('Erro ao atualizar agendamento:', error.message)
+        console.error('Erro detalhado:', {
+          status: error.response?.status,
+          url: error.config?.url,
+          method: error.config?.method,
+          data: error.config?.data,
+        })
         return rejectWithValue(error.message)
       }
       return rejectWithValue('Erro desconhecido')
