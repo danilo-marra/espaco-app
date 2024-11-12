@@ -8265,6 +8265,241 @@
       "tipoAgendamento": "Orientação Parental",
       "statusAgendamento": "Confirmado",
       "observacoesAgendamento": ""
+    },
+    {
+      "id": "813e860d-f669-40c3-91c7-3293c0a8a293",
+      "terapeutaInfo": {
+        "id": "9f7a90e2-4773-4ae4-8b84-11de3872bfee",
+        "nomeTerapeuta": "Daniele",
+        "telefoneTerapeuta": "61981593923",
+        "emailTerapeuta": "danilo2311@gmail.com",
+        "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
+        "dtEntrada": "2021-04-05T03:00:00.000Z",
+        "chavePix": "098098098098"
+      },
+      "pacienteInfo": {
+        "id": "f1062935-c939-4470-819b-5f51e625d516",
+        "nomePaciente": "Zequinha Junior",
+        "dtNascimento": "2024-10-01T03:00:00.000Z",
+        "terapeutaInfo": {
+          "id": "9f7a90e2-4773-4ae4-8b84-11de3872bfee",
+          "nomeTerapeuta": "Daniele",
+          "telefoneTerapeuta": "61981593923",
+          "emailTerapeuta": "danilo2311@gmail.com",
+          "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
+          "dtEntrada": "2021-04-05T03:00:00.000Z",
+          "chavePix": "098098098098"
+        },
+        "nomeResponsavel": "Danilo Marra Rabelo",
+        "telefoneResponsavel": "61981593923",
+        "emailResponsavel": "danilo2311@gmail.com",
+        "cpfResponsavel": "024.818.181-54",
+        "enderecoResponsavel": "SHCES 301 BLOCO C apt 202",
+        "origem": "Indicação"
+      },
+      "dataAgendamento": "2024-11-17T03:00:00.000Z",
+      "horarioAgendamento": "10:00",
+      "localAgendamento": "Sala Verde",
+      "modalidadeAgendamento": "Presencial",
+      "tipoAgendamento": "Sessão",
+      "statusAgendamento": "Confirmado",
+      "observacoesAgendamento": "vf"
+    },
+    {
+      "id": "25eb17a3-1241-485a-8f55-51cccd2b2112",
+      "recurrenceId": "2804be72-a3ce-4876-991a-d76675c68512",
+      "terapeutaInfo": {
+        "id": "6319090b-0f6d-4808-b6b2-872156bccd65",
+        "nomeTerapeuta": "Afonso Gonzales",
+        "telefoneTerapeuta": "61981593923",
+        "emailTerapeuta": "danilo2311@gmail.com",
+        "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
+        "dtEntrada": "2022-06-28T03:00:00.000Z",
+        "chavePix": "098098098098"
+      },
+      "pacienteInfo": {
+        "id": "8541b835-d0d0-467b-a95b-a27e4297e451",
+        "nomePaciente": "Juquinha",
+        "dtNascimento": "2024-10-15T03:00:00.000Z",
+        "terapeutaInfo": {
+          "id": "6319090b-0f6d-4808-b6b2-872156bccd65",
+          "nomeTerapeuta": "Afonso Gonzales",
+          "telefoneTerapeuta": "61981593923",
+          "emailTerapeuta": "danilo2311@gmail.com",
+          "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
+          "dtEntrada": "2022-06-28T03:00:00.000Z",
+          "chavePix": "098098098098"
+        },
+        "nomeResponsavel": "Pai do Juca",
+        "telefoneResponsavel": "61981593923",
+        "emailResponsavel": "danilo2311@gmail.com",
+        "cpfResponsavel": "876.876.876-87",
+        "enderecoResponsavel": "SHCES 301 BLOCO C apt 202",
+        "origem": "Indicação"
+      },
+      "dataAgendamento": "2024-11-13T03:00:00.000Z",
+      "horarioAgendamento": "10:00",
+      "localAgendamento": "Sala Verde",
+      "modalidadeAgendamento": "Presencial",
+      "tipoAgendamento": "Sessão",
+      "statusAgendamento": "Confirmado",
+      "observacoesAgendamento": ""
+    },
+    {
+      "id": "6942f159-b3d7-4d62-bceb-785b119ece27",
+      "terapeutaInfo": {
+        "id": "6319090b-0f6d-4808-b6b2-872156bccd65",
+        "nomeTerapeuta": "Afonso Gonzales",
+        "telefoneTerapeuta": "61981593923",
+        "emailTerapeuta": "danilo2311@gmail.com",
+        "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
+        "dtEntrada": "2022-06-28T03:00:00.000Z",
+        "chavePix": "098098098098"
+      },
+      "pacienteInfo": {
+        "id": "8541b835-d0d0-467b-a95b-a27e4297e451",
+        "nomePaciente": "Juquinha",
+        "dtNascimento": "2024-10-15T03:00:00.000Z",
+        "terapeutaInfo": {
+          "id": "6319090b-0f6d-4808-b6b2-872156bccd65",
+          "nomeTerapeuta": "Afonso Gonzales",
+          "telefoneTerapeuta": "61981593923",
+          "emailTerapeuta": "danilo2311@gmail.com",
+          "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
+          "dtEntrada": "2022-06-28T03:00:00.000Z",
+          "chavePix": "098098098098"
+        },
+        "nomeResponsavel": "Pai do Juca",
+        "telefoneResponsavel": "61981593923",
+        "emailResponsavel": "danilo2311@gmail.com",
+        "cpfResponsavel": "876.876.876-87",
+        "enderecoResponsavel": "SHCES 301 BLOCO C apt 202",
+        "origem": "Indicação"
+      },
+      "dataAgendamento": "2024-11-13T03:00:00.000Z",
+      "horarioAgendamento": "10:00",
+      "localAgendamento": "Sala Verde",
+      "modalidadeAgendamento": "Presencial",
+      "tipoAgendamento": "Orientação Parental",
+      "statusAgendamento": "Confirmado",
+      "observacoesAgendamento": "jhgjhg"
+    },
+    {
+      "id": "d86aeb64-949b-4409-aed1-2eef46292621",
+      "terapeutaInfo": {
+        "id": "dfe2e8c9-c9d7-4dc1-b45b-e3c60d3d3850",
+        "nomeTerapeuta": "Danilo Marra Rabelo",
+        "telefoneTerapeuta": "61981593923",
+        "emailTerapeuta": "danilo2311@gmail.com",
+        "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
+        "curriculo": "teste curriculo",
+        "chavePix": "098098098098"
+      },
+      "pacienteInfo": {
+        "id": "0d1152df-14a7-44c5-95f1-6b9935b8babf",
+        "nomePaciente": "kiki",
+        "dtNascimento": "2024-10-07T00:00:00.000Z",
+        "terapeutaInfo": {
+          "id": "dfe2e8c9-c9d7-4dc1-b45b-e3c60d3d3850",
+          "nomeTerapeuta": "Danilo Marra Rabelo",
+          "telefoneTerapeuta": "61981593923",
+          "emailTerapeuta": "danilo2311@gmail.com",
+          "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
+          "curriculo": "teste curriculo",
+          "chavePix": "098098098098"
+        },
+        "nomeResponsavel": "Danilo Marra Rabelo",
+        "telefoneResponsavel": "61981593923",
+        "emailResponsavel": "danilo2311@gmail.com",
+        "cpfResponsavel": "876.876.876-87",
+        "enderecoResponsavel": "SHCES 301 BLOCO C apt 202",
+        "origem": "Instagram"
+      },
+      "dataAgendamento": "2024-11-15T03:00:00.000Z",
+      "horarioAgendamento": "15:00",
+      "localAgendamento": "Sala Verde",
+      "modalidadeAgendamento": "Presencial",
+      "tipoAgendamento": "Sessão",
+      "statusAgendamento": "Confirmado",
+      "observacoesAgendamento": "uhgjhg"
+    },
+    {
+      "id": "a469d312-0e77-4ae1-829f-acc857576803",
+      "terapeutaInfo": {
+        "id": "9f7a90e2-4773-4ae4-8b84-11de3872bfee",
+        "nomeTerapeuta": "Daniele",
+        "telefoneTerapeuta": "61981593923",
+        "emailTerapeuta": "danilo2311@gmail.com",
+        "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
+        "dtEntrada": "2021-04-05T03:00:00.000Z",
+        "chavePix": "098098098098"
+      },
+      "pacienteInfo": {
+        "id": "f1062935-c939-4470-819b-5f51e625d516",
+        "nomePaciente": "Zequinha Junior",
+        "dtNascimento": "2024-10-01T03:00:00.000Z",
+        "terapeutaInfo": {
+          "id": "9f7a90e2-4773-4ae4-8b84-11de3872bfee",
+          "nomeTerapeuta": "Daniele",
+          "telefoneTerapeuta": "61981593923",
+          "emailTerapeuta": "danilo2311@gmail.com",
+          "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
+          "dtEntrada": "2021-04-05T03:00:00.000Z",
+          "chavePix": "098098098098"
+        },
+        "nomeResponsavel": "Danilo Marra Rabelo",
+        "telefoneResponsavel": "61981593923",
+        "emailResponsavel": "danilo2311@gmail.com",
+        "cpfResponsavel": "024.818.181-54",
+        "enderecoResponsavel": "SHCES 301 BLOCO C apt 202",
+        "origem": "Indicação"
+      },
+      "dataAgendamento": "2024-11-13T03:00:00.000Z",
+      "horarioAgendamento": "09:00",
+      "localAgendamento": "Sala Verde",
+      "modalidadeAgendamento": "Presencial",
+      "tipoAgendamento": "Sessão",
+      "statusAgendamento": "Confirmado",
+      "observacoesAgendamento": "sfds"
+    },
+    {
+      "id": "f575f290-c581-4ab0-88ee-40919362ca2f",
+      "terapeutaInfo": {
+        "id": "dfe2e8c9-c9d7-4dc1-b45b-e3c60d3d3850",
+        "nomeTerapeuta": "Danilo Marra Rabelo",
+        "telefoneTerapeuta": "61981593923",
+        "emailTerapeuta": "danilo2311@gmail.com",
+        "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
+        "curriculo": "teste curriculo",
+        "chavePix": "098098098098"
+      },
+      "pacienteInfo": {
+        "id": "6ba85654-0c2c-449e-8fe0-598f632ca4a8",
+        "nomePaciente": "Kaka",
+        "dtNascimento": "2024-10-07T00:00:00.000Z",
+        "terapeutaInfo": {
+          "id": "dfe2e8c9-c9d7-4dc1-b45b-e3c60d3d3850",
+          "nomeTerapeuta": "Danilo Marra Rabelo",
+          "telefoneTerapeuta": "61981593923",
+          "emailTerapeuta": "danilo2311@gmail.com",
+          "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
+          "curriculo": "teste curriculo",
+          "chavePix": "098098098098"
+        },
+        "nomeResponsavel": "",
+        "telefoneResponsavel": "",
+        "emailResponsavel": "",
+        "cpfResponsavel": "876.876.876-87",
+        "enderecoResponsavel": "",
+        "origem": "Busca no Google"
+      },
+      "dataAgendamento": "2024-11-14T03:00:00.000Z",
+      "horarioAgendamento": "10:00",
+      "localAgendamento": "Sala Azul",
+      "modalidadeAgendamento": "Presencial",
+      "tipoAgendamento": "Sessão",
+      "statusAgendamento": "Confirmado",
+      "observacoesAgendamento": "hgf"
     }
   ]
 }

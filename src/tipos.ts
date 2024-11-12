@@ -49,6 +49,7 @@ export interface Transacao {
 
 export interface Agendamento {
   id: string
+  recurrenceId?: string
   terapeutaInfo: Terapeuta
   pacienteInfo: Paciente
   dataAgendamento: Date

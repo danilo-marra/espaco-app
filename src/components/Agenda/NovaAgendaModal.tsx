@@ -35,61 +35,75 @@ import {
 import { Checkbox } from '../ui/checkbox'
 
 // Schema de validação
-const NovaAgendaFormSchema = z.object({
-  pacienteId: z.string().min(1, 'Selecione um paciente'),
-  dataAgendamento: z.date({
-    required_error: 'Selecione uma data',
-    invalid_type_error: 'Selecione uma data válida',
-  }),
-  horarioAgendamento: z
-    .string()
-    .regex(/^([0-1]\d|2[0-3]):([0-5]\d)$/, 'Formato inválido (hh:mm)'),
-  localAgendamento: z.enum(['Sala Verde', 'Sala Azul', 'Não Precisa de Sala'], {
-    required_error: 'Selecione uma sala',
-    invalid_type_error: 'Selecione uma sala válida',
-  }),
-  periodicidade: z.enum(['Não repetir', 'Semanal', 'Quinzenal']).optional(),
-  diasDaSemana: z
-    .array(
-      z.enum([
-        'Domingo',
-        'Segunda-feira',
-        'Terça-feira',
-        'Quarta-feira',
-        'Quinta-feira',
-        'Sexta-feira',
-        'Sábado',
-      ]),
-    )
-    .optional(),
-  dataFimRecorrencia: z.date({
-    required_error: 'Selecione uma data de fim',
-    invalid_type_error: 'Selecione uma data válida',
-  }),
-  modalidadeAgendamento: z.enum(['Presencial', 'Online'], {
-    required_error: 'Selecione uma modalidade',
-    invalid_type_error: 'Selecione uma modalidade válida',
-  }),
-  tipoAgendamento: z.enum(
-    [
-      'Sessão',
-      'Orientação Parental',
-      'Visita Escolar',
-      'Reunião Escolar',
-      'Supervisão',
-      'Outros',
-    ],
-    {
-      required_error: 'Selecione um tipo',
-      invalid_type_error: 'Selecione um tipo válido',
-    },
-  ),
-  statusAgendamento: z.enum(['Confirmado', 'Remarcado', 'Cancelado'], {
-    required_error: 'Selecione um status',
-    invalid_type_error: 'Selecione um status válido',
-  }),
-  observacoesAgendamento: z.string().optional(),
-})
+const NovaAgendaFormSchema = z
+  .object({
+    pacienteId: z.string().min(1, 'Selecione um paciente'),
+    dataAgendamento: z.date({
+      required_error: 'Selecione uma data',
+      invalid_type_error: 'Selecione uma data válida',
+    }),
+    horarioAgendamento: z
+      .string()
+      .regex(/^([0-1]\d|2[0-3]):([0-5]\d)$/, 'Formato inválido (hh:mm)'),
+    localAgendamento: z.enum(
+      ['Sala Verde', 'Sala Azul', 'Não Precisa de Sala'],
+      {
+        required_error: 'Selecione uma sala',
+        invalid_type_error: 'Selecione uma sala válida',
+      },
+    ),
+    diasDaSemana: z
+      .array(
+        z.enum([
+          'Domingo',
+          'Segunda-feira',
+          'Terça-feira',
+          'Quarta-feira',
+          'Quinta-feira',
+          'Sexta-feira',
+          'Sábado',
+        ]),
+      )
+      .optional(),
+    modalidadeAgendamento: z.enum(['Presencial', 'Online'], {
+      required_error: 'Selecione uma modalidade',
+      invalid_type_error: 'Selecione uma modalidade válida',
+    }),
+    tipoAgendamento: z.enum(
+      [
+        'Sessão',
+        'Orientação Parental',
+        'Visita Escolar',
+        'Reunião Escolar',
+        'Supervisão',
+        'Outros',
+      ],
+      {
+        required_error: 'Selecione um tipo',
+        invalid_type_error: 'Selecione um tipo válido',
+      },
+    ),
+    statusAgendamento: z.enum(['Confirmado', 'Remarcado', 'Cancelado'], {
+      required_error: 'Selecione um status',
+      invalid_type_error: 'Selecione um status válido',
+    }),
+    observacoesAgendamento: z.string().optional(),
+    periodicidade: z.enum(['Não repetir', 'Semanal', 'Quinzenal']),
+    dataFimRecorrencia: z.date().optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (
+      (data.periodicidade === 'Semanal' ||
+        data.periodicidade === 'Quinzenal') &&
+      !data.dataFimRecorrencia
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Data fim é obrigatória para agendamentos recorrentes',
+        path: ['dataFimRecorrencia'],
+      })
+    }
+  })
 
 type NovaAgendaFormInputs = z.infer<typeof NovaAgendaFormSchema>
 
@@ -100,8 +114,6 @@ export function NovaAgendaModal() {
   const [mensagemErro, setMensagemErro] = useState('')
   const calendarTriggerRef = useRef<HTMLButtonElement>(null)
   const [mensagemAlerta, setMensagemAlerta] = useState('')
-  const [conflito, setConflito] = useState(false)
-  const [mensagemConflito, setMensagemConflito] = useState('')
   const {
     control,
     register,
@@ -120,17 +132,25 @@ export function NovaAgendaModal() {
       tipoAgendamento: undefined,
       statusAgendamento: undefined,
       observacoesAgendamento: '',
+      periodicidade: 'Não repetir',
+      dataFimRecorrencia: undefined,
+      diasDaSemana: [],
     },
   })
   const pacienteId = watch('pacienteId')
 
-  const isButtonDisabled =
-    isSubmitting || Object.keys(errors).length > 0 || conflito
+  const isButtonDisabled = isSubmitting || Object.keys(errors).length > 0
 
   const pacienteSelecionado = useMemo(
     () => pacientes.find((paciente) => paciente.id === pacienteId),
     [pacienteId, pacientes],
   )
+
+  const isRecorrente = (periodicidade: string | undefined): boolean => {
+    return periodicidade === 'Semanal' || periodicidade === 'Quinzenal'
+  }
+
+  const recurrenceId = uuidv4()
 
   useEffect(() => {
     dispatch(fetchPacientes())
@@ -151,7 +171,7 @@ export function NovaAgendaModal() {
 
       const agendamentosParaCriar: Agendamento[] = []
 
-      if (data.periodicidade === 'Não repetir' || !data.periodicidade) {
+      if (!isRecorrente(data.periodicidade)) {
         // Criar agendamento único
         const novoAgendamento: Agendamento = {
           id: uuidv4(),
@@ -181,7 +201,7 @@ export function NovaAgendaModal() {
             const proximaData = getNextDate(
               dataAtual,
               diaSemana,
-              data.periodicidade,
+              data.periodicidade || 'Semanal',
             )
 
             // Verificar se a próxima data está dentro do intervalo desejado
@@ -200,6 +220,7 @@ export function NovaAgendaModal() {
 
             const novoAgendamento: Agendamento = {
               id: uuidv4(),
+              recurrenceId,
               terapeutaInfo: pacienteSelecionado.terapeutaInfo,
               pacienteInfo: pacienteSelecionado,
               dataAgendamento: proximaData,
@@ -228,8 +249,6 @@ export function NovaAgendaModal() {
       }
 
       reset()
-      setConflito(false)
-      setMensagemConflito('')
       setMensagemErro('')
       setMensagemAlerta('')
       setMensagemSucesso('Agendamento criado com sucesso!')
@@ -436,12 +455,15 @@ export function NovaAgendaModal() {
                 control={control}
                 name="periodicidade"
                 render={({ field: { onChange, value } }) => (
-                  <Select value={value} onValueChange={onChange}>
+                  <Select
+                    value={value || 'Não repetir'}
+                    onValueChange={onChange}
+                  >
                     <SelectTrigger className="shadow-rosa/50 focus:shadow-rosa w-full h-[40px] rounded-md px-4">
                       <SelectValue placeholder="Selecione a periodicidade" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Não Repetir">Não Repetir</SelectItem>
+                      <SelectItem value="Não repetir">Não repetir</SelectItem>
                       <SelectItem value="Semanal">Semanal</SelectItem>
                       <SelectItem value="Quinzenal">Quinzenal</SelectItem>
                     </SelectContent>
@@ -477,9 +499,10 @@ export function NovaAgendaModal() {
                         <label
                           key={dia}
                           className="flex items-center space-x-2"
-                          htmlFor="diasDaSemana"
+                          htmlFor={dia}
                         >
                           <Checkbox
+                            id={dia}
                             checked={value?.includes(
                               dia as
                                 | 'Domingo'
@@ -497,7 +520,7 @@ export function NovaAgendaModal() {
                                 onChange((value || []).filter((d) => d !== dia))
                               }
                             }}
-                            className="w-4 h-4 border rounded"
+                            className="w-4 h-4 border rounded data-[state=checked]:bg-rosa data-[state=checked]:border-rosa"
                           />
                           <span>{dia}</span>
                         </label>
@@ -846,11 +869,6 @@ export function NovaAgendaModal() {
             </p>
           )}
 
-          {conflito && (
-            <p className="text-red-800 text-sm mt-4 bg-red-100 text-center p-2">
-              {mensagemConflito}
-            </p>
-          )}
           <button
             type="submit"
             disabled={isButtonDisabled}

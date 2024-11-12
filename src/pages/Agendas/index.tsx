@@ -521,7 +521,7 @@ export function Agendas() {
                         onKeyDown={() => handleEditAgenda(agendamento)}
                       >
                         <div className="flex justify-between">
-                          <div>
+                          <div className="font-semibold">
                             {agendamento.horarioAgendamento} -{' '}
                             {
                               agendamento.pacienteInfo.terapeutaInfo
@@ -546,6 +546,7 @@ export function Agendas() {
                             </button>
                           </div>
                         </div>
+                        <div>{agendamento.pacienteInfo.nomePaciente}</div>
                         <hr
                           className={`my-2 border-2 ${agendamento.localAgendamento === 'Sala Verde' ? 'border-green-500' : 'border-blue-500'} `}
                         />
