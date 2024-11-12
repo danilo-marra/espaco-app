@@ -5,7 +5,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import { ptBR } from 'date-fns/locale'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { addMonths, addWeeks, format, isBefore, setDay } from 'date-fns'
+import { addWeeks, format, isBefore, setDay } from 'date-fns'
 import { Label } from '../ui/label'
 import * as RadioGroup from '@radix-ui/react-radio-group'
 import {
@@ -48,9 +48,7 @@ const NovaAgendaFormSchema = z.object({
     required_error: 'Selecione uma sala',
     invalid_type_error: 'Selecione uma sala válida',
   }),
-  periodicidade: z
-    .enum(['Não repetir', 'Semanal', 'Quinzenal', 'Mensal'])
-    .optional(),
+  periodicidade: z.enum(['Não repetir', 'Semanal', 'Quinzenal']).optional(),
   diasDaSemana: z
     .array(
       z.enum([
@@ -305,8 +303,6 @@ export function NovaAgendaModal() {
             dataAtual = addWeeks(dataAtual, 1)
           } else if (data.periodicidade === 'Quinzenal') {
             dataAtual = addWeeks(dataAtual, 2)
-          } else if (data.periodicidade === 'Mensal') {
-            dataAtual = addMonths(dataAtual, 1)
           }
         }
       }
@@ -354,15 +350,8 @@ export function NovaAgendaModal() {
     let proximaData = setDay(baseDate, targetDay, { weekStartsOn: 0 })
 
     if (isBefore(proximaData, baseDate)) {
-      if (periodicidade === 'Mensal') {
-        proximaData = addMonths(proximaData, 1)
-        proximaData = setDay(proximaData, targetDay, { weekStartsOn: 0 })
-      } else {
-        proximaData = addWeeks(
-          proximaData,
-          periodicidade === 'Quinzenal' ? 2 : 1,
-        )
-      }
+      proximaData = setDay(proximaData, targetDay, { weekStartsOn: 0 })
+      proximaData = addWeeks(proximaData, periodicidade === 'Quinzenal' ? 2 : 1)
     }
 
     return proximaData
@@ -540,7 +529,6 @@ export function NovaAgendaModal() {
                       <SelectItem value="Não Repetir">Não Repetir</SelectItem>
                       <SelectItem value="Semanal">Semanal</SelectItem>
                       <SelectItem value="Quinzenal">Quinzenal</SelectItem>
-                      <SelectItem value="Mensal">Mensal</SelectItem>
                     </SelectContent>
                   </Select>
                 )}
@@ -549,8 +537,7 @@ export function NovaAgendaModal() {
             {/* // Se a periodicidade for semanal, permitir selecionar os dias da
             semana */}
             {(watch('periodicidade') === 'Semanal' ||
-              watch('periodicidade') === 'Quinzenal' ||
-              watch('periodicidade') === 'Mensal') && (
+              watch('periodicidade') === 'Quinzenal') && (
               <div className="space-y-2">
                 <label
                   htmlFor="diasDaSemana"
@@ -608,8 +595,7 @@ export function NovaAgendaModal() {
 
             {/* // Permitir selecionar a data de fim da recorrência */}
             {(watch('periodicidade') === 'Semanal' ||
-              watch('periodicidade') === 'Quinzenal' ||
-              watch('periodicidade') === 'Mensal') && (
+              watch('periodicidade') === 'Quinzenal') && (
               <div className="space-y-2">
                 <label
                   className="text-sm text-slate-500"
