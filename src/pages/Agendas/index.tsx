@@ -145,10 +145,11 @@ export function Agendas() {
 
   const filteredAgendamentosNoRoom = useMemo(() => {
     return agendamentos.filter((agendamento) => {
-      const isSameWeekFilter = isSameWeek(
-        new Date(agendamento.dataAgendamento),
-        selectedDate,
-      )
+      const isInSelectedPeriod =
+        viewMode === 'semanal'
+          ? isSameWeek(new Date(agendamento.dataAgendamento), selectedDate)
+          : isSameMonth(new Date(agendamento.dataAgendamento), selectedDate)
+
       const isSameTerapeuta =
         selectedTerapeuta === 'Todos' ||
         selectedTerapeuta ===
@@ -164,9 +165,11 @@ export function Agendas() {
         (selectedStatus.cancelado &&
           agendamento.statusAgendamento === 'Cancelado')
 
-      return isSameWeekFilter && isSameTerapeuta && isNoRoom && isSelectedStatus
+      return (
+        isInSelectedPeriod && isSameTerapeuta && isNoRoom && isSelectedStatus
+      )
     })
-  }, [agendamentos, selectedDate, selectedTerapeuta, selectedStatus])
+  }, [agendamentos, selectedDate, selectedTerapeuta, selectedStatus, viewMode])
 
   // Handlers
 
@@ -254,7 +257,7 @@ export function Agendas() {
       <main className="flex-1 bg-gray-100 p-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl font-semibold">Agendas das Terapeutas</h1>
+          <h1 className="text-2xl font-semibold">Agenda Terapeutas</h1>
           <Dialog>
             <DialogTrigger asChild>
               <button
