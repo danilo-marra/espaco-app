@@ -24,8 +24,11 @@ import { EditarTransacaoModal } from '../../components/Transacao/EditarTransacao
 import { ExcluirModal } from '../../components/ExcluirModal'
 import Pagination from '../../components/Pagination'
 import { dateFormatter, priceFormatter } from '../../utils/formatter'
-import { calculateRepasseInfo } from '../../utils/calculateRepasseInfo'
-import type { AppDispatch, RootState } from '../../store/store'
+import {
+  selectEnhancedTransacoes,
+  selectTransacoesSummary,
+  type AppDispatch,
+} from '../../store/store'
 import type { Transacao } from '../../tipos'
 import { deleteTransacao, fetchTransacoes } from '../../store/transacoesSlice'
 import { fetchSessoes } from '../../store/sessoesSlice'
@@ -33,18 +36,12 @@ import { calculateTotals } from '../../store/totalsSlice'
 
 export function Transacoes() {
   const dispatch = useDispatch<AppDispatch>()
-  const {
-    data: transacoes,
-    loading,
-    error,
-  } = useSelector((state: RootState) => state.transacoes)
-  const { data: sessoes } = useSelector((state: RootState) => state.sessoes)
   const [dataAtual, setDataAtual] = useState<Date>(new Date())
-  const [summary, setSummary] = useState({ entrada: 0, saida: 0, total: 0 })
+  const month = dataAtual.getMonth()
+  const year = dataAtual.getFullYear()
   const [searchValue, setSearchValue] = useState<string>('')
   const [currentPage, setCurrentPage] = useState(1)
   const transacoesPorPagina = 10
-  const [totalPages, setTotalPages] = useState<number>(0)
   const {
     isModalOpen,
     modalMessage,
@@ -61,50 +58,62 @@ export function Transacoes() {
     string | null
   >(null)
   const [isSuccess, setIsSuccess] = useState(false)
+  // Memoizar o seletor de resumo
+  const transacoesSummarySelector = useMemo(
+    () => selectTransacoesSummary(month, year),
+    [month, year],
+  )
+  const summary = useSelector(transacoesSummarySelector)
 
-  const enhancedTransacoes = useMemo(() => {
-    const sessoesDoMes = sessoes.filter((sessao) => {
-      const dataSessao = new Date(sessao.dtSessao1)
-      return (
-        dataSessao.getMonth() === dataAtual.getMonth() &&
-        dataSessao.getFullYear() === dataAtual.getFullYear()
-      )
-    })
+  const enhancedTransacoesSelector = useMemo(
+    () => selectEnhancedTransacoes(month, year, searchValue),
+    [month, year, searchValue],
+  )
+  const enhancedTransacoes = useSelector(enhancedTransacoesSelector)
 
-    const totaisMesAtual = sessoesDoMes.reduce(
-      (acc, sessao) => {
-        const calculations = calculateRepasseInfo(sessao)
-        return {
-          totalValue: acc.totalValue + calculations.totalValue,
-          totalRepasse: acc.totalRepasse + calculations.repasseValue,
-        }
-      },
-      { totalValue: 0, totalRepasse: 0 },
-    )
+  // const enhancedTransacoes = useMemo(() => {
+  //   const sessoesDoMes = sessoes.filter((sessao) => {
+  //     const dataSessao = new Date(sessao.dtSessao1)
+  //     return (
+  //       dataSessao.getMonth() === dataAtual.getMonth() &&
+  //       dataSessao.getFullYear() === dataAtual.getFullYear()
+  //     )
+  //   })
 
-    const mesAtual = format(dataAtual, 'MMMM', { locale: ptBR }).replace(
-      /^\w/,
-      (c) => c.toUpperCase(),
-    )
+  //   const totaisMesAtual = sessoesDoMes.reduce(
+  //     (acc, sessao) => {
+  //       const calculations = calculateRepasseInfo(sessao)
+  //       return {
+  //         totalValue: acc.totalValue + calculations.totalValue,
+  //         totalRepasse: acc.totalRepasse + calculations.repasseValue,
+  //       }
+  //     },
+  //     { totalValue: 0, totalRepasse: 0 },
+  //   )
 
-    const totalSessoes: Transacao = {
-      id: 'total-sessoes',
-      descricao: `Sessões (${mesAtual})`,
-      tipo: 'entrada',
-      valor: totaisMesAtual.totalValue,
-      dtCriacao: new Date(),
-    }
+  //   const mesAtual = format(dataAtual, 'MMMM', { locale: ptBR }).replace(
+  //     /^\w/,
+  //     (c) => c.toUpperCase(),
+  //   )
 
-    const totalRepasse: Transacao = {
-      id: 'total-repasses',
-      descricao: `Repasses (${mesAtual})`,
-      tipo: 'saida',
-      valor: totaisMesAtual.totalRepasse,
-      dtCriacao: new Date(),
-    }
+  //   const totalSessoes: Transacao = {
+  //     id: 'total-sessoes',
+  //     descricao: `Sessões (${mesAtual})`,
+  //     tipo: 'entrada',
+  //     valor: totaisMesAtual.totalValue,
+  //     dtCriacao: new Date(),
+  //   }
 
-    return [...transacoes, totalSessoes, totalRepasse]
-  }, [transacoes, sessoes, dataAtual])
+  //   const totalRepasse: Transacao = {
+  //     id: 'total-repasses',
+  //     descricao: `Repasses (${mesAtual})`,
+  //     tipo: 'saida',
+  //     valor: totaisMesAtual.totalRepasse,
+  //     dtCriacao: new Date(),
+  //   }
+
+  //   return [...transacoes, totalSessoes, totalRepasse]
+  // }, [transacoes, sessoes, dataAtual])
 
   useEffect(() => {
     dispatch(fetchTransacoes())
@@ -113,36 +122,38 @@ export function Transacoes() {
     })
   }, [dispatch])
 
-  useEffect(() => {
-    if (loading || error) return
+  const totalPages = Math.ceil(enhancedTransacoes.length / transacoesPorPagina)
 
-    const filteredTransacoes = enhancedTransacoes.filter((transacao) => {
-      if (transacao.id.startsWith('total-')) return true
-      const dataTransacao = new Date(transacao.dtCriacao)
-      return (
-        dataTransacao.getMonth() === dataAtual.getMonth() &&
-        dataTransacao.getFullYear() === dataAtual.getFullYear() &&
-        transacao.descricao.toLowerCase().includes(searchValue.toLowerCase())
-      )
-    })
+  // useEffect(() => {
+  //   if (loading || error) return
 
-    const newSummary = filteredTransacoes.reduce(
-      (acc, transacao) => {
-        if (transacao.tipo === 'entrada') {
-          acc.entrada += transacao.valor
-          acc.total += transacao.valor
-        } else {
-          acc.saida += transacao.valor
-          acc.total -= transacao.valor
-        }
-        return acc
-      },
-      { entrada: 0, saida: 0, total: 0 },
-    )
+  //   const filteredTransacoes = enhancedTransacoes.filter((transacao) => {
+  //     if (transacao.id.startsWith('total-')) return true
+  //     const dataTransacao = new Date(transacao.dtCriacao)
+  //     return (
+  //       dataTransacao.getMonth() === dataAtual.getMonth() &&
+  //       dataTransacao.getFullYear() === dataAtual.getFullYear() &&
+  //       transacao.descricao.toLowerCase().includes(searchValue.toLowerCase())
+  //     )
+  //   })
 
-    setSummary(newSummary)
-    setTotalPages(Math.ceil(filteredTransacoes.length / transacoesPorPagina))
-  }, [enhancedTransacoes, searchValue, dataAtual, loading, error])
+  //   const newSummary = filteredTransacoes.reduce(
+  //     (acc, transacao) => {
+  //       if (transacao.tipo === 'entrada') {
+  //         acc.entrada += transacao.valor
+  //         acc.total += transacao.valor
+  //       } else {
+  //         acc.saida += transacao.valor
+  //         acc.total -= transacao.valor
+  //       }
+  //       return acc
+  //     },
+  //     { entrada: 0, saida: 0, total: 0 },
+  //   )
+
+  //   setSummary(newSummary)
+  //   setTotalPages(Math.ceil(filteredTransacoes.length / transacoesPorPagina))
+  // }, [enhancedTransacoes, searchValue, dataAtual, loading, error])
 
   const handleMonthChange = (increment: number) => {
     setDataAtual(
@@ -187,18 +198,11 @@ export function Transacoes() {
 
   const paginatedTransacoes = useMemo(() => {
     const startIndex = (currentPage - 1) * transacoesPorPagina
-    return enhancedTransacoes
-      .filter((transacao) => {
-        if (transacao.id.startsWith('total-')) return true
-        const dataTransacao = new Date(transacao.dtCriacao)
-        return (
-          dataTransacao.getMonth() === dataAtual.getMonth() &&
-          dataTransacao.getFullYear() === dataAtual.getFullYear() &&
-          transacao.descricao.toLowerCase().includes(searchValue.toLowerCase())
-        )
-      })
-      .slice(startIndex, startIndex + transacoesPorPagina)
-  }, [enhancedTransacoes, currentPage, dataAtual, searchValue])
+    return enhancedTransacoes.slice(
+      startIndex,
+      startIndex + transacoesPorPagina,
+    )
+  }, [enhancedTransacoes, currentPage])
 
   return (
     <div className="flex min-h-screen">
