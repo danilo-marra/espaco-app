@@ -182,7 +182,7 @@ export function Pacientes() {
           <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
             <Users size={24} />
             <span className="text-xl font-semibold">
-              Total de Pacientes: {filteredPacientes.length}
+              Paciente(s): {filteredPacientes.length}
             </span>
           </div>
           <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">

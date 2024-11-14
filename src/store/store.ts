@@ -13,6 +13,7 @@ import type {
   Terapeuta,
   Transacao,
   Agendamento,
+  PacienteEstatisticas,
 } from '../tipos'
 import { calculateRepasseInfo } from '@/utils/calculateRepasseInfo'
 
@@ -195,6 +196,48 @@ export const selectEnhancedTransacoes = (
       return allTransacoes
     },
   )
+
+export const selectPacienteEstatisticas = createSelector(
+  [(state: RootState) => state.pacientes.data],
+  (pacientes): PacienteEstatisticas => {
+    const hoje = new Date()
+    const mesAtual = hoje.getMonth()
+    const anoAtual = hoje.getFullYear()
+
+    const pacientesMesAtual = pacientes.filter((paciente) => {
+      const dtEntradaPaciente = new Date(paciente.dtEntradaPaciente)
+      return (
+        dtEntradaPaciente.getMonth() === mesAtual &&
+        dtEntradaPaciente.getFullYear() === anoAtual
+      )
+    }).length
+
+    const pacientesMesAnterior = pacientes.filter((paciente) => {
+      const dtEntradaPaciente = new Date(paciente.dtEntradaPaciente)
+      const mesAnterior = mesAtual === 0 ? 11 : mesAtual - 1
+      const anoMesAnterior = mesAtual === 0 ? anoAtual - 1 : anoAtual
+      return (
+        dtEntradaPaciente.getMonth() === mesAnterior &&
+        dtEntradaPaciente.getFullYear() === anoMesAnterior
+      )
+    }).length
+
+    const percentualCrescimento =
+      pacientesMesAnterior === 0
+        ? 100
+        : Math.round(
+            ((pacientesMesAtual - pacientesMesAnterior) /
+              pacientesMesAnterior) *
+              100,
+          )
+
+    return {
+      novosPacientes: pacientesMesAtual,
+      novosPacientesMesAnterior: pacientesMesAnterior,
+      percentualCrescimento,
+    }
+  },
+)
 
 export const store = configureStore({
   reducer: {

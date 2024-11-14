@@ -18,6 +18,13 @@ export interface Paciente {
   cpfResponsavel: string
   enderecoResponsavel: string
   origem: 'Indicação' | 'Instagram' | 'Busca no Google' | 'Outros' | undefined
+  dtEntradaPaciente: Date
+}
+
+export interface PacienteEstatisticas {
+  novosPacientes: number
+  novosPacientesMesAnterior: number
+  percentualCrescimento: number
 }
 
 export interface Sessao {

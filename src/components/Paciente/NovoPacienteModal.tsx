@@ -24,6 +24,7 @@ const NovoPacienteFormSchema = z.object({
   cpfResponsavel: z.string(),
   enderecoResponsavel: z.string(),
   origem: z.enum(['Indicação', 'Instagram', 'Busca no Google', 'Outros']),
+  dtEntradaPaciente: z.date().nullable().optional(),
 })
 
 type NovoPacienteFormInputs = z.infer<typeof NovoPacienteFormSchema>
@@ -42,6 +43,18 @@ export function NovoPacienteModal() {
     formState: { isSubmitting, errors },
   } = useForm<NovoPacienteFormInputs>({
     resolver: zodResolver(NovoPacienteFormSchema),
+    defaultValues: {
+      nomePaciente: '',
+      dtNascimento: undefined,
+      terapeutaId: '',
+      nomeResponsavel: '',
+      telefoneResponsavel: '',
+      emailResponsavel: '',
+      cpfResponsavel: '',
+      enderecoResponsavel: '',
+      origem: undefined, // undefined para select vazio
+      dtEntradaPaciente: null,
+    },
   })
 
   async function handleCreateNewPaciente(data: NovoPacienteFormInputs) {
@@ -67,6 +80,7 @@ export function NovoPacienteModal() {
         cpfResponsavel: data.cpfResponsavel,
         enderecoResponsavel: data.enderecoResponsavel,
         origem: data.origem,
+        dtEntradaPaciente: data.dtEntradaPaciente || new Date(), // Usa data atual se não preenchido
       }
 
       // Faz o dispatch do thunk addPaciente
@@ -114,29 +128,55 @@ export function NovoPacienteModal() {
             {errors.nomePaciente && (
               <p className="text-red-500">{errors.nomePaciente.message}</p>
             )}
-            <Controller
-              control={control}
-              name="dtNascimento"
-              render={({ field }) => (
-                <DatePicker
-                  className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
-                  id="dtNascimento"
-                  placeholderText="Data de nascimento"
-                  selected={field.value}
-                  onChange={(date) => field.onChange(date)}
-                  dateFormat="dd/MM/yyyy"
-                  locale={ptBR}
-                  onFocus={handleFocus}
-                  autoComplete="off"
-                  showMonthDropdown
-                  showYearDropdown
-                  dropdownMode="select"
+            <div className="flex space-x-4">
+              <div>
+                <Controller
+                  control={control}
+                  name="dtNascimento"
+                  render={({ field }) => (
+                    <DatePicker
+                      className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
+                      id="dtNascimento"
+                      placeholderText="Data de nascimento"
+                      selected={field.value}
+                      onChange={(date) => field.onChange(date)}
+                      dateFormat="dd/MM/yyyy"
+                      locale={ptBR}
+                      onFocus={handleFocus}
+                      autoComplete="off"
+                      showMonthDropdown
+                      showYearDropdown
+                      dropdownMode="select"
+                    />
+                  )}
                 />
-              )}
-            />
-            {errors.dtNascimento && (
-              <p className="text-red-500">{errors.dtNascimento.message}</p>
-            )}
+                {errors.dtNascimento && (
+                  <p className="text-red-500">{errors.dtNascimento.message}</p>
+                )}
+              </div>
+              <div>
+                <Controller
+                  control={control}
+                  name="dtEntradaPaciente"
+                  render={({ field }) => (
+                    <DatePicker
+                      className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
+                      id="dtEntradaPaciente"
+                      placeholderText="Data de entrada"
+                      selected={field.value}
+                      onChange={(date) => field.onChange(date)}
+                      dateFormat="dd/MM/yyyy"
+                      locale={ptBR}
+                      onFocus={handleFocus}
+                      autoComplete="off"
+                      showMonthDropdown
+                      showYearDropdown
+                      dropdownMode="select"
+                    />
+                  )}
+                />
+              </div>
+            </div>
             <select
               className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
               id="terapeutaId"
