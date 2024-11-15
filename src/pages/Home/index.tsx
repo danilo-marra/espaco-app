@@ -1,5 +1,9 @@
+import { LucroPorMesChart } from '@/components/Home/LucroPorMesChart'
+import { MaioresLucrosPorTerapeutasPorMesChart } from '@/components/Home/MaioresLucrosPorTerapeutasPorMesChart'
 import { NovosPacientesChart } from '@/components/Home/NovosPacientesChart'
 import ReceitaAnualChart from '@/components/Home/ReceitaAnualChart'
+import { SessoesAgendamentosChart } from '@/components/Home/SessoesAgendamentosChart'
+import { StatusPagamentosChart } from '@/components/Home/StatusPagamentosChart'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import {
@@ -57,10 +61,14 @@ export function Home() {
           </PopoverContent>
         </Popover>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <LucroPorMesChart />
+          <StatusPagamentosChart />
           <NovosPacientesChart />
+          <SessoesAgendamentosChart />
         </div>
         <div>
           <ReceitaAnualChart />
+          <MaioresLucrosPorTerapeutasPorMesChart />
         </div>
       </main>
     </div>
