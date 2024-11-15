@@ -2,21 +2,14 @@ import { CaretLeft, CaretRight, ChartBar } from '@phosphor-icons/react'
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
 import { addYears, format, subYears } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Legend,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts'
+import { Bar, BarChart, CartesianGrid, Legend, XAxis, YAxis } from 'recharts'
 import { priceFormatter } from '@/utils/formatter'
 import { useSelector } from 'react-redux'
 import { selectTransacoesSummary, type RootState } from '@/store/store'
 import { useMemo, useState } from 'react'
 import { createSelector } from '@reduxjs/toolkit'
 import { Button } from '../ui/button'
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '../ui/chart'
 
 type Totals = {
   faturamento: number
@@ -100,7 +93,7 @@ export default function ReceitaAnualChart() {
   }
 
   return (
-    <Card className="w-full max-w-[55em] rounded-xl">
+    <Card className="max-w-4xl">
       <CardHeader>
         <CardTitle className="text-rosa flex items-center mb-6">
           <ChartBar size={20} className="mr-2" />
@@ -131,18 +124,21 @@ export default function ReceitaAnualChart() {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="overflow-x-auto">
-          <BarChart width={800} height={300} data={chartData}>
+        <ChartContainer config={chartConfig}>
+          <BarChart accessibilityLayer data={chartData}>
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey="month"
               tickLine={false}
               axisLine={false}
               interval={0}
+              tickMargin={10}
+              tickFormatter={(value) => value.slice(0, 3)}
             />
             <YAxis />
-            <Tooltip
-              formatter={(value: number) => priceFormatter.format(value)}
+            <ChartTooltip
+              cursor={false}
+              content={<ChartTooltipContent hideLabel />}
             />
             <Legend
               content={({ payload }) => (
@@ -194,7 +190,7 @@ export default function ReceitaAnualChart() {
               barSize={40}
             />
           </BarChart>
-        </div>
+        </ChartContainer>
       </CardContent>
     </Card>
   )

@@ -41,6 +41,13 @@
       "tipo": "saida",
       "valor": 300,
       "dtCriacao": "2024-11-01T03:00:00.000Z"
+    },
+    {
+      "id": "e235c41f-011d-42ea-9345-be8da7da5a0c",
+      "descricao": "Aluguel",
+      "tipo": "entrada",
+      "valor": 1200,
+      "dtCriacao": "2024-11-13T03:00:00.000Z"
     }
   ],
   "pacientes": [

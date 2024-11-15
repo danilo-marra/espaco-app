@@ -9,17 +9,16 @@ import {
 } from '@/components/ui/popover'
 import { fetchPacientes } from '@/store/pacientesSlice'
 import { fetchSessoes } from '@/store/sessoesSlice'
-import { selectPacienteEstatisticas, type AppDispatch } from '@/store/store'
+import { type AppDispatch } from '@/store/store'
 import { fetchTransacoes } from '@/store/transacoesSlice'
 import { CalendarBlank } from '@phosphor-icons/react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { useEffect, useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
 
 export function Home() {
   const dispatch = useDispatch<AppDispatch>()
-  const estatisticas = useSelector(selectPacienteEstatisticas)
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
 
   useEffect(() => {
@@ -58,9 +57,11 @@ export function Home() {
           </PopoverContent>
         </Popover>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <NovosPacientesChart estatisticas={estatisticas} />
+          <NovosPacientesChart />
         </div>
-        <ReceitaAnualChart />
+        <div>
+          <ReceitaAnualChart />
+        </div>
       </main>
     </div>
   )

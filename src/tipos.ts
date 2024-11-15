@@ -25,6 +25,7 @@ export interface PacienteEstatisticas {
   novosPacientes: number
   novosPacientesMesAnterior: number
   percentualCrescimento: number
+  pacientesPorMes: number[]
 }
 
 export interface Sessao {

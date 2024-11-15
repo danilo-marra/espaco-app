@@ -26,6 +26,7 @@ export interface PacientesState {
   data: Paciente[]
   loading: boolean
   error: string | null
+  estatisticas: PacienteEstatisticas
 }
 
 export interface TerapeutasState {
@@ -235,6 +236,7 @@ export const selectPacienteEstatisticas = createSelector(
       novosPacientes: pacientesMesAtual,
       novosPacientesMesAnterior: pacientesMesAnterior,
       percentualCrescimento,
+      pacientesPorMes: [],
     }
   },
 )

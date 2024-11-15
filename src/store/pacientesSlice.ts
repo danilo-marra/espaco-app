@@ -13,12 +13,41 @@ const initialState: PacientesState = {
   data: [],
   loading: false,
   error: null,
+  estatisticas: {
+    novosPacientes: 0,
+    novosPacientesMesAnterior: 0,
+    percentualCrescimento: 0,
+    pacientesPorMes: [],
+  },
+}
+
+const calcularPacientesPorMes = (pacientes: Paciente[]): number[] => {
+  const pacientesPorMes = new Array(12).fill(0)
+
+  pacientes.forEach((paciente) => {
+    const dtEntrada = new Date(paciente.dtEntradaPaciente)
+    const mes = dtEntrada.getMonth()
+    const ano = dtEntrada.getFullYear()
+
+    // Só conta pacientes do ano atual
+    if (ano === new Date().getFullYear()) {
+      pacientesPorMes[mes]++
+    }
+  })
+
+  return pacientesPorMes
 }
 
 // Thunk para buscar pacientes
 export const fetchPacientes = createAsyncThunk<Paciente[]>(
   'pacientes/fetchPacientes',
-  async () => httpRequest<Paciente[]>(`${API_URL}/pacientes`, 'GET'),
+  async () => {
+    const response = await httpRequest<Paciente[]>(
+      `${API_URL}/pacientes`,
+      'GET',
+    )
+    return response
+  },
 )
 
 // Thunk para adicionar paciente
@@ -65,6 +94,14 @@ export const updatePaciente = createAsyncThunk<
     }
   },
 )
+
+const calcularPercentualCrescimento = (
+  atual: number,
+  anterior: number,
+): number => {
+  if (anterior === 0) return atual > 0 ? 100 : 0
+  return Math.round(((atual - anterior) / anterior) * 100)
+}
 
 // Thunk para atualizar sessões relacionadas
 export const updateSessoesByPaciente = createAsyncThunk<
@@ -127,6 +164,21 @@ const pacientesSlice = createSlice({
       .addCase(fetchPacientes.fulfilled, (state, action) => {
         state.loading = false
         state.data = action.payload
+
+        // Calcula estatísticas
+        const pacientesPorMes = calcularPacientesPorMes(action.payload)
+        const mesAtual = new Date().getMonth()
+
+        state.estatisticas = {
+          novosPacientes: pacientesPorMes[mesAtual],
+          novosPacientesMesAnterior:
+            mesAtual > 0 ? pacientesPorMes[mesAtual - 1] : pacientesPorMes[11],
+          percentualCrescimento: calcularPercentualCrescimento(
+            pacientesPorMes[mesAtual],
+            mesAtual > 0 ? pacientesPorMes[mesAtual - 1] : pacientesPorMes[11],
+          ),
+          pacientesPorMes,
+        }
       })
       .addCase(fetchPacientes.rejected, (state, action) => {
         state.loading = false
