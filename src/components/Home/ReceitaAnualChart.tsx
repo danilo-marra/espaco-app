@@ -93,7 +93,7 @@ export default function ReceitaAnualChart() {
   }
 
   return (
-    <Card className="max-w-4xl">
+    <Card className="">
       <CardHeader>
         <CardTitle className="text-rosa flex items-center mb-6">
           <ChartBar size={20} className="mr-2" />

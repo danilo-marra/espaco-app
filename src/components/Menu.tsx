@@ -1,5 +1,6 @@
 import {
   CalendarBlank,
+  CalendarCheck,
   House,
   List,
   Money,
@@ -48,7 +49,7 @@ export function Menu() {
           </li>
           <hr />
           <li className="hover:text-blue-300 cursor-pointer flex items-center space-x-2">
-            <CalendarBlank size={24} />
+            <CalendarCheck size={24} />
             <NavLink to={'/sessoes'}>Sessões</NavLink>
           </li>
           <hr />

@@ -16,37 +16,97 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart'
-import { TrendUp } from '@phosphor-icons/react/dist/ssr'
-const chartData = [
-  { month: 'January', desktop: 186, mobile: 80 },
-  { month: 'February', desktop: 305, mobile: 200 },
-  { month: 'March', desktop: 237, mobile: 120 },
-  { month: 'April', desktop: 73, mobile: 190 },
-  { month: 'May', desktop: 209, mobile: 130 },
-  { month: 'June', desktop: 214, mobile: 140 },
-]
+import { useMemo } from 'react'
+import { format, isSameMonth, subMonths } from 'date-fns'
+import { useSelector } from 'react-redux'
+import type { RootState } from '@/store/store'
+import { ptBR } from 'date-fns/locale'
+import { CalendarCheck } from '@phosphor-icons/react'
 
 const chartConfig = {
-  desktop: {
-    label: 'Desktop',
-    color: 'hsl(var(--chart-1))',
+  agendamentos: {
+    label: 'Agendamentos',
+    color: '#C3586A',
   },
-  mobile: {
-    label: 'Mobile',
-    color: 'hsl(var(--chart-2))',
+  sessoes: {
+    label: 'Sessões',
+    color: '#3395AE',
   },
 } satisfies ChartConfig
 
 export function SessoesAgendamentosChart() {
+  // Generate last 6 months array
+  const monthsArray = useMemo(() => {
+    const months = []
+    const now = new Date()
+    for (let i = 5; i >= 0; i--) {
+      months.push(subMonths(now, i))
+    }
+    return months
+  }, [])
+
+  const agendamentos = useSelector(
+    (state: RootState) => state.agendamentos.data,
+  )
+  const sessoes = useSelector((state: RootState) => state.sessoes.data)
+
+  // Calculate data for each month
+  const chartData = useMemo(() => {
+    return monthsArray.map((date) => {
+      const agendamentosNoMes = agendamentos.filter((agendamento) =>
+        isSameMonth(new Date(agendamento.dataAgendamento), date),
+      ).length
+
+      const sessoesNoMes = sessoes.filter((sessao) =>
+        isSameMonth(new Date(sessao.dtSessao1), date),
+      ).length
+
+      return {
+        month: format(date, 'MMM', { locale: ptBR }).toUpperCase(),
+        agendamentos: agendamentosNoMes,
+        sessoes: sessoesNoMes,
+      }
+    })
+  }, [agendamentos, sessoes, monthsArray])
+
+  // Calculate totals
+  const totals = useMemo(() => {
+    return chartData.reduce(
+      (acc, curr) => ({
+        agendamentos: acc.agendamentos + curr.agendamentos,
+        sessoes: acc.sessoes + curr.sessoes,
+      }),
+      { agendamentos: 0, sessoes: 0 },
+    )
+  }, [chartData])
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Area Chart - Legend</CardTitle>
+        <CardTitle className="text-rosa flex items-center">
+          <CalendarCheck size={16} className="mr-2" />
+          <p className="font-semibold">Agendamentos x Sessões</p>
+        </CardTitle>
         <CardDescription>
-          Showing total visitors for the last 6 months
+          {format(monthsArray[0], 'MMMM', { locale: ptBR })
+            .charAt(0)
+            .toUpperCase() +
+            format(monthsArray[0], 'MMMM', { locale: ptBR }).slice(1)}{' '}
+          -{' '}
+          {format(monthsArray[5], 'MMMM', { locale: ptBR })
+            .charAt(0)
+            .toLocaleUpperCase() +
+            format(monthsArray[5], 'MMMM', { locale: ptBR }).slice(1)}{' '}
+          {format(monthsArray[5], 'yyyy')}
         </CardDescription>
       </CardHeader>
       <CardContent>
+        <div className="flex items-center space-x-2 justify-center my-6 text-center">
+          <p className="text-4xl font-bold">
+            <span className="text-rosa">{totals.agendamentos}</span> x{' '}
+            <span className="text-azul">{totals.sessoes}</span>
+          </p>
+        </div>
         <ChartContainer config={chartConfig}>
           <AreaChart
             accessibilityLayer
@@ -62,42 +122,34 @@ export function SessoesAgendamentosChart() {
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              tickFormatter={(value) => value.slice(0, 3)}
             />
             <ChartTooltip
               cursor={false}
               content={<ChartTooltipContent indicator="line" />}
             />
             <Area
-              dataKey="mobile"
+              dataKey="agendamentos"
               type="natural"
-              fill="var(--color-mobile)"
+              fill="#C3586A"
               fillOpacity={0.4}
-              stroke="var(--color-mobile)"
+              stroke="#C3586A"
               stackId="a"
             />
             <Area
-              dataKey="desktop"
+              dataKey="sessoes"
               type="natural"
-              fill="var(--color-desktop)"
+              fill="#3395AE"
               fillOpacity={0.4}
-              stroke="var(--color-desktop)"
+              stroke="#3395AE"
               stackId="a"
             />
             <ChartLegend content={<ChartLegendContent />} />
           </AreaChart>
         </ChartContainer>
       </CardContent>
-      <CardFooter>
-        <div className="flex w-full items-start gap-2 text-sm">
-          <div className="grid gap-2">
-            <div className="flex items-center gap-2 font-medium leading-none">
-              Trending up by 5.2% this month <TrendUp className="h-4 w-4" />
-            </div>
-            <div className="flex items-center gap-2 leading-none text-muted-foreground">
-              January - June 2024
-            </div>
-          </div>
+      <CardFooter className="flex-col gap-2 text-sm">
+        <div className="leading-none text-muted-foreground">
+          Relação entre agendamentos e sessões realizadas
         </div>
       </CardFooter>
     </Card>

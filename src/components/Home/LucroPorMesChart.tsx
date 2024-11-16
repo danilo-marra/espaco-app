@@ -10,15 +10,17 @@ import {
   CardTitle,
   CardDescription,
   CardContent,
+  CardFooter,
 } from '@/components/ui/card'
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart'
-import { Minus, PiggyBank, Plus } from '@phosphor-icons/react'
+import { Minus, PiggyBank, Plus, TrendUp } from '@phosphor-icons/react'
 import { selectTransacoesSummary, type RootState } from '@/store/store'
 import { priceFormatter } from '@/utils/formatter'
+import { TrendDown } from '@phosphor-icons/react/dist/ssr'
 
 export function LucroPorMesChart() {
   // Generate an array of the last 6 months
@@ -55,16 +57,32 @@ export function LucroPorMesChart() {
   // Determine if the profit is negative
   const lucroClass = lastMonthLucro < 0 ? 'text-red-500' : 'text-green-500'
 
+  const percentageChange = useMemo(() => {
+    const currentMonth = chartData[chartData.length - 1]?.lucro || 0
+    const previousMonth = chartData[chartData.length - 2]?.lucro || 0
+
+    if (previousMonth === 0) return currentMonth > 0 ? 100 : 0
+    return Math.round(((currentMonth - previousMonth) / previousMonth) * 100)
+  }, [chartData])
+
   return (
-    <Card className="w-full max-w-lg">
-      <CardHeader>
+    <Card className="flex flex-col">
+      <CardHeader className="pb-0">
         <CardTitle className="flex items-center text-rosa">
-          <PiggyBank className="mr-4" size={16} />
+          <PiggyBank className="mr-2" size={16} />
           <p className="font-semibold">Lucro</p>
         </CardTitle>
         <CardDescription>
-          {format(monthsArray[0], 'MMMM', { locale: ptBR })} -{' '}
-          {format(monthsArray[5], 'MMMM', { locale: ptBR })}
+          {format(monthsArray[0], 'MMMM', { locale: ptBR })
+            .charAt(0)
+            .toUpperCase() +
+            format(monthsArray[0], 'MMMM', { locale: ptBR }).slice(1)}{' '}
+          -{' '}
+          {format(monthsArray[5], 'MMMM', { locale: ptBR })
+            .charAt(0)
+            .toLocaleUpperCase() +
+            format(monthsArray[5], 'MMMM', { locale: ptBR }).slice(1)}{' '}
+          {format(monthsArray[5], ' yyyy')}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -118,6 +136,20 @@ export function LucroPorMesChart() {
           </LineChart>
         </ChartContainer>
       </CardContent>
+      <CardFooter className="flex-col gap-2 text-sm">
+        <div className="flex items-center gap-2 font-medium leading-none">
+          {percentageChange > 0 ? 'Aumento' : 'Redução'} de{' '}
+          {Math.abs(percentageChange)}% neste mês
+          {percentageChange > 0 ? (
+            <TrendUp className="h-4 w-4" />
+          ) : (
+            <TrendDown className="h-4 w-4" />
+          )}
+        </div>
+        <div className="leading-none text-muted-foreground">
+          Lucros dos últimos 6 meses
+        </div>
+      </CardFooter>
     </Card>
   )
 }

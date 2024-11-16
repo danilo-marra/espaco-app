@@ -66,7 +66,7 @@ export function Home() {
           <NovosPacientesChart />
           <SessoesAgendamentosChart />
         </div>
-        <div>
+        <div className="grid gap-4 md:grid-cols-2">
           <ReceitaAnualChart />
           <MaioresLucrosPorTerapeutasPorMesChart />
         </div>
