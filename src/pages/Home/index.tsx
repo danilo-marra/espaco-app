@@ -4,26 +4,17 @@ import { NovosPacientesChart } from '@/components/Home/NovosPacientesChart'
 import ReceitaAnualChart from '@/components/Home/ReceitaAnualChart'
 import { SessoesAgendamentosChart } from '@/components/Home/SessoesAgendamentosChart'
 import { StatusPagamentosChart } from '@/components/Home/StatusPagamentosChart'
-import { Button } from '@/components/ui/button'
-import { Calendar } from '@/components/ui/calendar'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
+import { fetchAgendamentos } from '@/store/agendamentosSlice'
 import { fetchPacientes } from '@/store/pacientesSlice'
 import { fetchSessoes } from '@/store/sessoesSlice'
 import { type AppDispatch } from '@/store/store'
+import { fetchTerapeutas } from '@/store/terapeutasSlice'
 import { fetchTransacoes } from '@/store/transacoesSlice'
-import { CalendarBlank } from '@phosphor-icons/react'
-import { format } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 
 export function Home() {
   const dispatch = useDispatch<AppDispatch>()
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date())
 
   useEffect(() => {
     // Fetch all necessary data when component mounts
@@ -32,6 +23,8 @@ export function Home() {
         dispatch(fetchPacientes()),
         dispatch(fetchTransacoes()),
         dispatch(fetchSessoes()),
+        dispatch(fetchAgendamentos()),
+        dispatch(fetchTerapeutas()),
       ])
     }
 
@@ -41,25 +34,6 @@ export function Home() {
   return (
     <div className="flex min-h-screen">
       <main className="flex-1 bg-gray-100 p-8 space-y-4">
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className="w-[240px] justify-start text-left font-normal"
-            >
-              <CalendarBlank className="mr-2 h-4 w-4" />
-              {format(selectedDate, 'PPP', { locale: ptBR })}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="end">
-            <Calendar
-              mode="single"
-              selected={selectedDate}
-              onSelect={(date) => date && setSelectedDate(date)}
-              initialFocus
-            />
-          </PopoverContent>
-        </Popover>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <LucroPorMesChart />
           <StatusPagamentosChart />

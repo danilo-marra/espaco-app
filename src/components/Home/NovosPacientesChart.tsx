@@ -1,4 +1,4 @@
-import { Plus, TrendUp, TrendDown, Users } from '@phosphor-icons/react'
+import { TrendUp, TrendDown, Users } from '@phosphor-icons/react'
 import {
   Card,
   CardContent,
@@ -80,8 +80,7 @@ export function NovosPacientesChart() {
       </CardHeader>
       <CardContent>
         <div className="flex items-center space-x-2 justify-center my-6 text-center text-rosa">
-          <Plus size={22} weight="bold" />
-          <p className="text-4xl font-bold">{totalPacientes}</p>
+          <p className="text-4xl font-semibold">+ {totalPacientes}</p>
         </div>
         <ChartContainer config={chartConfig}>
           <BarChart

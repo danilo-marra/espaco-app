@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { useSelector } from 'react-redux'
+import { createSelector } from '@reduxjs/toolkit'
 import { LineChart, Line, XAxis, CartesianGrid } from 'recharts'
 import { format, subMonths } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
@@ -34,14 +35,19 @@ export function LucroPorMesChart() {
   }, [])
 
   // Create a selector to get summaries for each month
-  const summaries = useSelector((state: RootState) =>
-    monthsArray.map((date) => {
-      const month = date.getMonth()
-      const year = date.getFullYear()
-      const summary = selectTransacoesSummary(month, year)(state)
-      return { date, summary }
-    }),
-  )
+  const selectSummaries = (monthsArray: Date[]) =>
+    createSelector(
+      (state: RootState) => state,
+      (state) =>
+        monthsArray.map((date) => {
+          const month = date.getMonth()
+          const year = date.getFullYear()
+          const summary = selectTransacoesSummary(month, year)(state)
+          return { date, summary }
+        }),
+    )
+
+  const summaries = useSelector(selectSummaries(monthsArray))
 
   // Prepare the chart data
   const chartData = summaries.map(({ date, summary }) => ({
@@ -49,13 +55,15 @@ export function LucroPorMesChart() {
     lucro: summary.total || 0,
   }))
 
-  // Get the profit of the last month
-  const lastMonthLucro = chartData[chartData.length - 1]?.lucro || 0
+  // Get the accumulated profit for the last 6 months
+  const accumulatedLucro = useMemo(() => {
+    return chartData.reduce((acc, curr) => acc + curr.lucro, 0)
+  }, [chartData])
 
-  const ProfitIcon = lastMonthLucro < 0 ? Minus : Plus
+  const ProfitIcon = accumulatedLucro < 0 ? Minus : Plus
 
   // Determine if the profit is negative
-  const lucroClass = lastMonthLucro < 0 ? 'text-red-500' : 'text-green-500'
+  const lucroClass = accumulatedLucro < 0 ? 'text-red-500' : 'text-green-500'
 
   const percentageChange = useMemo(() => {
     const currentMonth = chartData[chartData.length - 1]?.lucro || 0
@@ -91,7 +99,7 @@ export function LucroPorMesChart() {
         >
           <ProfitIcon size={22} weight="bold" />
           <p className="text-4xl font-bold">
-            {priceFormatter.format(Math.abs(lastMonthLucro))}
+            {priceFormatter.format(Math.abs(accumulatedLucro))}
           </p>
         </div>
         <ChartContainer

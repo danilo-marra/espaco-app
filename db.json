@@ -38,7 +38,7 @@
     {
       "id": "b5b3e1d6-607f-4a26-a78f-036b34dcb787",
       "descricao": "Sofá",
-      "tipo": "saida",
+      "tipo": "entrada",
       "valor": 300,
       "dtCriacao": "2024-11-01T03:00:00.000Z"
     },
@@ -48,6 +48,13 @@
       "tipo": "entrada",
       "valor": 1200,
       "dtCriacao": "2024-11-13T03:00:00.000Z"
+    },
+    {
+      "id": "3724d937-d455-4095-857d-ca9ff4360725",
+      "descricao": "Aluguel",
+      "tipo": "entrada",
+      "valor": 300,
+      "dtCriacao": "2024-08-12T03:00:00.000Z"
     }
   ],
   "pacientes": [

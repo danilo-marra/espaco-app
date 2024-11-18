@@ -61,7 +61,7 @@ export default function ReceitaAnualChart() {
   const chartConfig = {
     faturamento: {
       label: 'Faturamento',
-      color: '#3b82f6',
+      color: '#3395AE',
     },
     despesa: {
       label: 'Despesa',
@@ -93,7 +93,7 @@ export default function ReceitaAnualChart() {
   }
 
   return (
-    <Card className="">
+    <Card>
       <CardHeader>
         <CardTitle className="text-rosa flex items-center mb-6">
           <ChartBar size={20} className="mr-2" />

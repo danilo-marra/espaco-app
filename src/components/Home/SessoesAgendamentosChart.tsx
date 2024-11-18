@@ -21,7 +21,7 @@ import { format, isSameMonth, subMonths } from 'date-fns'
 import { useSelector } from 'react-redux'
 import type { RootState } from '@/store/store'
 import { ptBR } from 'date-fns/locale'
-import { CalendarCheck } from '@phosphor-icons/react'
+import { Calendar } from '@phosphor-icons/react'
 
 const chartConfig = {
   agendamentos: {
@@ -84,7 +84,7 @@ export function SessoesAgendamentosChart() {
     <Card>
       <CardHeader>
         <CardTitle className="text-rosa flex items-center">
-          <CalendarCheck size={16} className="mr-2" />
+          <Calendar size={16} className="mr-2" />
           <p className="font-semibold">Agendamentos x Sessões</p>
         </CardTitle>
         <CardDescription>
@@ -102,9 +102,11 @@ export function SessoesAgendamentosChart() {
       </CardHeader>
       <CardContent>
         <div className="flex items-center space-x-2 justify-center my-6 text-center">
-          <p className="text-4xl font-bold">
-            <span className="text-rosa">{totals.agendamentos}</span> x{' '}
-            <span className="text-azul">{totals.sessoes}</span>
+          <p className="text-4xl">
+            <span className="text-rosa font-semibold">
+              {totals.agendamentos}
+            </span>{' '}
+            x <span className="text-azul font-semibold">{totals.sessoes}</span>
           </p>
         </div>
         <ChartContainer config={chartConfig}>
