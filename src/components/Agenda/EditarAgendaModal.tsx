@@ -48,7 +48,10 @@ const EditarAgendaFormSchema = z
       required_error: 'Selecione uma data',
       invalid_type_error: 'Selecione uma data válida',
     }),
-    horarioAgendamento: z.string().min(1, 'Selecione um horário'),
+    horarioAgendamento: z
+      .string()
+      .min(1, 'Selecione um horário')
+      .regex(/^([0-1]\d|2[0-3]):([0-5]\d)$/),
     localAgendamento: z.enum([
       'Sala Verde',
       'Sala Azul',

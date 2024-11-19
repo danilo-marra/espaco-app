@@ -24,7 +24,7 @@ const initialState: PacientesState = {
 const calcularPacientesPorMes = (pacientes: Paciente[]): number[] => {
   const pacientesPorMes = new Array(12).fill(0)
 
-  pacientes.forEach((paciente) => {
+  for (const paciente of pacientes) {
     const dtEntrada = new Date(paciente.dtEntradaPaciente)
     const mes = dtEntrada.getMonth()
     const ano = dtEntrada.getFullYear()
@@ -33,7 +33,7 @@ const calcularPacientesPorMes = (pacientes: Paciente[]): number[] => {
     if (ano === new Date().getFullYear()) {
       pacientesPorMes[mes]++
     }
-  })
+  }
 
   return pacientesPorMes
 }

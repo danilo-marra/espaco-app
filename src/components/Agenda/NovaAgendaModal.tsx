@@ -44,7 +44,8 @@ const NovaAgendaFormSchema = z
     }),
     horarioAgendamento: z
       .string()
-      .regex(/^([0-1]\d|2[0-3]):([0-5]\d)$/, 'Formato inválido (hh:mm)'),
+      .min(1, 'Selecione um horário')
+      .regex(/^([0-1]\d|2[0-3]):([0-5]\d)$/),
     localAgendamento: z.enum(
       ['Sala Verde', 'Sala Azul', 'Não Precisa de Sala'],
       {

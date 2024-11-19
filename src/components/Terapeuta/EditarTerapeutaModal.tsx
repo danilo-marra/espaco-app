@@ -10,11 +10,16 @@ import { Controller, useForm } from 'react-hook-form'
 import { updateTerapeuta } from '../../store/terapeutasSlice'
 import DatePicker from 'react-datepicker'
 import { ptBR } from 'date-fns/locale'
+import { maskPhone } from '@/utils/formatter'
+import { toast } from 'sonner'
 
 const EditarTerapeutaFormSchema = z.object({
   id: z.string().uuid(),
   nomeTerapeuta: z.string().min(1, 'Nome do terapeuta é obrigatório'),
-  telefoneTerapeuta: z.string(),
+  telefoneTerapeuta: z
+    .string()
+    .min(14, 'Telefone é obrigatório')
+    .regex(/^\(\d{2}\) \d{4,5}-\d{4}$/),
   emailTerapeuta: z.string().email('Email inválido'),
   enderecoTerapeuta: z.string(),
   dtEntrada: z.date().refine((data) => data <= new Date(), {
@@ -84,13 +89,12 @@ export function EditarTerapeutaModal({
 
       reset()
 
-      setMensagemSucesso('Terapeuta atualizado com sucesso!')
-      setMensagemErro('')
+      toast.success('Terapeuta atualizado com sucesso!')
       console.log('Terapeuta atualizado:', data)
-
+      setMensagemErro('')
       onClose()
     } catch (error) {
-      setMensagemErro('Erro ao atualizar Terapeuta')
+      toast.error('Erro ao atualizar Terapeuta')
       setMensagemSucesso('')
       console.error('Erro ao atualizar Terapeuta:', error)
     }
@@ -134,9 +138,19 @@ export function EditarTerapeutaModal({
                 className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
                 id="telefoneTerapeuta"
                 placeholder="Telefone do terapeuta"
-                {...register('telefoneTerapeuta')}
+                {...register('telefoneTerapeuta', {
+                  onChange: (e) => {
+                    const masked = maskPhone(e.target.value)
+                    e.target.value = masked
+                  },
+                })}
                 onFocus={handleFocus}
               />
+              {errors.telefoneTerapeuta && (
+                <p className="text-red-500">
+                  {errors.telefoneTerapeuta.message}
+                </p>
+              )}
               <input
                 className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
                 id="emailTerapeuta"

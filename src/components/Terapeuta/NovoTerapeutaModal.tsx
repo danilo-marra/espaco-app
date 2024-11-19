@@ -11,10 +11,14 @@ import { v4 as uuidv4 } from 'uuid'
 import { addTerapeuta } from '../../store/terapeutasSlice'
 import DatePicker from 'react-datepicker'
 import { ptBR } from 'date-fns/locale'
+import { maskPhone } from '@/utils/formatter'
 
 const NovoTerapeutaFormSchema = z.object({
   nomeTerapeuta: z.string().min(1, 'Nome do terapeuta é obrigatório'),
-  telefoneTerapeuta: z.string(),
+  telefoneTerapeuta: z
+    .string()
+    .min(14, 'Telefone é obrigatório')
+    .regex(/^\(\d{2}\) \d{4,5}-\d{4}$/),
   emailTerapeuta: z.string().email('Email inválido'),
   enderecoTerapeuta: z.string(),
   dtEntrada: z.date().refine((data) => data <= new Date(), {
@@ -109,9 +113,17 @@ export function NovoTerapeutaModal() {
               className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
               id="telefoneTerapeuta"
               placeholder="Telefone do terapeuta"
-              {...register('telefoneTerapeuta')}
+              {...register('telefoneTerapeuta', {
+                onChange: (e) => {
+                  const masked = maskPhone(e.target.value)
+                  e.target.value = masked
+                },
+              })}
               onFocus={handleFocus}
             />
+            {errors.telefoneTerapeuta && (
+              <p className="text-red-500">{errors.telefoneTerapeuta.message}</p>
+            )}
             <input
               type="email"
               className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"

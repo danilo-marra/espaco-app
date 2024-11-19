@@ -54,7 +54,7 @@ export function MaioresLucrosPorTerapeutasPorMesChart() {
       [key: string]: { nome: string; atendimentos: number; receita: number }
     } = {}
 
-    filteredSessoes.forEach((sessao) => {
+    for (const sessao of filteredSessoes) {
       const therapistId = sessao.terapeutaInfo.id
       const therapistName = sessao.terapeutaInfo.nomeTerapeuta
 
@@ -81,7 +81,7 @@ export function MaioresLucrosPorTerapeutasPorMesChart() {
 
       terapeutaMap[therapistId].atendimentos += validDatesCount
       terapeutaMap[therapistId].receita += totalValue
-    })
+    }
 
     // Convert the map to an array
     const dataArray = Object.values(terapeutaMap)

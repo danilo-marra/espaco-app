@@ -55,6 +55,13 @@
       "tipo": "entrada",
       "valor": 300,
       "dtCriacao": "2024-08-12T03:00:00.000Z"
+    },
+    {
+      "id": "e487d42a-53b5-4832-a4f9-faf51ae9050e",
+      "descricao": "dsad",
+      "tipo": "saida",
+      "valor": 129.09,
+      "dtCriacao": "2024-11-11T03:00:00.000Z"
     }
   ],
   "pacientes": [
@@ -780,13 +787,34 @@
       "enderecoResponsavel": "SHCES 301 BLOCO C apt 202",
       "origem": "Indicação",
       "dtEntradaPaciente": "2024-10-09T03:00:00.000Z"
+    },
+    {
+      "id": "573d0dc4-9d0b-4b3e-80df-818d5f8b96b8",
+      "nomePaciente": "Ferreira",
+      "dtNascimento": "2012-04-04T03:00:00.000Z",
+      "terapeutaInfo": {
+        "id": "7f2b29fb-3356-4be0-aa08-84578cc84d4f",
+        "nomeTerapeuta": "Yolanda",
+        "telefoneTerapeuta": "(61) 98159-3923",
+        "emailTerapeuta": "danilo2311@gmail.com",
+        "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
+        "dtEntrada": "2024-11-04T03:00:00.000Z",
+        "chavePix": "44"
+      },
+      "nomeResponsavel": "Danilo Marra Rabelo",
+      "telefoneResponsavel": "(65) 76576-5765",
+      "emailResponsavel": "danilo2311@gmail.com",
+      "cpfResponsavel": "657.657.657-65",
+      "enderecoResponsavel": "SHCES 301 BLOCO C apt 202",
+      "origem": "Indicação",
+      "dtEntradaPaciente": "2024-11-12T03:00:00.000Z"
     }
   ],
   "terapeutas": [
     {
       "id": "5b306851-c6d3-45c3-8f95-8f2d713e6e83",
       "nomeTerapeuta": "Bia",
-      "telefoneTerapeuta": "6192095674",
+      "telefoneTerapeuta": "(61) 92095-6746",
       "emailTerapeuta": "thaismarra@gmail.com",
       "enderecoTerapeuta": "SHCES Quadra 801 Bloco A",
       "dtEntrada": "2024-09-04T00:00:00.000Z",
@@ -845,6 +873,33 @@
       "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
       "dtEntrada": "2024-07-29T03:00:00.000Z",
       "chavePix": "098098098098"
+    },
+    {
+      "id": "7f2b29fb-3356-4be0-aa08-84578cc84d4f",
+      "nomeTerapeuta": "Yolanda",
+      "telefoneTerapeuta": "(61) 98159-3923",
+      "emailTerapeuta": "danilo2311@gmail.com",
+      "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
+      "dtEntrada": "2024-11-04T03:00:00.000Z",
+      "chavePix": "44"
+    },
+    {
+      "id": "54ebc7a9-9159-48f5-8727-55b5f5f9e6f9",
+      "nomeTerapeuta": "Danilo Marra Rabelo",
+      "telefoneTerapeuta": "(09) 80980-9809",
+      "emailTerapeuta": "danilo2311@gmail.com",
+      "enderecoTerapeuta": "SHCES 301 BLOCO C apt 202",
+      "dtEntrada": "2024-11-04T03:00:00.000Z",
+      "chavePix": "44"
+    },
+    {
+      "id": "107c4fdc-5027-4cba-873d-d29f7c5aa03f",
+      "nomeTerapeuta": "Danilo Marra Rabelo",
+      "telefoneTerapeuta": "(09) 80980-9809",
+      "emailTerapeuta": "danilo2311@gmail.com",
+      "enderecoTerapeuta": "danilo2311@gmail.com",
+      "dtEntrada": "2024-10-29T03:00:00.000Z",
+      "chavePix": "44"
     }
   ],
   "sessoes": [

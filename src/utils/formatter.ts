@@ -32,3 +32,37 @@ export const maskTime = (value: string) => {
 
   return value
 }
+
+export const maskPhone = (value: string) => {
+  if (!value) return ''
+
+  // Remove tudo que não for número
+  let formattedValue = value.replace(/\D/g, '')
+
+  // Limita a 11 dígitos (9 + DDD)
+  formattedValue = formattedValue.slice(0, 11)
+
+  // Aplica a máscara
+  formattedValue = formattedValue.replace(/^(\d{2})(\d)/g, '($1) $2') // Parenteses em volta do DDD
+  formattedValue = formattedValue.replace(/(\d)(\d{4})$/, '$1-$2') // Hífen antes dos últimos 4 dígitos
+
+  return formattedValue
+}
+
+export const maskCPF = (value: string) => {
+  // Remove tudo que não for número
+  let formattedValue = value.replace(/\D/g, '')
+
+  // Limita a 11 dígitos
+  formattedValue = formattedValue.slice(0, 11)
+
+  // Aplica a máscara
+  formattedValue = formattedValue.replace(/^(\d{3})(\d)/g, '$1.$2') // Ponto após os 3 primeiros dígitos
+  formattedValue = formattedValue.replace(/^(\d{3})\.(\d{3})(\d)/g, '$1.$2.$3') // Ponto após os 3 primeiros dígitos
+  formattedValue = formattedValue.replace(
+    /^(\d{3})\.(\d{3})\.(\d{3})(\d)/g,
+    '$1.$2.$3-$4',
+  ) // Hífen após os 3 primeiros dígitos
+
+  return formattedValue
+}

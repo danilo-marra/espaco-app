@@ -11,6 +11,8 @@ import type { AppDispatch, RootState } from '../../store/store'
 import { useEffect, useState } from 'react'
 import { fetchPacientes, updatePaciente } from '../../store/pacientesSlice'
 import { fetchTerapeutas } from '../../store/terapeutasSlice'
+import { maskCPF, maskPhone } from '@/utils/formatter'
+import { toast } from 'sonner'
 
 const EditarPacienteFormSchema = z.object({
   id: z.string(),
@@ -20,9 +22,15 @@ const EditarPacienteFormSchema = z.object({
   }),
   terapeutaId: z.string().min(1, 'Selecione um(a) terapeuta'), // Alterado aqui
   nomeResponsavel: z.string(),
-  telefoneResponsavel: z.string(),
+  telefoneResponsavel: z
+    .string()
+    .min(14, 'Telefone é obrigatório')
+    .regex(/^\(\d{2}\) \d{4,5}-\d{4}$/),
   emailResponsavel: z.string(),
-  cpfResponsavel: z.string(),
+  cpfResponsavel: z
+    .string()
+    .min(14, 'CPF é obrigatório')
+    .regex(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/),
   enderecoResponsavel: z.string(),
   origem: z.enum(['Indicação', 'Instagram', 'Busca no Google', 'Outros']),
   dtEntradaPaciente: z.date().nullable().optional(),
@@ -126,8 +134,10 @@ export function EditarPacienteModal({
       setMensagemSucesso('Paciente atualizado com sucesso!')
       setMensagemErro('')
       console.log('Paciente atualizado:', data)
+      toast.success('Paciente atualizado com sucesso!')
       onClose()
     } catch (error) {
+      toast.error('Erro ao editar paciente')
       setMensagemErro('Erro ao editar paciente')
       setMensagemSucesso('')
       console.error('Erro ao editar paciente:', error)
@@ -254,9 +264,19 @@ export function EditarPacienteModal({
                 className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
                 id="telefoneResponsavel"
                 placeholder="Telefone do responsável"
-                {...register('telefoneResponsavel')}
+                {...register('telefoneResponsavel', {
+                  onChange: (e) => {
+                    const masked = maskPhone(e.target.value)
+                    e.target.value = masked
+                  },
+                })}
                 onFocus={handleFocus}
               />
+              {errors.telefoneResponsavel && (
+                <p className="text-red-500">
+                  {errors.telefoneResponsavel.message}
+                </p>
+              )}
               <input
                 type="email"
                 className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
@@ -270,9 +290,17 @@ export function EditarPacienteModal({
                 className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
                 id="cpfResponsavel"
                 placeholder="CPF do responsável"
-                {...register('cpfResponsavel')}
+                {...register('cpfResponsavel', {
+                  onChange: (e) => {
+                    const masked = maskCPF(e.target.value)
+                    e.target.value = masked
+                  },
+                })}
                 onFocus={handleFocus}
               />
+              {errors.cpfResponsavel && (
+                <p className="text-red-500">{errors.cpfResponsavel.message}</p>
+              )}
               <input
                 type="text"
                 className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
