@@ -6,7 +6,9 @@ export interface Terapeuta {
   enderecoTerapeuta: string
   dtEntrada: Date
   chavePix: string
+  foto?: string
 }
+
 export interface Paciente {
   id: string
   nomePaciente: string

@@ -3,6 +3,7 @@ import {
   CaretRight,
   HandCoins,
   TrendUp,
+  User,
 } from '@phosphor-icons/react'
 import {
   Card,
@@ -29,6 +30,7 @@ import { priceFormatter } from '@/utils/formatter'
 export function MaioresLucrosPorTerapeutasPorMesChart() {
   const [selectedMonth, setSelectedMonth] = useState(new Date())
   const sessoes = useSelector((state: RootState) => state.sessoes.data)
+  const terapeutas = useSelector((state: RootState) => state.terapeutas.data)
 
   const handlePreviousMonth = () => {
     setSelectedMonth((prev) => new Date(prev.setMonth(prev.getMonth() - 1)))
@@ -51,12 +53,21 @@ export function MaioresLucrosPorTerapeutasPorMesChart() {
 
     // Group sessions by therapist
     const terapeutaMap: {
-      [key: string]: { nome: string; atendimentos: number; receita: number }
+      [key: string]: {
+        nome: string
+        atendimentos: number
+        receita: number
+        foto?: string
+      }
     } = {}
 
     for (const sessao of filteredSessoes) {
       const therapistId = sessao.terapeutaInfo.id
+      // Obtenha o terapeuta atualizado
+      const terapeuta = terapeutas.find((t) => t.id === therapistId)
+      if (!terapeuta) continue
       const therapistName = sessao.terapeutaInfo.nomeTerapeuta
+      const therapistFoto = terapeuta.foto
 
       // Calculate total value for the session
       const { totalValue } = calculateRepasseInfo(sessao)
@@ -64,6 +75,7 @@ export function MaioresLucrosPorTerapeutasPorMesChart() {
       if (!terapeutaMap[therapistId]) {
         terapeutaMap[therapistId] = {
           nome: therapistName,
+          foto: therapistFoto,
           atendimentos: 0,
           receita: 0,
         }
@@ -90,7 +102,41 @@ export function MaioresLucrosPorTerapeutasPorMesChart() {
     dataArray.sort((a, b) => b.receita - a.receita)
 
     return dataArray
-  }, [sessoes, selectedMonth])
+  }, [sessoes, selectedMonth, terapeutas])
+
+  const renderCustomYAxisTick = (props: {
+    x: number
+    y: number
+    payload: { value: string }
+  }) => {
+    const { x, y, payload } = props
+    const data = chartData.find((item) => item.nome === payload.value)
+
+    if (!data || x === undefined || y === undefined) {
+      return <g />
+    }
+
+    return (
+      <g transform={`translate(${Number(x) - 160},${Number(y) - 10})`}>
+        {data.foto ? (
+          <image
+            href={data.foto}
+            x={-15}
+            y={-5}
+            height={30}
+            width={30}
+            clipPath="circle(10px at 10px, 10px)"
+          />
+        ) : (
+          // Ícone padrão se não houver foto
+          <User x={-15} y={-5} size={30} weight="fill" color="#ccc" />
+        )}
+        <text x={25} y={15} fill="#666">
+          {data.nome}
+        </text>
+      </g>
+    )
+  }
 
   const totalReceita = chartData.reduce((acc, curr) => acc + curr.receita, 0)
   const totalAtendimentos = chartData.reduce(
@@ -148,8 +194,8 @@ export function MaioresLucrosPorTerapeutasPorMesChart() {
             layout="vertical"
             margin={{
               top: 20,
-              right: 30,
-              left: 60,
+              right: 60,
+              left: 140,
               bottom: 5,
             }}
           >
@@ -159,6 +205,7 @@ export function MaioresLucrosPorTerapeutasPorMesChart() {
               type="category"
               tickLine={false}
               axisLine={false}
+              tick={renderCustomYAxisTick}
             />
             <Tooltip
               cursor={{ fill: 'transparent' }}

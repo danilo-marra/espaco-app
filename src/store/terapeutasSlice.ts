@@ -178,7 +178,14 @@ export const deleteTerapeuta = createAsyncThunk<string, string>(
 const terapeutasSlice = createSlice({
   name: 'terapeutas',
   initialState,
-  reducers: {},
+  reducers: {
+    updateTerapeuta: (state, action: PayloadAction<Terapeuta>) => {
+      const index = state.data.findIndex((t) => t.id === action.payload.id)
+      if (index !== -1) {
+        state.data[index] = action.payload // Atualiza todo o objeto, incluindo 'foto'
+      }
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchTerapeutas.pending, (state) => {

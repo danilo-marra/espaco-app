@@ -17,7 +17,7 @@ const NovoTerapeutaFormSchema = z.object({
   nomeTerapeuta: z.string().min(1, 'Nome do terapeuta é obrigatório'),
   telefoneTerapeuta: z
     .string()
-    .min(14, 'Telefone é obrigatório')
+    .min(13, 'Telefone é obrigatório')
     .regex(/^\(\d{2}\) \d{4,5}-\d{4}$/),
   emailTerapeuta: z.string().email('Email inválido'),
   enderecoTerapeuta: z.string(),
@@ -25,6 +25,7 @@ const NovoTerapeutaFormSchema = z.object({
     message: 'Data de entrada não pode ser maior que a data atual',
   }),
   chavePix: z.string(),
+  foto: z.string().optional(),
 })
 
 type NovoTerapeutaFormInputs = z.infer<typeof NovoTerapeutaFormSchema>
@@ -38,6 +39,7 @@ export function NovoTerapeutaModal() {
     control,
     handleSubmit,
     reset,
+    setValue,
     formState: { isSubmitting, errors },
   } = useForm<NovoTerapeutaFormInputs>({
     resolver: zodResolver(NovoTerapeutaFormSchema),
@@ -55,6 +57,7 @@ export function NovoTerapeutaModal() {
         enderecoTerapeuta: data.enderecoTerapeuta,
         dtEntrada: data.dtEntrada,
         chavePix: data.chavePix,
+        foto: data.foto,
       }
 
       // Faz o dispatch do thunk addTerapeuta
@@ -71,6 +74,18 @@ export function NovoTerapeutaModal() {
       console.error('Erro ao cadastrar Terapeuta:', error)
       setMensagemErro('Erro ao cadastrar Terapeuta. Tente novamente.')
       setMensagemSucesso('')
+    }
+  }
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    handleFocus()
+    const file = e.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setValue('foto', reader.result as string)
+      }
+      reader.readAsDataURL(file)
     }
   }
 
@@ -108,6 +123,14 @@ export function NovoTerapeutaModal() {
             {errors.nomeTerapeuta && (
               <p className="text-red-500">{errors.nomeTerapeuta.message}</p>
             )}
+            <input
+              type="file"
+              accept="image/*"
+              className="shadow-rosa/50 focus:shadow-rosa block w-full rounded-md px-4 py-2 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
+              id="foto"
+              onChange={handleFileChange}
+              onFocus={handleFocus}
+            />
             <input
               type="text"
               className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"

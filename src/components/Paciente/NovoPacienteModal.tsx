@@ -22,7 +22,7 @@ const NovoPacienteFormSchema = z.object({
   nomeResponsavel: z.string(),
   telefoneResponsavel: z
     .string()
-    .min(14, 'Telefone é obrigatório')
+    .min(13, 'Telefone é obrigatório')
     .regex(/^\(\d{2}\) \d{4,5}-\d{4}$/),
   emailResponsavel: z.string(),
   cpfResponsavel: z

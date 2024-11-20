@@ -18,7 +18,7 @@ const EditarTerapeutaFormSchema = z.object({
   nomeTerapeuta: z.string().min(1, 'Nome do terapeuta é obrigatório'),
   telefoneTerapeuta: z
     .string()
-    .min(14, 'Telefone é obrigatório')
+    .min(13, 'Telefone é obrigatório')
     .regex(/^\(\d{2}\) \d{4,5}-\d{4}$/),
   emailTerapeuta: z.string().email('Email inválido'),
   enderecoTerapeuta: z.string(),
@@ -26,6 +26,7 @@ const EditarTerapeutaFormSchema = z.object({
     message: 'Data de entrada não pode ser maior que a data atual',
   }),
   chavePix: z.string(),
+  foto: z.string().optional(),
 })
 
 type EditarTerapeutaFormInputs = z.infer<typeof EditarTerapeutaFormSchema>
@@ -51,6 +52,7 @@ export function EditarTerapeutaModal({
     control,
     handleSubmit,
     reset,
+    setValue,
     formState: { isSubmitting, errors },
   } = useForm<EditarTerapeutaFormInputs>({
     resolver: zodResolver(EditarTerapeutaFormSchema),
@@ -67,6 +69,7 @@ export function EditarTerapeutaModal({
         enderecoTerapeuta: terapeuta.enderecoTerapeuta,
         dtEntrada: new Date(terapeuta.dtEntrada),
         chavePix: terapeuta.chavePix,
+        foto: terapeuta.foto,
       })
     }
   }, [terapeutaId, terapeutas, reset])
@@ -83,6 +86,7 @@ export function EditarTerapeutaModal({
         enderecoTerapeuta: data.enderecoTerapeuta,
         dtEntrada: data.dtEntrada,
         chavePix: data.chavePix,
+        foto: data.foto,
       }
 
       await dispatch(updateTerapeuta(terapeutaEditado)).unwrap()
@@ -97,6 +101,18 @@ export function EditarTerapeutaModal({
       toast.error('Erro ao atualizar Terapeuta')
       setMensagemSucesso('')
       console.error('Erro ao atualizar Terapeuta:', error)
+    }
+  }
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    handleFocus()
+    const file = e.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setValue('foto', reader.result as string)
+      }
+      reader.readAsDataURL(file)
     }
   }
 
@@ -118,9 +134,18 @@ export function EditarTerapeutaModal({
             onSubmit={handleSubmit(handleEditTerapeuta)}
             className="space-y-6 p-6 bg-white rounded-lg"
           >
-            <h3 className="font-medium text-azul text-xl mt-6">
-              Dados do Terapeuta
-            </h3>
+            <div className="flex justify-between items-center">
+              <h3 className="font-medium text-azul text-xl mt-6">
+                Dados do Terapeuta
+              </h3>
+              <div>
+                <img
+                  src={terapeutas.find((t) => t.id === terapeutaId)?.foto}
+                  alt="Foto"
+                  className="w-16 h-16 rounded-full object-cover mx-auto"
+                />
+              </div>
+            </div>
             <div className="space-y-4">
               <input
                 type="text"
@@ -133,6 +158,14 @@ export function EditarTerapeutaModal({
               {errors.nomeTerapeuta && (
                 <p className="text-red-500">{errors.nomeTerapeuta.message}</p>
               )}
+              <input
+                type="file"
+                accept="image/*"
+                className="shadow-rosa/50 focus:shadow-rosa block w-full rounded-md px-4 py-2 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
+                id="foto"
+                onChange={handleFileChange}
+                onFocus={handleFocus}
+              />
               <input
                 type="text"
                 className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"

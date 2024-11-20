@@ -178,6 +178,7 @@ export function Terapeutas() {
             <thead className="bg-rosa text-white">
               <tr>
                 <th className="p-4 text-left">Nome</th>
+                <th className="p-4 text-left">Foto</th>
                 <th className="p-4 text-left">Telefone</th>
                 <th className="p-4 text-left">Email</th>
                 <th className="p-4 text-left">Endereço</th>
@@ -190,6 +191,19 @@ export function Terapeutas() {
               {paginatedTerapeutas.map((terapeuta) => (
                 <tr key={terapeuta.id}>
                   <td className="p-4">{terapeuta.nomeTerapeuta}</td>
+                  <td className="p-4">
+                    {terapeuta.foto ? (
+                      <img
+                        src={terapeuta.foto}
+                        alt={terapeuta.nomeTerapeuta}
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center">
+                        <User size={24} className="text-white" />
+                      </div>
+                    )}
+                  </td>
                   <td className="p-4">{terapeuta.telefoneTerapeuta}</td>
                   <td className="p-4">{terapeuta.emailTerapeuta}</td>
                   <td className="p-4">{terapeuta.enderecoTerapeuta}</td>
