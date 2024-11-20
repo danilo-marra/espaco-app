@@ -208,10 +208,10 @@ export function Agendas() {
             dispatch(deleteAgendamento(agendamento.id)).unwrap(),
           ),
         )
-        toast.info('Todos os agendamentos do paciente foram excluídos!')
+        toast.success('Todos os agendamentos do paciente foram excluídos!')
       } else {
         await dispatch(deleteAgendamento(agendamentoParaExcluir.id)).unwrap()
-        toast.info('Agendamento excluído com sucesso!')
+        toast.success('Agendamento excluído com sucesso!')
       }
     } catch (error) {
       toast.error('Erro ao excluir agendamento!')
@@ -298,7 +298,7 @@ export function Agendas() {
         </div>
         {/* Filters and Summary */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
+          <div className="flex items-center space-x-2 p-4 bg-white rounded shadow">
             <User size={24} />
             <label htmlFor="terapeutas" className="text-xl font-semibold">
               Terapeuta:
@@ -316,7 +316,7 @@ export function Agendas() {
               ))}
             </select>
           </div>
-          <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
+          <div className="flex items-center space-x-2 p-4 bg-white rounded shadow">
             <Door size={24} />
             <label htmlFor="localAgendamento" className="text-xl font-semibold">
               Sala:
@@ -342,42 +342,46 @@ export function Agendas() {
               </label>
             </div>
           </div>
-          <div className="flex items-center space-x-4 p-4 bg-white rounded shadow">
-            <CalendarCheck size={24} />
-            <label
-              htmlFor="statusAgendamento"
-              className="text-xl font-semibold"
-            >
-              Status:
-            </label>
-            <div className="flex items-center space-x-4 mt-1">
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  className="form-checkbox h-4 w-4 text-green-500"
-                  checked={selectedStatus.confirmado}
-                  onChange={() => handleStatusChange('confirmado')}
-                />
-                <span className="ml-2">Confirmado</span>
+          <div className="bg-white rounded shadow lg:flex items-center">
+            <div className="flex items-center space-x-2 p-4">
+              <CalendarCheck size={24} />
+              <label
+                htmlFor="statusAgendamento"
+                className="text-xl font-semibold"
+              >
+                Status:
               </label>
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  className="form-checkbox h-4 w-4 text-yellow-500"
-                  checked={selectedStatus.remarcado}
-                  onChange={() => handleStatusChange('remarcado')}
-                />
-                <span className="ml-2">Remarcado</span>
-              </label>
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  className="form-checkbox h-4 w-4 text-red-500"
-                  checked={selectedStatus.cancelado}
-                  onChange={() => handleStatusChange('cancelado')}
-                />
-                <span className="ml-2">Cancelado</span>
-              </label>
+            </div>
+            <div className="">
+              <div className="space-x-2 p-2 mt-1">
+                <label className="">
+                  <input
+                    type="checkbox"
+                    className="form-checkbox h-4 w-4 text-green-500"
+                    checked={selectedStatus.confirmado}
+                    onChange={() => handleStatusChange('confirmado')}
+                  />
+                  <span className="ml-2">Confirmado</span>
+                </label>
+                <label className="">
+                  <input
+                    type="checkbox"
+                    className="form-checkbox h-4 w-4 text-yellow-500"
+                    checked={selectedStatus.remarcado}
+                    onChange={() => handleStatusChange('remarcado')}
+                  />
+                  <span className="ml-2">Remarcado</span>
+                </label>
+                <label className="">
+                  <input
+                    type="checkbox"
+                    className="form-checkbox h-4 w-4 text-red-500"
+                    checked={selectedStatus.cancelado}
+                    onChange={() => handleStatusChange('cancelado')}
+                  />
+                  <span className="ml-2">Cancelado</span>
+                </label>
+              </div>
             </div>
           </div>
         </div>

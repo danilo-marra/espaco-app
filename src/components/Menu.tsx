@@ -17,7 +17,9 @@ export function Menu() {
     <div>
       <button
         type="button"
-        className="fixed top-5 left-5 md:hidden text-gray-500 focus:outline-none z-30"
+        className={`fixed top-5 left-5 md:hidden focus:outline-none z-30 ${
+          isMenuOpen ? 'text-white' : 'text-gray-500'
+        }`}
         onClick={() => setIsMenuOpen(!isMenuOpen)}
       >
         <List size={24} weight="bold" />
