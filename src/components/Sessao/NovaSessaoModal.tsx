@@ -1,54 +1,54 @@
-import { X } from '@phosphor-icons/react'
-import * as Dialog from '@radix-ui/react-dialog'
-import * as RadioGroup from '@radix-ui/react-radio-group'
-import { v4 as uuidv4 } from 'uuid'
-import { Controller, useForm } from 'react-hook-form'
-import { useDispatch, useSelector } from 'react-redux'
-import type { AppDispatch, RootState } from '../../store/store'
-import { useEffect, useMemo, useState } from 'react'
-import { fetchPacientes } from '../../store/pacientesSlice'
-import { fetchTerapeutas } from '../../store/terapeutasSlice'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { ptBR } from 'date-fns/locale'
-import DatePicker from 'react-datepicker'
-import { addSessao } from '../../store/sessoesSlice'
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
-import { isSameMonth } from 'date-fns'
+import { X } from "@phosphor-icons/react";
+import * as Dialog from "@radix-ui/react-dialog";
+import * as RadioGroup from "@radix-ui/react-radio-group";
+import { v4 as uuidv4 } from "uuid";
+import { Controller, useForm } from "react-hook-form";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "../../store/store";
+import { useEffect, useMemo, useState } from "react";
+import { fetchPacientes } from "../../store/pacientesSlice";
+import { fetchTerapeutas } from "../../store/terapeutasSlice";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { ptBR } from "date-fns/locale";
+import DatePicker from "react-datepicker";
+import { addSessao } from "../../store/sessoesSlice";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { isSameMonth } from "date-fns";
 
 // TODO utilizar register em  todos os campos do formulário
 
 // Schema de validação
 const NovaSessaoFormSchema = z.object({
-  terapeutaId: z.string().min(1, 'Selecione um terapeuta'),
-  pacienteId: z.string().min(1, 'Selecione um paciente'),
+  terapeutaId: z.string().min(1, "Selecione um terapeuta"),
+  pacienteId: z.string().min(1, "Selecione um paciente"),
   statusSessao: z.enum([
-    'Pagamento Pendente',
-    'Pagamento Realizado',
-    'Nota Fiscal Emitida',
-    'Nota Fiscal Enviada',
+    "Pagamento Pendente",
+    "Pagamento Realizado",
+    "Nota Fiscal Emitida",
+    "Nota Fiscal Enviada",
   ]),
-  valorSessao: z.number().positive('O valor deve ser maior que zero'),
+  valorSessao: z.number().positive("O valor deve ser maior que zero"),
   dtSessao1: z.date().refine((date) => date !== null, {
-    message: 'Pelo menos uma data de sessão é obrigatória',
+    message: "Pelo menos uma data de sessão é obrigatória",
   }),
   dtSessao2: z.date().optional(),
   dtSessao3: z.date().optional(),
   dtSessao4: z.date().optional(),
   dtSessao5: z.date().optional(),
   dtSessao6: z.date().optional(),
-})
+});
 
-type NovaSessaoFormInputs = z.infer<typeof NovaSessaoFormSchema>
+type NovaSessaoFormInputs = z.infer<typeof NovaSessaoFormSchema>;
 
 export function NovaSessaoModal() {
-  const dispatch = useDispatch<AppDispatch>()
-  const [mensagemSucesso, setMensagemSucesso] = useState('')
-  const [mensagemErro, setMensagemErro] = useState('')
-  const terapeutas = useSelector((state: RootState) => state.terapeutas.data)
-  const pacientes = useSelector((state: RootState) => state.pacientes.data)
-  const sessoes = useSelector((state: RootState) => state.sessoes.data)
-  const [mensagemAlerta, setMensagemAlerta] = useState('')
+  const dispatch = useDispatch<AppDispatch>();
+  const [mensagemSucesso, setMensagemSucesso] = useState("");
+  const [mensagemErro, setMensagemErro] = useState("");
+  const terapeutas = useSelector((state: RootState) => state.terapeutas.data);
+  const pacientes = useSelector((state: RootState) => state.pacientes.data);
+  const sessoes = useSelector((state: RootState) => state.sessoes.data);
+  const [mensagemAlerta, setMensagemAlerta] = useState("");
 
   const {
     control,
@@ -60,25 +60,25 @@ export function NovaSessaoModal() {
   } = useForm<NovaSessaoFormInputs>({
     resolver: zodResolver(NovaSessaoFormSchema),
     defaultValues: {
-      statusSessao: 'Pagamento Pendente',
+      statusSessao: "Pagamento Pendente",
     },
-  })
+  });
 
-  const pacienteId = watch('pacienteId')
-  const terapeutaId = watch('terapeutaId')
+  const pacienteId = watch("pacienteId");
+  const terapeutaId = watch("terapeutaId");
   const isButtonDisabled =
-    isSubmitting || Object.keys(errors).length > 0 || mensagemAlerta !== ''
+    isSubmitting || Object.keys(errors).length > 0 || mensagemAlerta !== "";
   const pacienteSelecionado = useMemo(
     () => pacientes.find((paciente) => paciente.id === pacienteId),
     [pacienteId, pacientes],
-  )
+  );
 
   useEffect(() => {
-    dispatch(fetchPacientes())
-    dispatch(fetchTerapeutas())
+    dispatch(fetchPacientes());
+    dispatch(fetchTerapeutas());
 
     if (terapeutaId) {
-      const dataAtual = new Date()
+      const dataAtual = new Date();
 
       const existeSessaoNoMes = sessoes.some((sessao) => {
         if (sessao.terapeutaInfo.id === terapeutaId) {
@@ -90,43 +90,43 @@ export function NovaSessaoModal() {
             sessao.dtSessao4,
             sessao.dtSessao5,
             sessao.dtSessao6,
-          ]
+          ];
 
           return datasSessao.some(
             (data) => data && isSameMonth(data, dataAtual),
-          )
+          );
         }
-        return false
-      })
+        return false;
+      });
 
       if (existeSessaoNoMes) {
         setMensagemAlerta(
-          `Já existe uma sessão criada para este terapeuta neste mês de ${dataAtual.toLocaleString('pt-BR', { month: 'long' })}`,
-        )
+          `Já existe uma sessão criada para este terapeuta neste mês de ${dataAtual.toLocaleString("pt-BR", { month: "long" })}`,
+        );
       } else {
-        setMensagemAlerta('')
+        setMensagemAlerta("");
       }
     }
-  }, [dispatch, terapeutaId, sessoes])
+  }, [dispatch, terapeutaId, sessoes]);
 
   async function handleCreateNewSessao(data: NovaSessaoFormInputs) {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       const terapeutaSelecionado = terapeutas.find(
         (terapeuta) => terapeuta.id === data.terapeutaId,
-      )
+      );
 
       if (!terapeutaSelecionado) {
-        throw new Error('Terapeuta não encontrado')
+        throw new Error("Terapeuta não encontrado");
       }
 
       const pacienteSelecionado = pacientes.find(
         (paciente) => paciente.id === data.pacienteId,
-      )
+      );
 
       if (!pacienteSelecionado) {
-        throw new Error('Paciente não encontrado')
+        throw new Error("Paciente não encontrado");
       }
 
       const novaSessao = {
@@ -141,24 +141,24 @@ export function NovaSessaoModal() {
         dtSessao4: data.dtSessao4,
         dtSessao5: data.dtSessao5,
         dtSessao6: data.dtSessao6,
-      }
+      };
 
       // Faz o dispatch do thunk addSessao
-      dispatch(addSessao(novaSessao)).unwrap()
+      dispatch(addSessao(novaSessao)).unwrap();
 
-      reset()
-      setMensagemSucesso('Sessão criada com sucesso!')
-      setMensagemErro('')
+      reset();
+      setMensagemSucesso("Sessão criada com sucesso!");
+      setMensagemErro("");
     } catch (error) {
-      console.error('Erro ao criar nova sessão:', error)
-      setMensagemErro('Erro ao criar sessão. Tente novamente.')
-      setMensagemSucesso('')
+      console.error("Erro ao criar nova sessão:", error);
+      setMensagemErro("Erro ao criar sessão. Tente novamente.");
+      setMensagemSucesso("");
     }
   }
 
   function handleFocus() {
-    setMensagemSucesso('')
-    setMensagemErro('')
+    setMensagemSucesso("");
+    setMensagemErro("");
   }
 
   return (
@@ -179,9 +179,9 @@ export function NovaSessaoModal() {
           <div className="space-y-2">
             <select
               className={`shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px] ${
-                errors.terapeutaId ? 'border-red-500' : ''
+                errors.terapeutaId ? "border-red-500" : ""
               }`}
-              {...register('terapeutaId')}
+              {...register("terapeutaId")}
               onFocus={handleFocus}
             >
               <option value="">Selecione um terapeuta</option>
@@ -208,9 +208,9 @@ export function NovaSessaoModal() {
             <div className="space-y-2">
               <select
                 className={`shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px] ${
-                  errors.pacienteId ? 'border-red-500' : ''
+                  errors.pacienteId ? "border-red-500" : ""
                 }`}
-                {...register('pacienteId')}
+                {...register("pacienteId")}
               >
                 <option value="">Selecione um paciente</option>
                 {pacientes
@@ -234,7 +234,7 @@ export function NovaSessaoModal() {
               disabled
               className="shadow-rosa/50 focus:shadow-rosa w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px] bg-gray-100"
               placeholder="Nome do Responsável"
-              value={`Responsável: ${pacienteSelecionado?.nomeResponsavel || ''}`}
+              value={`Responsável: ${pacienteSelecionado?.nomeResponsavel || ""}`}
             />
             <h3 className="font-medium text-azul text-xl mb-4">
               Dados da Sessão
@@ -322,7 +322,7 @@ export function NovaSessaoModal() {
               step="any"
               className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
               placeholder="Valor da sessão"
-              {...register('valorSessao', {
+              {...register("valorSessao", {
                 valueAsNumber: true,
               })}
             />
@@ -470,10 +470,10 @@ export function NovaSessaoModal() {
             type="submit"
             disabled={isButtonDisabled}
             className={`w-full bg-rosa hover:bg-rosa/90 text-white font-medium py-2 px-4 rounded-md transition-colors ${
-              isButtonDisabled ? 'opacity-50 cursor-not-allowed' : ''
+              isButtonDisabled ? "opacity-50 cursor-not-allowed" : ""
             }`}
           >
-            {isSubmitting ? 'Salvando...' : 'Salvar'}
+            {isSubmitting ? "Salvando..." : "Salvar"}
           </button>
         </form>
 
@@ -493,5 +493,5 @@ export function NovaSessaoModal() {
         </Dialog.Close>
       </Dialog.Content>
     </Dialog.Portal>
-  )
+  );
 }

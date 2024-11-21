@@ -1,46 +1,46 @@
-import { X } from '@phosphor-icons/react'
-import * as Dialog from '@radix-ui/react-dialog'
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
-import * as RadioGroup from '@radix-ui/react-radio-group'
-import { Controller, useForm } from 'react-hook-form'
-import DatePicker from 'react-datepicker'
-import { ptBR } from 'date-fns/locale'
-import { z } from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useEffect, useMemo, useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import type { AppDispatch, RootState } from '../../store/store'
-import { fetchPacientes } from '../../store/pacientesSlice'
-import { updateSessao } from '../../store/sessoesSlice'
-import { fetchTerapeutas } from '../../store/terapeutasSlice'
+import { X } from "@phosphor-icons/react";
+import * as Dialog from "@radix-ui/react-dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import * as RadioGroup from "@radix-ui/react-radio-group";
+import { Controller, useForm } from "react-hook-form";
+import DatePicker from "react-datepicker";
+import { ptBR } from "date-fns/locale";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect, useMemo, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "../../store/store";
+import { fetchPacientes } from "../../store/pacientesSlice";
+import { updateSessao } from "../../store/sessoesSlice";
+import { fetchTerapeutas } from "../../store/terapeutasSlice";
 
 const EditarSessaoFormSchema = z.object({
   id: z.string(),
-  terapeutaId: z.string().min(1, 'Selecione um terapeuta'),
-  pacienteId: z.string().min(1, 'Selecione um paciente'),
+  terapeutaId: z.string().min(1, "Selecione um terapeuta"),
+  pacienteId: z.string().min(1, "Selecione um paciente"),
   statusSessao: z.enum([
-    'Pagamento Pendente',
-    'Pagamento Realizado',
-    'Nota Fiscal Emitida',
-    'Nota Fiscal Enviada',
+    "Pagamento Pendente",
+    "Pagamento Realizado",
+    "Nota Fiscal Emitida",
+    "Nota Fiscal Enviada",
   ]),
-  valorSessao: z.number().positive('O valor deve ser maior que zero'),
+  valorSessao: z.number().positive("O valor deve ser maior que zero"),
   dtSessao1: z.date().refine((date) => date !== null, {
-    message: 'Pelo menos uma data de sessão é obrigatória',
+    message: "Pelo menos uma data de sessão é obrigatória",
   }),
   dtSessao2: z.date().optional(),
   dtSessao3: z.date().optional(),
   dtSessao4: z.date().optional(),
   dtSessao5: z.date().optional(),
   dtSessao6: z.date().optional(),
-})
+});
 
-type EditarSessaoFormInputs = z.infer<typeof EditarSessaoFormSchema>
+type EditarSessaoFormInputs = z.infer<typeof EditarSessaoFormSchema>;
 
 interface EditarSessaoModalProps {
-  sessaoId: string
-  open: boolean
-  onClose: () => void
+  sessaoId: string;
+  open: boolean;
+  onClose: () => void;
 }
 
 export function EditarSessaoModal({
@@ -58,37 +58,37 @@ export function EditarSessaoModal({
     formState: { isSubmitting, errors },
   } = useForm<EditarSessaoFormInputs>({
     resolver: zodResolver(EditarSessaoFormSchema),
-  })
-  const [mensagemSucesso, setMensagemSucesso] = useState('')
-  const [mensagemErro, setMensagemErro] = useState('')
-  const dispatch = useDispatch<AppDispatch>()
-  const terapeutas = useSelector((state: RootState) => state.terapeutas.data)
-  const pacientes = useSelector((state: RootState) => state.pacientes.data)
-  const sessoes = useSelector((state: RootState) => state.sessoes.data)
-  const pacienteId = watch('pacienteId')
-  const terapeutaId = watch('terapeutaId')
+  });
+  const [mensagemSucesso, setMensagemSucesso] = useState("");
+  const [mensagemErro, setMensagemErro] = useState("");
+  const dispatch = useDispatch<AppDispatch>();
+  const terapeutas = useSelector((state: RootState) => state.terapeutas.data);
+  const pacientes = useSelector((state: RootState) => state.pacientes.data);
+  const sessoes = useSelector((state: RootState) => state.sessoes.data);
+  const pacienteId = watch("pacienteId");
+  const terapeutaId = watch("terapeutaId");
   const pacienteSelecionado = useMemo(
     () => pacientes.find((paciente) => paciente.id === pacienteId),
     [pacienteId, pacientes],
-  )
-  const isButtonDisabled = isSubmitting || Object.keys(errors).length > 0
+  );
+  const isButtonDisabled = isSubmitting || Object.keys(errors).length > 0;
 
   useEffect(() => {
-    dispatch(fetchPacientes())
-    dispatch(fetchTerapeutas())
-  }, [dispatch])
+    dispatch(fetchPacientes());
+    dispatch(fetchTerapeutas());
+  }, [dispatch]);
 
   useEffect(() => {
     const associatedPaciente = pacientes.find(
       (paciente) => paciente.terapeutaInfo.id === terapeutaId,
-    )
+    );
 
     if (associatedPaciente) {
-      setValue('pacienteId', associatedPaciente.id)
+      setValue("pacienteId", associatedPaciente.id);
     }
 
     if (sessaoId) {
-      const sessao = sessoes.find((s) => s.id === sessaoId)
+      const sessao = sessoes.find((s) => s.id === sessaoId);
       if (sessao) {
         reset({
           id: sessao.id,
@@ -102,27 +102,27 @@ export function EditarSessaoModal({
           dtSessao4: sessao.dtSessao4 ? new Date(sessao.dtSessao4) : undefined,
           dtSessao5: sessao.dtSessao5 ? new Date(sessao.dtSessao5) : undefined,
           dtSessao6: sessao.dtSessao6 ? new Date(sessao.dtSessao6) : undefined,
-        })
+        });
       }
     }
-  }, [pacientes, terapeutaId, sessaoId, sessoes, reset, setValue])
+  }, [pacientes, terapeutaId, sessaoId, sessoes, reset, setValue]);
 
   function handleFocus() {
-    setMensagemSucesso('')
-    setMensagemErro('')
+    setMensagemSucesso("");
+    setMensagemErro("");
   }
 
   async function handleEditSessao(data: EditarSessaoFormInputs) {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       // Corrigir a busca pelo terapeuta utilizando o ID
       const terapeutaInfo = terapeutas.find(
         (terapeuta) => terapeuta.id === data.terapeutaId,
-      )
+      );
 
       if (!terapeutaInfo) {
-        throw new Error('Terapeuta não encontrado')
+        throw new Error("Terapeuta não encontrado");
       }
 
       const sessaoEditada = {
@@ -139,30 +139,30 @@ export function EditarSessaoModal({
         dtSessao4: data.dtSessao4,
         dtSessao5: data.dtSessao5,
         dtSessao6: data.dtSessao6,
-      }
+      };
 
       if (!sessaoEditada.pacienteInfo) {
-        throw new Error('Paciente não encontrado')
+        throw new Error("Paciente não encontrado");
       }
-      await dispatch(updateSessao(sessaoEditada)).unwrap()
+      await dispatch(updateSessao(sessaoEditada)).unwrap();
 
       // Recarrega os terapeutas e pacientes
-      dispatch(fetchTerapeutas())
-      dispatch(fetchPacientes())
+      dispatch(fetchTerapeutas());
+      dispatch(fetchPacientes());
 
       // Limpa os dados do formulário
-      reset()
+      reset();
 
       // Atualizar as mensagens para referirem-se à sessão
-      setMensagemSucesso('Sessão atualizada com sucesso!')
-      setMensagemErro('')
-      console.log('Sessão atualizada:', data)
-      onClose()
+      setMensagemSucesso("Sessão atualizada com sucesso!");
+      setMensagemErro("");
+      console.log("Sessão atualizada:", data);
+      onClose();
     } catch (error) {
       // Atualizar as mensagens para referirem-se à sessão
-      setMensagemErro('Erro ao editar sessão')
-      setMensagemSucesso('')
-      console.error('Erro ao editar sessão:', error)
+      setMensagemErro("Erro ao editar sessão");
+      setMensagemSucesso("");
+      console.error("Erro ao editar sessão:", error);
     }
   }
 
@@ -185,9 +185,9 @@ export function EditarSessaoModal({
             <div className="space-y-2">
               <select
                 className={`shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px] ${
-                  errors.terapeutaId ? 'border-red-500' : ''
+                  errors.terapeutaId ? "border-red-500" : ""
                 }`}
-                {...register('terapeutaId')}
+                {...register("terapeutaId")}
                 onFocus={handleFocus}
               >
                 <option value="">Selecione um terapeuta</option>
@@ -211,9 +211,9 @@ export function EditarSessaoModal({
               <div className="space-y-2">
                 <select
                   className={`shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px] ${
-                    errors.pacienteId ? 'border-red-500' : ''
+                    errors.pacienteId ? "border-red-500" : ""
                   }`}
-                  {...register('pacienteId')}
+                  {...register("pacienteId")}
                   onFocus={handleFocus}
                 >
                   <option value="">Selecione um paciente</option>
@@ -239,7 +239,7 @@ export function EditarSessaoModal({
                 disabled
                 className="shadow-rosa/50 focus:shadow-rosa w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px] bg-gray-100"
                 placeholder="Nome do Responsável"
-                value={`Responsável: ${pacienteSelecionado?.nomeResponsavel || ''}`}
+                value={`Responsável: ${pacienteSelecionado?.nomeResponsavel || ""}`}
               />
               <h3 className="font-medium text-azul text-xl mb-4">
                 Dados da Sessão
@@ -327,7 +327,7 @@ export function EditarSessaoModal({
                 step="any"
                 className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
                 placeholder="Valor da sessão"
-                {...register('valorSessao', {
+                {...register("valorSessao", {
                   valueAsNumber: true,
                 })}
               />
@@ -475,10 +475,10 @@ export function EditarSessaoModal({
               type="submit"
               disabled={isButtonDisabled}
               className={`w-full bg-rosa hover:bg-rosa/90 text-white font-medium py-2 px-4 rounded-md transition-colors ${
-                isButtonDisabled ? 'opacity-50 cursor-not-allowed' : ''
+                isButtonDisabled ? "opacity-50 cursor-not-allowed" : ""
               }`}
             >
-              {isSubmitting ? 'Salvando...' : 'Salvar'}
+              {isSubmitting ? "Salvando..." : "Salvar"}
             </button>
           </form>
 
@@ -499,5 +499,5 @@ export function EditarSessaoModal({
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
-  )
+  );
 }

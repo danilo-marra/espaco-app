@@ -1,120 +1,120 @@
-import { CalendarIcon } from '@radix-ui/react-icons'
-import { cn } from '@/lib/utils'
-import { Calendar } from '../ui/calendar'
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
-import { ptBR } from 'date-fns/locale'
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { addWeeks, format, isBefore, setDay } from 'date-fns'
-import { Label } from '../ui/label'
-import * as RadioGroup from '@radix-ui/react-radio-group'
+import { CalendarIcon } from "@radix-ui/react-icons";
+import { cn } from "@/lib/utils";
+import { Calendar } from "../ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { ptBR } from "date-fns/locale";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { addWeeks, format, isBefore, setDay } from "date-fns";
+import { Label } from "../ui/label";
+import * as RadioGroup from "@radix-ui/react-radio-group";
 import {
   DialogContent,
   DialogDescription,
   DialogOverlay,
   DialogPortal,
   DialogTitle,
-} from '../ui/dialog'
-import { useDispatch, useSelector } from 'react-redux'
-import type { AppDispatch, RootState } from '@/store/store'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { Controller, useForm } from 'react-hook-form'
-import { fetchPacientes } from '@/store/pacientesSlice'
-import { v4 as uuidv4 } from 'uuid'
-import { addAgendamento } from '@/store/agendamentosSlice'
-import { maskTime } from '@/utils/formatter'
-import type { Agendamento } from '@/tipos'
+} from "../ui/dialog";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "@/store/store";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Controller, useForm } from "react-hook-form";
+import { fetchPacientes } from "@/store/pacientesSlice";
+import { v4 as uuidv4 } from "uuid";
+import { addAgendamento } from "@/store/agendamentosSlice";
+import { maskTime } from "@/utils/formatter";
+import type { Agendamento } from "@/tipos";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../ui/select'
-import { Checkbox } from '../ui/checkbox'
+} from "../ui/select";
+import { Checkbox } from "../ui/checkbox";
 
 // Schema de validação
 const NovaAgendaFormSchema = z
   .object({
-    pacienteId: z.string().min(1, 'Selecione um paciente'),
+    pacienteId: z.string().min(1, "Selecione um paciente"),
     dataAgendamento: z.date({
-      required_error: 'Selecione uma data',
-      invalid_type_error: 'Selecione uma data válida',
+      required_error: "Selecione uma data",
+      invalid_type_error: "Selecione uma data válida",
     }),
     horarioAgendamento: z
       .string()
-      .min(1, 'Selecione um horário')
+      .min(1, "Selecione um horário")
       .regex(/^([0-1]\d|2[0-3]):([0-5]\d)$/),
     localAgendamento: z.enum(
-      ['Sala Verde', 'Sala Azul', 'Não Precisa de Sala'],
+      ["Sala Verde", "Sala Azul", "Não Precisa de Sala"],
       {
-        required_error: 'Selecione uma sala',
-        invalid_type_error: 'Selecione uma sala válida',
+        required_error: "Selecione uma sala",
+        invalid_type_error: "Selecione uma sala válida",
       },
     ),
     diasDaSemana: z
       .array(
         z.enum([
-          'Domingo',
-          'Segunda-feira',
-          'Terça-feira',
-          'Quarta-feira',
-          'Quinta-feira',
-          'Sexta-feira',
-          'Sábado',
+          "Domingo",
+          "Segunda-feira",
+          "Terça-feira",
+          "Quarta-feira",
+          "Quinta-feira",
+          "Sexta-feira",
+          "Sábado",
         ]),
       )
       .optional(),
-    modalidadeAgendamento: z.enum(['Presencial', 'Online'], {
-      required_error: 'Selecione uma modalidade',
-      invalid_type_error: 'Selecione uma modalidade válida',
+    modalidadeAgendamento: z.enum(["Presencial", "Online"], {
+      required_error: "Selecione uma modalidade",
+      invalid_type_error: "Selecione uma modalidade válida",
     }),
     tipoAgendamento: z.enum(
       [
-        'Sessão',
-        'Orientação Parental',
-        'Visita Escolar',
-        'Reunião Escolar',
-        'Supervisão',
-        'Outros',
+        "Sessão",
+        "Orientação Parental",
+        "Visita Escolar",
+        "Reunião Escolar",
+        "Supervisão",
+        "Outros",
       ],
       {
-        required_error: 'Selecione um tipo',
-        invalid_type_error: 'Selecione um tipo válido',
+        required_error: "Selecione um tipo",
+        invalid_type_error: "Selecione um tipo válido",
       },
     ),
-    statusAgendamento: z.enum(['Confirmado', 'Remarcado', 'Cancelado'], {
-      required_error: 'Selecione um status',
-      invalid_type_error: 'Selecione um status válido',
+    statusAgendamento: z.enum(["Confirmado", "Remarcado", "Cancelado"], {
+      required_error: "Selecione um status",
+      invalid_type_error: "Selecione um status válido",
     }),
     observacoesAgendamento: z.string().optional(),
-    periodicidade: z.enum(['Não repetir', 'Semanal', 'Quinzenal']),
+    periodicidade: z.enum(["Não repetir", "Semanal", "Quinzenal"]),
     dataFimRecorrencia: z.date().optional(),
   })
   .superRefine((data, ctx) => {
     if (
-      (data.periodicidade === 'Semanal' ||
-        data.periodicidade === 'Quinzenal') &&
+      (data.periodicidade === "Semanal" ||
+        data.periodicidade === "Quinzenal") &&
       !data.dataFimRecorrencia
     ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'Data fim é obrigatória para agendamentos recorrentes',
-        path: ['dataFimRecorrencia'],
-      })
+        message: "Data fim é obrigatória para agendamentos recorrentes",
+        path: ["dataFimRecorrencia"],
+      });
     }
-  })
+  });
 
-type NovaAgendaFormInputs = z.infer<typeof NovaAgendaFormSchema>
+type NovaAgendaFormInputs = z.infer<typeof NovaAgendaFormSchema>;
 
 export function NovaAgendaModal() {
-  const dispatch = useDispatch<AppDispatch>()
-  const pacientes = useSelector((state: RootState) => state.pacientes.data)
-  const [mensagemSucesso, setMensagemSucesso] = useState('')
-  const [mensagemErro, setMensagemErro] = useState('')
-  const calendarTriggerRef = useRef<HTMLButtonElement>(null)
-  const [mensagemAlerta, setMensagemAlerta] = useState('')
+  const dispatch = useDispatch<AppDispatch>();
+  const pacientes = useSelector((state: RootState) => state.pacientes.data);
+  const [mensagemSucesso, setMensagemSucesso] = useState("");
+  const [mensagemErro, setMensagemErro] = useState("");
+  const calendarTriggerRef = useRef<HTMLButtonElement>(null);
+  const [mensagemAlerta, setMensagemAlerta] = useState("");
   const {
     control,
     register,
@@ -125,52 +125,52 @@ export function NovaAgendaModal() {
   } = useForm<NovaAgendaFormInputs>({
     resolver: zodResolver(NovaAgendaFormSchema),
     defaultValues: {
-      pacienteId: '',
+      pacienteId: "",
       dataAgendamento: undefined,
-      horarioAgendamento: '',
+      horarioAgendamento: "",
       localAgendamento: undefined,
       modalidadeAgendamento: undefined,
       tipoAgendamento: undefined,
       statusAgendamento: undefined,
-      observacoesAgendamento: '',
-      periodicidade: 'Não repetir',
+      observacoesAgendamento: "",
+      periodicidade: "Não repetir",
       dataFimRecorrencia: undefined,
       diasDaSemana: [],
     },
-  })
-  const pacienteId = watch('pacienteId')
+  });
+  const pacienteId = watch("pacienteId");
 
-  const isButtonDisabled = isSubmitting || Object.keys(errors).length > 0
+  const isButtonDisabled = isSubmitting || Object.keys(errors).length > 0;
 
   const pacienteSelecionado = useMemo(
     () => pacientes.find((paciente) => paciente.id === pacienteId),
     [pacienteId, pacientes],
-  )
+  );
 
   const isRecorrente = (periodicidade: string | undefined): boolean => {
-    return periodicidade === 'Semanal' || periodicidade === 'Quinzenal'
-  }
+    return periodicidade === "Semanal" || periodicidade === "Quinzenal";
+  };
 
-  const recurrenceId = uuidv4()
+  const recurrenceId = uuidv4();
 
   useEffect(() => {
-    dispatch(fetchPacientes())
-  }, [dispatch])
+    dispatch(fetchPacientes());
+  }, [dispatch]);
 
   async function handleCreateNewAgendamento(data: NovaAgendaFormInputs) {
     try {
       // Simula um atraso (pode ser removido)
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       const pacienteSelecionado = pacientes.find(
         (paciente) => paciente.id === data.pacienteId,
-      )
+      );
 
       if (!pacienteSelecionado) {
-        throw new Error('Paciente não encontrado')
+        throw new Error("Paciente não encontrado");
       }
 
-      const agendamentosParaCriar: Agendamento[] = []
+      const agendamentosParaCriar: Agendamento[] = [];
 
       if (!isRecorrente(data.periodicidade)) {
         // Criar agendamento único
@@ -184,17 +184,17 @@ export function NovaAgendaModal() {
           modalidadeAgendamento: data.modalidadeAgendamento,
           tipoAgendamento: data.tipoAgendamento,
           statusAgendamento: data.statusAgendamento,
-          observacoesAgendamento: data.observacoesAgendamento || '',
-        }
-        agendamentosParaCriar.push(novoAgendamento)
+          observacoesAgendamento: data.observacoesAgendamento || "",
+        };
+        agendamentosParaCriar.push(novoAgendamento);
       } else {
         // Verificar se diasDaSemana foi fornecido
-        const diasSelecionados = data.diasDaSemana || []
+        const diasSelecionados = data.diasDaSemana || [];
         if (diasSelecionados.length === 0) {
-          throw new Error('Selecione pelo menos um dia da semana')
+          throw new Error("Selecione pelo menos um dia da semana");
         }
 
-        let dataAtual = data.dataAgendamento
+        let dataAtual = data.dataAgendamento;
 
         while (dataAtual <= data.dataFimRecorrencia!) {
           for (const diaSemana of diasSelecionados) {
@@ -202,11 +202,11 @@ export function NovaAgendaModal() {
             const proximaData = getNextDate(
               dataAtual,
               diaSemana,
-              data.periodicidade || 'Semanal',
-            )
+              data.periodicidade || "Semanal",
+            );
 
             // Verificar se a próxima data está dentro do intervalo desejado
-            if (proximaData > data.dataFimRecorrencia!) continue
+            if (proximaData > data.dataFimRecorrencia!) continue;
 
             // Evitar adicionar agendamentos duplicados
             if (
@@ -216,7 +216,7 @@ export function NovaAgendaModal() {
                   proximaData.getTime(),
               )
             ) {
-              continue
+              continue;
             }
 
             const novoAgendamento: Agendamento = {
@@ -230,37 +230,37 @@ export function NovaAgendaModal() {
               modalidadeAgendamento: data.modalidadeAgendamento,
               tipoAgendamento: data.tipoAgendamento,
               statusAgendamento: data.statusAgendamento,
-              observacoesAgendamento: data.observacoesAgendamento || '',
-            }
-            agendamentosParaCriar.push(novoAgendamento)
+              observacoesAgendamento: data.observacoesAgendamento || "",
+            };
+            agendamentosParaCriar.push(novoAgendamento);
           }
 
           // Incrementar dataAtual de acordo com a periodicidade
-          if (data.periodicidade === 'Semanal') {
-            dataAtual = addWeeks(dataAtual, 1)
-          } else if (data.periodicidade === 'Quinzenal') {
-            dataAtual = addWeeks(dataAtual, 2)
+          if (data.periodicidade === "Semanal") {
+            dataAtual = addWeeks(dataAtual, 1);
+          } else if (data.periodicidade === "Quinzenal") {
+            dataAtual = addWeeks(dataAtual, 2);
           }
         }
       }
 
       // Adicionar todos os agendamentos
       for (const agendamento of agendamentosParaCriar) {
-        await dispatch(addAgendamento(agendamento)).unwrap()
+        await dispatch(addAgendamento(agendamento)).unwrap();
       }
 
-      reset()
-      setMensagemErro('')
-      setMensagemAlerta('')
-      setMensagemSucesso('Agendamento criado com sucesso!')
+      reset();
+      setMensagemErro("");
+      setMensagemAlerta("");
+      setMensagemSucesso("Agendamento criado com sucesso!");
     } catch (error) {
-      console.error('Erro ao criar novo agendamento:', error)
+      console.error("Erro ao criar novo agendamento:", error);
       const errorMessage =
         error instanceof Error
           ? error.message
-          : 'Erro ao criar novo agendamento. Tente novamente.'
-      setMensagemErro(errorMessage)
-      setMensagemSucesso('')
+          : "Erro ao criar novo agendamento. Tente novamente.";
+      setMensagemErro(errorMessage);
+      setMensagemSucesso("");
     }
   }
 
@@ -272,29 +272,32 @@ export function NovaAgendaModal() {
   ): Date {
     const dayMap: { [key: string]: number } = {
       Domingo: 0,
-      'Segunda-feira': 1,
-      'Terça-feira': 2,
-      'Quarta-feira': 3,
-      'Quinta-feira': 4,
-      'Sexta-feira': 5,
+      "Segunda-feira": 1,
+      "Terça-feira": 2,
+      "Quarta-feira": 3,
+      "Quinta-feira": 4,
+      "Sexta-feira": 5,
       Sábado: 6,
-    }
+    };
 
-    const targetDay = dayMap[diaSemana]
+    const targetDay = dayMap[diaSemana];
 
-    let proximaData = setDay(baseDate, targetDay, { weekStartsOn: 0 })
+    let proximaData = setDay(baseDate, targetDay, { weekStartsOn: 0 });
 
     if (isBefore(proximaData, baseDate)) {
-      proximaData = setDay(proximaData, targetDay, { weekStartsOn: 0 })
-      proximaData = addWeeks(proximaData, periodicidade === 'Quinzenal' ? 2 : 1)
+      proximaData = setDay(proximaData, targetDay, { weekStartsOn: 0 });
+      proximaData = addWeeks(
+        proximaData,
+        periodicidade === "Quinzenal" ? 2 : 1,
+      );
     }
 
-    return proximaData
+    return proximaData;
   }
 
   function handleFocus() {
-    setMensagemSucesso('')
-    setMensagemErro('')
+    setMensagemSucesso("");
+    setMensagemErro("");
   }
 
   return (
@@ -326,10 +329,10 @@ export function NovaAgendaModal() {
               name="pacienteId"
               render={({ field: { onChange, value } }) => (
                 <Select
-                  value={value || ''}
+                  value={value || ""}
                   onValueChange={(val) => {
-                    onChange(val)
-                    handleFocus()
+                    onChange(val);
+                    handleFocus();
                   }}
                 >
                   <SelectTrigger className="shadow-rosa/50 focus:shadow-rosa w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]">
@@ -358,7 +361,7 @@ export function NovaAgendaModal() {
               disabled
               className="shadow-rosa/50 focus:shadow-rosa w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px] bg-gray-100"
               placeholder="Nome do Terapeuta"
-              value={pacienteSelecionado?.terapeutaInfo.nomeTerapeuta || ''}
+              value={pacienteSelecionado?.terapeutaInfo.nomeTerapeuta || ""}
             />
           </div>
           <h3 className="font-medium text-azul text-xl mb-4">
@@ -385,14 +388,14 @@ export function NovaAgendaModal() {
                           id="dataAgendamento"
                           ref={calendarTriggerRef}
                           className={cn(
-                            'shadow-rosa/50 focus:shadow-rosa w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px] text-left flex items-center',
-                            !field.value && 'text-slate-400',
+                            "shadow-rosa/50 focus:shadow-rosa w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px] text-left flex items-center",
+                            !field.value && "text-slate-400",
                           )}
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
                           {field.value
-                            ? format(field.value, 'dd/MM/yyyy')
-                            : 'Selecione uma data'}
+                            ? format(field.value, "dd/MM/yyyy")
+                            : "Selecione uma data"}
                         </button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
@@ -400,15 +403,15 @@ export function NovaAgendaModal() {
                           mode="single"
                           selected={field.value}
                           onSelect={(date) => {
-                            field.onChange(date)
-                            calendarTriggerRef.current?.click()
-                            calendarTriggerRef.current?.focus()
+                            field.onChange(date);
+                            calendarTriggerRef.current?.click();
+                            calendarTriggerRef.current?.focus();
                           }}
                           initialFocus
                           locale={ptBR}
                           classNames={{
-                            day_selected: 'bg-rosa text-white',
-                            month: 'capitalize',
+                            day_selected: "bg-rosa text-white",
+                            month: "capitalize",
                           }}
                         />
                       </PopoverContent>
@@ -433,10 +436,10 @@ export function NovaAgendaModal() {
                   type="text"
                   maxLength={5}
                   placeholder="hh:mm"
-                  {...register('horarioAgendamento', {
+                  {...register("horarioAgendamento", {
                     onChange: (e) => {
-                      const masked = maskTime(e.target.value)
-                      e.target.value = masked
+                      const masked = maskTime(e.target.value);
+                      e.target.value = masked;
                     },
                   })}
                   className="shadow-rosa/50 focus:shadow-rosa w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
@@ -457,7 +460,7 @@ export function NovaAgendaModal() {
                 name="periodicidade"
                 render={({ field: { onChange, value } }) => (
                   <Select
-                    value={value || 'Não repetir'}
+                    value={value || "Não repetir"}
                     onValueChange={onChange}
                   >
                     <SelectTrigger className="shadow-rosa/50 focus:shadow-rosa w-full h-[40px] rounded-md px-4">
@@ -474,8 +477,8 @@ export function NovaAgendaModal() {
             </div>
             {/* // Se a periodicidade for semanal, permitir selecionar os dias da
             semana */}
-            {(watch('periodicidade') === 'Semanal' ||
-              watch('periodicidade') === 'Quinzenal') && (
+            {(watch("periodicidade") === "Semanal" ||
+              watch("periodicidade") === "Quinzenal") && (
               <div className="space-y-2">
                 <label
                   htmlFor="diasDaSemana"
@@ -489,13 +492,13 @@ export function NovaAgendaModal() {
                   render={({ field: { onChange, value } }) => (
                     <div className="flex flex-wrap gap-2">
                       {[
-                        'Domingo',
-                        'Segunda-feira',
-                        'Terça-feira',
-                        'Quarta-feira',
-                        'Quinta-feira',
-                        'Sexta-feira',
-                        'Sábado',
+                        "Domingo",
+                        "Segunda-feira",
+                        "Terça-feira",
+                        "Quarta-feira",
+                        "Quinta-feira",
+                        "Sexta-feira",
+                        "Sábado",
                       ].map((dia) => (
                         <label
                           key={dia}
@@ -506,19 +509,21 @@ export function NovaAgendaModal() {
                             id={dia}
                             checked={value?.includes(
                               dia as
-                                | 'Domingo'
-                                | 'Segunda-feira'
-                                | 'Terça-feira'
-                                | 'Quarta-feira'
-                                | 'Quinta-feira'
-                                | 'Sexta-feira'
-                                | 'Sábado',
+                                | "Domingo"
+                                | "Segunda-feira"
+                                | "Terça-feira"
+                                | "Quarta-feira"
+                                | "Quinta-feira"
+                                | "Sexta-feira"
+                                | "Sábado",
                             )}
                             onCheckedChange={(checked) => {
                               if (checked) {
-                                onChange([...(value || []), dia])
+                                onChange([...(value || []), dia]);
                               } else {
-                                onChange((value || []).filter((d) => d !== dia))
+                                onChange(
+                                  (value || []).filter((d) => d !== dia),
+                                );
                               }
                             }}
                             className="w-4 h-4 border rounded data-[state=checked]:bg-rosa data-[state=checked]:border-rosa"
@@ -533,8 +538,8 @@ export function NovaAgendaModal() {
             )}
 
             {/* // Permitir selecionar a data de fim da recorrência */}
-            {(watch('periodicidade') === 'Semanal' ||
-              watch('periodicidade') === 'Quinzenal') && (
+            {(watch("periodicidade") === "Semanal" ||
+              watch("periodicidade") === "Quinzenal") && (
               <div className="space-y-2">
                 <label
                   className="text-sm text-slate-500"
@@ -553,14 +558,14 @@ export function NovaAgendaModal() {
                           id="dataFimRecorrencia"
                           ref={calendarTriggerRef}
                           className={cn(
-                            'shadow-rosa/50 focus:shadow-rosa w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px] text-left flex items-center',
-                            !field.value && 'text-slate-400',
+                            "shadow-rosa/50 focus:shadow-rosa w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px] text-left flex items-center",
+                            !field.value && "text-slate-400",
                           )}
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
                           {field.value
-                            ? format(field.value, 'dd/MM/yyyy')
-                            : 'Selecione uma data fim da recorrência'}
+                            ? format(field.value, "dd/MM/yyyy")
+                            : "Selecione uma data fim da recorrência"}
                         </button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
@@ -568,15 +573,15 @@ export function NovaAgendaModal() {
                           mode="single"
                           selected={field.value}
                           onSelect={(date) => {
-                            field.onChange(date)
-                            calendarTriggerRef.current?.click()
-                            calendarTriggerRef.current?.focus()
+                            field.onChange(date);
+                            calendarTriggerRef.current?.click();
+                            calendarTriggerRef.current?.focus();
                           }}
                           initialFocus
                           locale={ptBR}
                           classNames={{
-                            day_selected: 'bg-rosa text-white',
-                            month: 'capitalize',
+                            day_selected: "bg-rosa text-white",
+                            month: "capitalize",
                           }}
                         />
                       </PopoverContent>
@@ -604,10 +609,10 @@ export function NovaAgendaModal() {
                 render={({ field }) => (
                   <RadioGroup.Root
                     className="flex items-center gap-x-6"
-                    value={field.value || ''}
+                    value={field.value || ""}
                     onValueChange={(value) => {
-                      field.onChange(value)
-                      handleFocus()
+                      field.onChange(value);
+                      handleFocus();
                     }}
                   >
                     <div className="flex items-center gap-2">
@@ -677,10 +682,10 @@ export function NovaAgendaModal() {
                 render={({ field }) => (
                   <RadioGroup.Root
                     id="modalidadeAgendamento"
-                    value={field.value || ''}
+                    value={field.value || ""}
                     onValueChange={(value) => {
-                      field.onChange(value)
-                      handleFocus()
+                      field.onChange(value);
+                      handleFocus();
                     }}
                     className="flex items-center gap-x-6"
                   >
@@ -737,8 +742,8 @@ export function NovaAgendaModal() {
                   <Select
                     value={value}
                     onValueChange={(val) => {
-                      onChange(val)
-                      handleFocus()
+                      onChange(val);
+                      handleFocus();
                     }}
                   >
                     <SelectTrigger className="shadow-rosa/50 focus:shadow-rosa w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]">
@@ -778,10 +783,10 @@ export function NovaAgendaModal() {
                   <RadioGroup.Root
                     id="statusAgendamento"
                     className="flex items-center gap-x-6"
-                    value={value || ''}
+                    value={value || ""}
                     onValueChange={(val) => {
-                      onChange(val)
-                      handleFocus()
+                      onChange(val);
+                      handleFocus();
                     }}
                   >
                     {/* Confirmado */}
@@ -856,7 +861,7 @@ export function NovaAgendaModal() {
                 Observações
               </label>
               <textarea
-                {...register('observacoesAgendamento')}
+                {...register("observacoesAgendamento")}
                 id="observacoesAgendamento"
                 className="shadow-rosa/50 focus:shadow-rosa w-full min-h-[80px] rounded-md px-4 py-2 text-[15px] leading-normal shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
                 placeholder="Observações do agendamento"
@@ -874,10 +879,10 @@ export function NovaAgendaModal() {
             type="submit"
             disabled={isButtonDisabled}
             className={`w-full bg-rosa hover:bg-rosa/90 text-white font-medium py-2 px-4 rounded-md transition-colors ${
-              isButtonDisabled ? 'opacity-50 cursor-not-allowed' : ''
+              isButtonDisabled ? "opacity-50 cursor-not-allowed" : ""
             }`}
           >
-            {isSubmitting ? 'Salvando...' : 'Salvar'}
+            {isSubmitting ? "Salvando..." : "Salvar"}
           </button>
           {mensagemSucesso && (
             <p className="text-green-500 text-sm mt-4">{mensagemSucesso}</p>
@@ -889,5 +894,5 @@ export function NovaAgendaModal() {
         </form>
       </DialogContent>
     </DialogPortal>
-  )
+  );
 }

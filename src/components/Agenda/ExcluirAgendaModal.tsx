@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
-import { Button } from '../ui/button'
-import { Checkbox } from '../ui/checkbox'
+import { useEffect, useState } from "react";
+import { Button } from "../ui/button";
+import { Checkbox } from "../ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -8,16 +8,16 @@ import {
   DialogOverlay,
   DialogPortal,
   DialogTitle,
-} from '../ui/dialog'
+} from "../ui/dialog";
 
 interface ExcluirAgendaModalProps {
-  isOpen: boolean
-  onOpenChange: (isOpen: boolean) => void
-  title: string
-  message: string
-  messageAll: string
-  onConfirm: (deleteAll: boolean) => void
-  checked?: boolean
+  isOpen: boolean;
+  onOpenChange: (isOpen: boolean) => void;
+  title: string;
+  message: string;
+  messageAll: string;
+  onConfirm: (deleteAll: boolean) => void;
+  checked?: boolean;
 }
 
 export function ExcluirAgendaModal({
@@ -29,13 +29,13 @@ export function ExcluirAgendaModal({
   onConfirm,
   checked = false,
 }: ExcluirAgendaModalProps) {
-  const [deleteAll, setDeleteAll] = useState(false)
+  const [deleteAll, setDeleteAll] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
-      setDeleteAll(checked)
+      setDeleteAll(checked);
     }
-  }, [isOpen, checked])
+  }, [isOpen, checked]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -76,5 +76,5 @@ export function ExcluirAgendaModal({
         </DialogContent>
       </DialogPortal>
     </Dialog>
-  )
+  );
 }

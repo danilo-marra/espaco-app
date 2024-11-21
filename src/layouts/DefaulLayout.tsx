@@ -1,6 +1,6 @@
-import { Outlet } from 'react-router-dom'
-import { Menu } from '../components/Menu'
-import { Header } from '../components/Header'
+import { Outlet } from "react-router-dom";
+import { Menu } from "../components/Menu";
+import { Header } from "../components/Header";
 
 export function DefaultLayout() {
   return (
@@ -12,5 +12,5 @@ export function DefaultLayout() {
         <Outlet />
       </div>
     </div>
-  )
+  );
 }

@@ -1,5 +1,14 @@
-import { deleteAgendamento, fetchAgendamentos } from '@/store/agendamentosSlice'
-import type { RootState, AppDispatch } from '@/store/store'
+import { EditarAgendaModal } from "@/components/Agenda/EditarAgendaModal";
+import { ExcluirAgendaModal } from "@/components/Agenda/ExcluirAgendaModal";
+import { NovaAgendaModal } from "@/components/Agenda/NovaAgendaModal";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import { useModal } from "@/hooks/useModal";
+import {
+  deleteAgendamento,
+  fetchAgendamentos,
+} from "@/store/agendamentosSlice";
+import type { AppDispatch, RootState } from "@/store/store";
+import type { Agendamento } from "@/tipos";
 import {
   CalendarCheck,
   CaretLeft,
@@ -8,7 +17,7 @@ import {
   Plus,
   Trash,
   User,
-} from '@phosphor-icons/react'
+} from "@phosphor-icons/react";
 import {
   addDays,
   addMonths,
@@ -24,66 +33,62 @@ import {
   startOfWeek,
   subMonths,
   subWeeks,
-} from 'date-fns'
-import { ptBR } from 'date-fns/locale'
-import { useEffect, useMemo, useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { NovaAgendaModal } from '@/components/Agenda/NovaAgendaModal'
-import { Dialog, DialogTrigger } from '@/components/ui/dialog'
-import type { Agendamento } from '@/tipos'
-import { useModal } from '@/hooks/useModal'
-import { EditarAgendaModal } from '@/components/Agenda/EditarAgendaModal'
-import { toast } from 'sonner'
-import { ExcluirAgendaModal } from '@/components/Agenda/ExcluirAgendaModal'
+} from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { useEffect, useMemo, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { toast } from "sonner";
 
 export function Agendas() {
-  const [selectedDate, setSelectedDate] = useState(new Date())
-  const [viewMode, setViewMode] = useState<'semanal' | 'mensal'>('semanal')
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [viewMode, setViewMode] = useState<"semanal" | "mensal">("semanal");
 
   // Funções para alternar entre as visualizações
-  const handleSetWeeklyView = () => setViewMode('semanal')
-  const handleSetMonthlyView = () => setViewMode('mensal')
+  const handleSetWeeklyView = () => setViewMode("semanal");
+  const handleSetMonthlyView = () => setViewMode("mensal");
 
-  const [selectedTerapeuta, setSelectedTerapeuta] = useState('Todos')
+  const [selectedTerapeuta, setSelectedTerapeuta] = useState("Todos");
   const [chosedRoom, setChosedRoom] = useState({
     salaVerde: true,
     salaAzul: true,
-  })
-  const dispatch: AppDispatch = useDispatch()
+  });
+  const dispatch: AppDispatch = useDispatch();
   const agendamentos = useSelector(
     (state: RootState) => state.agendamentos.data,
-  )
+  );
 
   const [selectedStatus, setSelectedStatus] = useState({
     confirmado: true,
     remarcado: true,
     cancelado: true,
-  })
+  });
 
-  const [agendaEditando, setAgendaEditando] = useState<Agendamento | null>(null)
+  const [agendaEditando, setAgendaEditando] = useState<Agendamento | null>(
+    null,
+  );
   const [agendamentoParaExcluir, setAgendamentoParaExcluir] =
-    useState<Agendamento | null>(null)
-  const [isExcluirModalOpen, setIsExcluirModalOpen] = useState(false)
+    useState<Agendamento | null>(null);
+  const [isExcluirModalOpen, setIsExcluirModalOpen] = useState(false);
 
   // Modal
-  const { isEditModalOpen, openEditModal, closeEditModal } = useModal()
+  const { isEditModalOpen, openEditModal, closeEditModal } = useModal();
   const openExcluirModal = (agendamento: Agendamento) => {
-    setAgendamentoParaExcluir(agendamento)
-    setIsExcluirModalOpen(true)
-  }
+    setAgendamentoParaExcluir(agendamento);
+    setIsExcluirModalOpen(true);
+  };
 
   // Ordenar agenda por horário
   const sortByTime = (a: Agendamento, b: Agendamento) => {
-    return a.horarioAgendamento.localeCompare(b.horarioAgendamento)
-  }
+    return a.horarioAgendamento.localeCompare(b.horarioAgendamento);
+  };
 
   // Obter o início da semana da data selecionada
-  const startOfSelectedWeek = startOfWeek(selectedDate, { weekStartsOn: 0 })
+  const startOfSelectedWeek = startOfWeek(selectedDate, { weekStartsOn: 0 });
 
   // Obter todos os dias da semana
   const daysOfWeek = Array.from({ length: 7 }).map((_, index) =>
     addDays(startOfSelectedWeek, index),
-  )
+  );
 
   // Get unique therapists that have appointments in selected month
   const availableTherapists = useMemo(() => {
@@ -98,40 +103,40 @@ export function Agendas() {
       .filter(
         (terapeuta, index, self) =>
           index === self.findIndex((t) => t.id === terapeuta.id),
-      )
+      );
 
-    return [{ id: 'Todos', nome: 'Todos' }, ...therapists]
-  }, [agendamentos, selectedDate])
+    return [{ id: "Todos", nome: "Todos" }, ...therapists];
+  }, [agendamentos, selectedDate]);
 
   // Filter appointments by selected therapist, date and needs room
   const filteredAgendamentos = useMemo(() => {
     return agendamentos.filter((agendamento) => {
-      const agendamentoDate = new Date(agendamento.dataAgendamento)
+      const agendamentoDate = new Date(agendamento.dataAgendamento);
       const isInSelectedWeek = daysOfWeek.some((day) =>
         isSameDay(agendamentoDate, day),
-      )
+      );
       // Aplicar outros filtros (terapeuta, sala, etc.)
       const isSameTerapeuta =
-        selectedTerapeuta === 'Todos' ||
+        selectedTerapeuta === "Todos" ||
         selectedTerapeuta ===
-          agendamento.pacienteInfo.terapeutaInfo.nomeTerapeuta
+          agendamento.pacienteInfo.terapeutaInfo.nomeTerapeuta;
 
       const isChosedRoom =
         (chosedRoom.salaVerde &&
-          agendamento.localAgendamento === 'Sala Verde') ||
-        (chosedRoom.salaAzul && agendamento.localAgendamento === 'Sala Azul')
+          agendamento.localAgendamento === "Sala Verde") ||
+        (chosedRoom.salaAzul && agendamento.localAgendamento === "Sala Azul");
 
       const needsRoom =
-        agendamento.localAgendamento === 'Sala Verde' ||
-        agendamento.localAgendamento === 'Sala Azul'
+        agendamento.localAgendamento === "Sala Verde" ||
+        agendamento.localAgendamento === "Sala Azul";
 
       const isSelectedStatus =
         (selectedStatus.confirmado &&
-          agendamento.statusAgendamento === 'Confirmado') ||
+          agendamento.statusAgendamento === "Confirmado") ||
         (selectedStatus.remarcado &&
-          agendamento.statusAgendamento === 'Remarcado') ||
+          agendamento.statusAgendamento === "Remarcado") ||
         (selectedStatus.cancelado &&
-          agendamento.statusAgendamento === 'Cancelado')
+          agendamento.statusAgendamento === "Cancelado");
 
       return (
         isInSelectedWeek &&
@@ -139,118 +144,118 @@ export function Agendas() {
         needsRoom &&
         isChosedRoom &&
         isSelectedStatus
-      )
-    })
-  }, [agendamentos, daysOfWeek, selectedTerapeuta, chosedRoom, selectedStatus])
+      );
+    });
+  }, [agendamentos, daysOfWeek, selectedTerapeuta, chosedRoom, selectedStatus]);
 
   const filteredAgendamentosNoRoom = useMemo(() => {
     return agendamentos.filter((agendamento) => {
       const isInSelectedPeriod =
-        viewMode === 'semanal'
+        viewMode === "semanal"
           ? isSameWeek(new Date(agendamento.dataAgendamento), selectedDate)
-          : isSameMonth(new Date(agendamento.dataAgendamento), selectedDate)
+          : isSameMonth(new Date(agendamento.dataAgendamento), selectedDate);
 
       const isSameTerapeuta =
-        selectedTerapeuta === 'Todos' ||
+        selectedTerapeuta === "Todos" ||
         selectedTerapeuta ===
-          agendamento.pacienteInfo.terapeutaInfo.nomeTerapeuta
+          agendamento.pacienteInfo.terapeutaInfo.nomeTerapeuta;
 
-      const isNoRoom = agendamento.localAgendamento === 'Não Precisa de Sala'
+      const isNoRoom = agendamento.localAgendamento === "Não Precisa de Sala";
 
       const isSelectedStatus =
         (selectedStatus.confirmado &&
-          agendamento.statusAgendamento === 'Confirmado') ||
+          agendamento.statusAgendamento === "Confirmado") ||
         (selectedStatus.remarcado &&
-          agendamento.statusAgendamento === 'Remarcado') ||
+          agendamento.statusAgendamento === "Remarcado") ||
         (selectedStatus.cancelado &&
-          agendamento.statusAgendamento === 'Cancelado')
+          agendamento.statusAgendamento === "Cancelado");
 
       return (
         isInSelectedPeriod && isSameTerapeuta && isNoRoom && isSelectedStatus
-      )
-    })
-  }, [agendamentos, selectedDate, selectedTerapeuta, selectedStatus, viewMode])
+      );
+    });
+  }, [agendamentos, selectedDate, selectedTerapeuta, selectedStatus, viewMode]);
 
   // Handlers
 
-  const handleRoomChange = (room: 'salaVerde' | 'salaAzul') => {
+  const handleRoomChange = (room: "salaVerde" | "salaAzul") => {
     setChosedRoom((prev) => ({
       ...prev,
       [room]: !prev[room],
-    }))
-  }
+    }));
+  };
 
   const handleStatusChange = (
-    status: 'confirmado' | 'remarcado' | 'cancelado',
+    status: "confirmado" | "remarcado" | "cancelado",
   ) => {
     setSelectedStatus((prev) => ({
       ...prev,
       [status]: !prev[status],
-    }))
-  }
+    }));
+  };
 
   const handleEditAgenda = (agenda: Agendamento) => {
-    setAgendaEditando(agenda)
-    openEditModal()
-  }
+    setAgendaEditando(agenda);
+    openEditModal();
+  };
 
   const handleDeleteAgendamento = async (deleteAll: boolean) => {
-    if (!agendamentoParaExcluir) return
+    if (!agendamentoParaExcluir) return;
     try {
       if (deleteAll) {
         const agendamentosPaciente = agendamentos.filter(
           (agendamento) =>
             agendamento.pacienteInfo.id ===
             agendamentoParaExcluir.pacienteInfo.id,
-        )
+        );
         await Promise.all(
           agendamentosPaciente.map((agendamento) =>
             dispatch(deleteAgendamento(agendamento.id)).unwrap(),
           ),
-        )
-        toast.success('Todos os agendamentos do paciente foram excluídos!')
+        );
+        toast.success("Todos os agendamentos do paciente foram excluídos!");
       } else {
-        await dispatch(deleteAgendamento(agendamentoParaExcluir.id)).unwrap()
-        toast.success('Agendamento excluído com sucesso!')
+        await dispatch(deleteAgendamento(agendamentoParaExcluir.id)).unwrap();
+        toast.success("Agendamento excluído com sucesso!");
       }
     } catch (error) {
-      toast.error('Erro ao excluir agendamento!')
-      console.error('Erro ao excluir agendamento:', error)
+      toast.error("Erro ao excluir agendamento!");
+      console.error("Erro ao excluir agendamento:", error);
     } finally {
-      setIsExcluirModalOpen(false)
-      setAgendamentoParaExcluir(null)
+      setIsExcluirModalOpen(false);
+      setAgendamentoParaExcluir(null);
     }
-  }
+  };
 
   // Navegação entre semanas e meses
   const handlePrevious = () => {
-    if (viewMode === 'semanal') {
-      setSelectedDate(subWeeks(selectedDate, 1))
+    if (viewMode === "semanal") {
+      setSelectedDate(subWeeks(selectedDate, 1));
     } else {
-      setSelectedDate(subMonths(selectedDate, 1))
+      setSelectedDate(subMonths(selectedDate, 1));
     }
-  }
+  };
 
   const handleNext = () => {
-    if (viewMode === 'semanal') {
-      setSelectedDate(addWeeks(selectedDate, 1))
+    if (viewMode === "semanal") {
+      setSelectedDate(addWeeks(selectedDate, 1));
     } else {
-      setSelectedDate(addMonths(selectedDate, 1))
+      setSelectedDate(addMonths(selectedDate, 1));
     }
-  }
+  };
 
   // Função para obter os dias do mês
   const getDaysInMonth = (date: Date) => {
-    const start = startOfWeek(startOfMonth(date))
-    const end = endOfWeek(endOfMonth(date))
-    return eachDayOfInterval({ start, end })
-  }
+    const start = startOfWeek(startOfMonth(date));
+    const end = endOfWeek(endOfMonth(date));
+    return eachDayOfInterval({ start, end });
+  };
 
-  const daysOfMonth = getDaysInMonth(selectedDate)
+  const daysOfMonth = getDaysInMonth(selectedDate);
 
   useEffect(() => {
-    dispatch(fetchAgendamentos())
-  }, [dispatch])
+    dispatch(fetchAgendamentos());
+  }, [dispatch]);
 
   return (
     <div className="flex min-h-screen">
@@ -277,9 +282,9 @@ export function Agendas() {
             type="button"
             onClick={handleSetWeeklyView}
             className={`px-4 py-2 rounded ${
-              viewMode === 'semanal'
-                ? 'bg-azul text-white'
-                : 'bg-white text-azul'
+              viewMode === "semanal"
+                ? "bg-azul text-white"
+                : "bg-white text-azul"
             }`}
           >
             Semanal
@@ -288,9 +293,9 @@ export function Agendas() {
             type="button"
             onClick={handleSetMonthlyView}
             className={`px-4 py-2 rounded ${
-              viewMode === 'mensal'
-                ? 'bg-azul text-white'
-                : 'bg-white text-azul'
+              viewMode === "mensal"
+                ? "bg-azul text-white"
+                : "bg-white text-azul"
             }`}
           >
             Mensal
@@ -327,7 +332,7 @@ export function Agendas() {
                   type="checkbox"
                   className="form-checkbox h-4 w-4 text-azul"
                   checked={chosedRoom.salaVerde}
-                  onChange={() => handleRoomChange('salaVerde')}
+                  onChange={() => handleRoomChange("salaVerde")}
                 />
                 <span className="ml-2">Sala Verde</span>
               </label>
@@ -336,7 +341,7 @@ export function Agendas() {
                   type="checkbox"
                   className="form-checkbox h-4 w-4 text-azul"
                   checked={chosedRoom.salaAzul}
-                  onChange={() => handleRoomChange('salaAzul')}
+                  onChange={() => handleRoomChange("salaAzul")}
                 />
                 <span className="ml-2">Sala Azul</span>
               </label>
@@ -359,7 +364,7 @@ export function Agendas() {
                     type="checkbox"
                     className="form-checkbox h-4 w-4 text-green-500"
                     checked={selectedStatus.confirmado}
-                    onChange={() => handleStatusChange('confirmado')}
+                    onChange={() => handleStatusChange("confirmado")}
                   />
                   <span className="ml-2">Confirmado</span>
                 </label>
@@ -368,7 +373,7 @@ export function Agendas() {
                     type="checkbox"
                     className="form-checkbox h-4 w-4 text-yellow-500"
                     checked={selectedStatus.remarcado}
-                    onChange={() => handleStatusChange('remarcado')}
+                    onChange={() => handleStatusChange("remarcado")}
                   />
                   <span className="ml-2">Remarcado</span>
                 </label>
@@ -377,7 +382,7 @@ export function Agendas() {
                     type="checkbox"
                     className="form-checkbox h-4 w-4 text-red-500"
                     checked={selectedStatus.cancelado}
-                    onChange={() => handleStatusChange('cancelado')}
+                    onChange={() => handleStatusChange("cancelado")}
                   />
                   <span className="ml-2">Cancelado</span>
                 </label>
@@ -392,9 +397,9 @@ export function Agendas() {
           </button>
           <div className="flex items-center space-x-2">
             <h2 className="text-xl font-semibold">
-              {viewMode === 'semanal'
-                ? `${format(selectedDate, 'MMMM', { locale: ptBR }).replace(/^\w/, (c) => c.toUpperCase())} - Semana de ${format(startOfSelectedWeek, 'dd/MM/yyyy')} até ${format(addDays(startOfSelectedWeek, 6), 'dd/MM/yyyy')}`
-                : format(selectedDate, 'MMMM yyyy', { locale: ptBR }).replace(
+              {viewMode === "semanal"
+                ? `${format(selectedDate, "MMMM", { locale: ptBR }).replace(/^\w/, (c) => c.toUpperCase())} - Semana de ${format(startOfSelectedWeek, "dd/MM/yyyy")} até ${format(addDays(startOfSelectedWeek, 6), "dd/MM/yyyy")}`
+                : format(selectedDate, "MMMM yyyy", { locale: ptBR }).replace(
                     /^\w/,
                     (c) => c.toUpperCase(),
                   )}
@@ -407,10 +412,10 @@ export function Agendas() {
         {/* Cabeçalho dos Dias da Semana */}
 
         {/* Grid de Agendamentos da Semana */}
-        {viewMode === 'semanal' ? (
+        {viewMode === "semanal" ? (
           <div className="bg-white rounded shadow">
             <div className="grid grid-cols-7 gap-px bg-rosa">
-              {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((day) => (
+              {["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map((day) => (
                 <div
                   key={day}
                   className="p-4 text-center font-semibold text-branco"
@@ -425,7 +430,7 @@ export function Agendas() {
                   .filter((agendamento) =>
                     isSameDay(new Date(agendamento.dataAgendamento), day),
                   )
-                  .sort(sortByTime)
+                  .sort(sortByTime);
 
                 return (
                   <div
@@ -433,19 +438,19 @@ export function Agendas() {
                     className="min-h-[120px] p-2 bg-white"
                   >
                     <div className="font-semibold mb-1">
-                      {format(day, 'dd/MM')}
+                      {format(day, "dd/MM")}
                     </div>
                     <div className="space-y-2">
                       {dayAgendamentos.map((agendamento) => (
                         <div
                           key={agendamento.id}
-                          className={`text-sm p-1 space-y-1 rounded cursor-pointer transition-colors duration-200 hover:bg-slate-50 group ${agendamento.statusAgendamento === 'Cancelado' || agendamento.statusAgendamento === 'Remarcado' ? 'bg-red-100' : ''} ${agendamento.statusAgendamento === 'Cancelado' || agendamento.statusAgendamento === 'Remarcado' ? 'line-through' : ''}`}
+                          className={`text-sm p-1 space-y-1 rounded cursor-pointer transition-colors duration-200 hover:bg-slate-50 group ${agendamento.statusAgendamento === "Cancelado" || agendamento.statusAgendamento === "Remarcado" ? "bg-red-100" : ""} ${agendamento.statusAgendamento === "Cancelado" || agendamento.statusAgendamento === "Remarcado" ? "line-through" : ""}`}
                           onClick={() => handleEditAgenda(agendamento)}
                           onKeyDown={() => handleEditAgenda(agendamento)}
                         >
                           <div className="flex justify-between">
                             <div className="group-hover:text-zinc-500 font-semibold">
-                              {agendamento.horarioAgendamento} -{' '}
+                              {agendamento.horarioAgendamento} -{" "}
                               {
                                 agendamento.pacienteInfo.terapeutaInfo
                                   .nomeTerapeuta
@@ -457,12 +462,12 @@ export function Agendas() {
                                 title="Excluir agendamento"
                                 className="text-red-400 group-hover:text-red-600"
                                 onClick={(e) => {
-                                  e.stopPropagation()
-                                  openExcluirModal(agendamento)
+                                  e.stopPropagation();
+                                  openExcluirModal(agendamento);
                                 }}
                                 onKeyDown={(e) => {
-                                  e.stopPropagation()
-                                  openExcluirModal(agendamento)
+                                  e.stopPropagation();
+                                  openExcluirModal(agendamento);
                                 }}
                               >
                                 <Trash size={20} weight="bold">
@@ -475,25 +480,25 @@ export function Agendas() {
                             {agendamento.pacienteInfo.nomePaciente}
                           </div>
                           <div className=" italic text-slate-500 group-hover:text-zinc-500">
-                            {agendamento.tipoAgendamento} -{' '}
+                            {agendamento.tipoAgendamento} -{" "}
                             {agendamento.modalidadeAgendamento}
                           </div>
 
                           <hr
-                            className={`border-2 ${agendamento.localAgendamento === 'Sala Verde' ? 'border-green-500' : 'border-blue-500'}`}
+                            className={`border-2 ${agendamento.localAgendamento === "Sala Verde" ? "border-green-500" : "border-blue-500"}`}
                           />
                         </div>
                       ))}
                     </div>
                   </div>
-                )
+                );
               })}
             </div>
           </div>
         ) : (
           <div className="bg-white rounded shadow">
             <div className="grid grid-cols-7 gap-px bg-rosa">
-              {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((day) => (
+              {["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map((day) => (
                 <div
                   key={day}
                   className="p-4 text-center font-semibold text-branco"
@@ -508,28 +513,28 @@ export function Agendas() {
                   .filter((agendamento) =>
                     isSameDay(new Date(agendamento.dataAgendamento), day),
                   )
-                  .sort(sortByTime)
-                const isCurrentMonth = isSameMonth(day, selectedDate)
+                  .sort(sortByTime);
+                const isCurrentMonth = isSameMonth(day, selectedDate);
                 return (
                   <div
                     key={day.toISOString()}
                     className={`min-h-[100px] p-2 bg-white ${
-                      !isCurrentMonth ? 'bg-gray-100' : ''
+                      !isCurrentMonth ? "bg-gray-100" : ""
                     }`}
                   >
                     <div className="text-sm font-semibold">
-                      {format(day, 'd')}
+                      {format(day, "d")}
                     </div>
                     {dayAgendamentos.map((agendamento) => (
                       <div
                         key={agendamento.id}
-                        className={`mt-1 p-1 text-xs cursor-pointer hover:bg-slate-100 transition-colors duration-200 ${agendamento.statusAgendamento === 'Cancelado' || agendamento.statusAgendamento === 'Remarcado' ? 'bg-red-100' : ''} ${agendamento.statusAgendamento === 'Cancelado' || agendamento.statusAgendamento === 'Remarcado' ? 'line-through' : ''}`}
+                        className={`mt-1 p-1 text-xs cursor-pointer hover:bg-slate-100 transition-colors duration-200 ${agendamento.statusAgendamento === "Cancelado" || agendamento.statusAgendamento === "Remarcado" ? "bg-red-100" : ""} ${agendamento.statusAgendamento === "Cancelado" || agendamento.statusAgendamento === "Remarcado" ? "line-through" : ""}`}
                         onClick={() => handleEditAgenda(agendamento)}
                         onKeyDown={() => handleEditAgenda(agendamento)}
                       >
                         <div className="flex justify-between">
                           <div className="font-semibold">
-                            {agendamento.horarioAgendamento} -{' '}
+                            {agendamento.horarioAgendamento} -{" "}
                             {
                               agendamento.pacienteInfo.terapeutaInfo
                                 .nomeTerapeuta
@@ -541,12 +546,12 @@ export function Agendas() {
                               title="Excluir agendamento"
                               className="text-red-500"
                               onClick={(e) => {
-                                e.stopPropagation()
-                                openExcluirModal(agendamento)
+                                e.stopPropagation();
+                                openExcluirModal(agendamento);
                               }}
                               onKeyDown={(e) => {
-                                e.stopPropagation()
-                                openExcluirModal(agendamento)
+                                e.stopPropagation();
+                                openExcluirModal(agendamento);
                               }}
                             >
                               <Trash size={16} weight="bold" />
@@ -555,12 +560,12 @@ export function Agendas() {
                         </div>
                         <div>{agendamento.pacienteInfo.nomePaciente}</div>
                         <hr
-                          className={`my-2 border-2 ${agendamento.localAgendamento === 'Sala Verde' ? 'border-green-500' : 'border-blue-500'} `}
+                          className={`my-2 border-2 ${agendamento.localAgendamento === "Sala Verde" ? "border-green-500" : "border-blue-500"} `}
                         />
                       </div>
                     ))}
                   </div>
-                )
+                );
               })}
             </div>
           </div>
@@ -585,10 +590,10 @@ export function Agendas() {
                   <div className="font-semibold text-slate-500 group-hover:text-zinc-500 text-sm">
                     {format(
                       new Date(agendamento.dataAgendamento),
-                      'dd/MM/yyyy',
-                    )}{' '}
+                      "dd/MM/yyyy",
+                    )}{" "}
                     (
-                    {format(new Date(agendamento.dataAgendamento), 'EEEE', {
+                    {format(new Date(agendamento.dataAgendamento), "EEEE", {
                       locale: ptBR,
                     }).replace(/^\w/, (c) => c.toUpperCase())}
                     )
@@ -599,12 +604,12 @@ export function Agendas() {
                       title="Excluir agendamento"
                       className="text-red-500"
                       onClick={(e) => {
-                        e.stopPropagation()
-                        openExcluirModal(agendamento)
+                        e.stopPropagation();
+                        openExcluirModal(agendamento);
                       }}
                       onKeyDown={(e) => {
-                        e.stopPropagation()
-                        openExcluirModal(agendamento)
+                        e.stopPropagation();
+                        openExcluirModal(agendamento);
                       }}
                     >
                       <Trash size={20} weight="bold" />
@@ -614,21 +619,21 @@ export function Agendas() {
               </div>
               <div className="space-y-1">
                 <div
-                  className={`font-medium text-slate-900 group-hover:text-zinc-500 ${agendamento.statusAgendamento === 'Cancelado' || agendamento.statusAgendamento === 'Remarcado' ? 'line-through' : ''}`}
+                  className={`font-medium text-slate-900 group-hover:text-zinc-500 ${agendamento.statusAgendamento === "Cancelado" || agendamento.statusAgendamento === "Remarcado" ? "line-through" : ""}`}
                 >
-                  {agendamento.horarioAgendamento} -{' '}
+                  {agendamento.horarioAgendamento} -{" "}
                   {agendamento.pacienteInfo.terapeutaInfo.nomeTerapeuta}
                 </div>
                 <div className="text-slate-500 group-hover:text-zinc-500">
                   {agendamento.pacienteInfo.nomePaciente}
                 </div>
                 <div className="text-sm italic text-slate-500 group-hover:text-zinc-500">
-                  {agendamento.tipoAgendamento} -{' '}
+                  {agendamento.tipoAgendamento} -{" "}
                   {agendamento.modalidadeAgendamento}
                 </div>
                 <hr className="border-2 border-yellow-400" />
 
-                {agendamento.statusAgendamento !== 'Confirmado' && (
+                {agendamento.statusAgendamento !== "Confirmado" && (
                   <div className="text-base font-semibold text-orange-500 group-hover:text-orange-700">
                     {agendamento.statusAgendamento}
                   </div>
@@ -655,5 +660,5 @@ export function Agendas() {
         />
       </main>
     </div>
-  )
+  );
 }

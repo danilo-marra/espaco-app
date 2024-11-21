@@ -1,10 +1,9 @@
-import { useEffect, useMemo, useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { format } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
-import DatePicker from 'react-datepicker'
-import 'react-datepicker/dist/react-datepicker.css'
-import * as Dialog from '@radix-ui/react-dialog'
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { useEffect, useMemo, useState } from "react";
+import DatePicker from "react-datepicker";
+import { useDispatch, useSelector } from "react-redux";
+import "react-datepicker/dist/react-datepicker.css";
 import {
   ArrowCircleDown,
   ArrowCircleUp,
@@ -16,32 +15,33 @@ import {
   PencilSimple,
   Plus,
   TrashSimple,
-} from '@phosphor-icons/react'
+} from "@phosphor-icons/react";
+import * as Dialog from "@radix-ui/react-dialog";
 
-import { useModal } from '../../hooks/useModal'
-import { NovaTransacaoModal } from '../../components/Transacao/NovaTransacaoModal'
-import { EditarTransacaoModal } from '../../components/Transacao/EditarTransacaoModal'
-import { ExcluirModal } from '../../components/ExcluirModal'
-import Pagination from '../../components/Pagination'
-import { dateFormatter, priceFormatter } from '../../utils/formatter'
+import { ExcluirModal } from "../../components/ExcluirModal";
+import Pagination from "../../components/Pagination";
+import { EditarTransacaoModal } from "../../components/Transacao/EditarTransacaoModal";
+import { NovaTransacaoModal } from "../../components/Transacao/NovaTransacaoModal";
+import { useModal } from "../../hooks/useModal";
+import { fetchSessoes } from "../../store/sessoesSlice";
 import {
+  type AppDispatch,
   selectEnhancedTransacoes,
   selectTransacoesSummary,
-  type AppDispatch,
-} from '../../store/store'
-import type { Transacao } from '../../tipos'
-import { deleteTransacao, fetchTransacoes } from '../../store/transacoesSlice'
-import { fetchSessoes } from '../../store/sessoesSlice'
-import { calculateTotals } from '../../store/totalsSlice'
+} from "../../store/store";
+import { calculateTotals } from "../../store/totalsSlice";
+import { deleteTransacao, fetchTransacoes } from "../../store/transacoesSlice";
+import type { Transacao } from "../../tipos";
+import { dateFormatter, priceFormatter } from "../../utils/formatter";
 
 export function Transacoes() {
-  const dispatch = useDispatch<AppDispatch>()
-  const [dataAtual, setDataAtual] = useState<Date>(new Date())
-  const month = dataAtual.getMonth()
-  const year = dataAtual.getFullYear()
-  const [searchValue, setSearchValue] = useState<string>('')
-  const [currentPage, setCurrentPage] = useState(1)
-  const transacoesPorPagina = 10
+  const dispatch = useDispatch<AppDispatch>();
+  const [dataAtual, setDataAtual] = useState<Date>(new Date());
+  const month = dataAtual.getMonth();
+  const year = dataAtual.getFullYear();
+  const [searchValue, setSearchValue] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const transacoesPorPagina = 10;
   const {
     isModalOpen,
     modalMessage,
@@ -50,26 +50,26 @@ export function Transacoes() {
     closeModal,
     openEditModal,
     closeEditModal,
-  } = useModal()
+  } = useModal();
   const [transacaoEditando, setTransacaoEditando] = useState<Transacao | null>(
     null,
-  )
+  );
   const [transacaoParaExcluir, setTransacaoParaExcluir] = useState<
     string | null
-  >(null)
-  const [isSuccess, setIsSuccess] = useState(false)
+  >(null);
+  const [isSuccess, setIsSuccess] = useState(false);
   // Memoizar o seletor de resumo
   const transacoesSummarySelector = useMemo(
     () => selectTransacoesSummary(month, year),
     [month, year],
-  )
-  const summary = useSelector(transacoesSummarySelector)
+  );
+  const summary = useSelector(transacoesSummarySelector);
 
   const enhancedTransacoesSelector = useMemo(
     () => selectEnhancedTransacoes(month, year, searchValue),
     [month, year, searchValue],
-  )
-  const enhancedTransacoes = useSelector(enhancedTransacoesSelector)
+  );
+  const enhancedTransacoes = useSelector(enhancedTransacoesSelector);
 
   // const enhancedTransacoes = useMemo(() => {
   //   const sessoesDoMes = sessoes.filter((sessao) => {
@@ -116,13 +116,13 @@ export function Transacoes() {
   // }, [transacoes, sessoes, dataAtual])
 
   useEffect(() => {
-    dispatch(fetchTransacoes())
+    dispatch(fetchTransacoes());
     dispatch(fetchSessoes()).then(() => {
-      dispatch(calculateTotals())
-    })
-  }, [dispatch])
+      dispatch(calculateTotals());
+    });
+  }, [dispatch]);
 
-  const totalPages = Math.ceil(enhancedTransacoes.length / transacoesPorPagina)
+  const totalPages = Math.ceil(enhancedTransacoes.length / transacoesPorPagina);
 
   // useEffect(() => {
   //   if (loading || error) return
@@ -158,51 +158,51 @@ export function Transacoes() {
   const handleMonthChange = (increment: number) => {
     setDataAtual(
       new Date(dataAtual.getFullYear(), dataAtual.getMonth() + increment, 1),
-    )
-  }
+    );
+  };
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchValue(event.target.value)
-    setCurrentPage(1)
-  }
+    setSearchValue(event.target.value);
+    setCurrentPage(1);
+  };
 
   const handlePageChange = (newPage: number) => {
-    setCurrentPage(newPage)
-  }
+    setCurrentPage(newPage);
+  };
 
   const handleEditTransacao = (transacao: Transacao) => {
-    setTransacaoEditando(transacao)
-    openEditModal()
-  }
+    setTransacaoEditando(transacao);
+    openEditModal();
+  };
 
   const handleDeleteTransacao = async () => {
-    if (!transacaoParaExcluir) return
+    if (!transacaoParaExcluir) return;
 
     try {
-      await dispatch(deleteTransacao(transacaoParaExcluir)).unwrap()
-      openModal('Transação excluída com sucesso!')
-      setIsSuccess(true)
+      await dispatch(deleteTransacao(transacaoParaExcluir)).unwrap();
+      openModal("Transação excluída com sucesso!");
+      setIsSuccess(true);
     } catch (error) {
-      openModal('Erro ao excluir transação!')
-      console.error('Erro ao excluir transação:', error)
+      openModal("Erro ao excluir transação!");
+      console.error("Erro ao excluir transação:", error);
     } finally {
-      setTransacaoParaExcluir(null)
+      setTransacaoParaExcluir(null);
     }
-  }
+  };
 
   const openModalExcluir = (message: string, transacaoId: string) => {
-    openModal(message)
-    setTransacaoParaExcluir(transacaoId)
-    setIsSuccess(false)
-  }
+    openModal(message);
+    setTransacaoParaExcluir(transacaoId);
+    setIsSuccess(false);
+  };
 
   const paginatedTransacoes = useMemo(() => {
-    const startIndex = (currentPage - 1) * transacoesPorPagina
+    const startIndex = (currentPage - 1) * transacoesPorPagina;
     return enhancedTransacoes.slice(
       startIndex,
       startIndex + transacoesPorPagina,
-    )
-  }, [enhancedTransacoes, currentPage])
+    );
+  }, [enhancedTransacoes, currentPage]);
 
   return (
     <div className="flex min-h-screen">
@@ -248,7 +248,7 @@ export function Transacoes() {
             </div>
             <div
               className={`flex items-center space-x-1 p-4 bg-white rounded shadow font-bold ${
-                summary.total >= 0 ? 'text-green-500' : 'text-red-500'
+                summary.total >= 0 ? "text-green-500" : "text-red-500"
               }`}
             >
               <CurrencyDollar size={24} />
@@ -267,7 +267,7 @@ export function Transacoes() {
             </button>
             <div className="flex items-center space-x-2">
               <h2 className="text-xl font-semibold">
-                {format(dataAtual, 'MMMM yyyy', { locale: ptBR }).replace(
+                {format(dataAtual, "MMMM yyyy", { locale: ptBR }).replace(
                   /^\w/,
                   (c) => c.toUpperCase(),
                 )}
@@ -305,18 +305,18 @@ export function Transacoes() {
               </thead>
               <tbody>
                 {paginatedTransacoes.map((transacao) => {
-                  const isTotal = transacao.id.startsWith('total-')
+                  const isTotal = transacao.id.startsWith("total-");
                   return (
                     <tr
                       key={transacao.id}
-                      className={isTotal ? 'bg-gray-100' : ''}
+                      className={isTotal ? "bg-gray-100" : ""}
                     >
                       <td className="p-4">{transacao.descricao}</td>
                       <td
-                        className={`p-4 ${transacao.tipo === 'entrada' ? 'text-green-500' : 'text-red-500'}`}
+                        className={`p-4 ${transacao.tipo === "entrada" ? "text-green-500" : "text-red-500"}`}
                       >
                         <div className="flex items-center space-x-1">
-                          {transacao.tipo === 'entrada' ? (
+                          {transacao.tipo === "entrada" ? (
                             <ArrowCircleUp
                               size={24}
                               color="rgb(34 197 94)"
@@ -334,7 +334,7 @@ export function Transacoes() {
                       </td>
                       <td className="p-4">
                         {isTotal
-                          ? '-'
+                          ? "-"
                           : dateFormatter.format(new Date(transacao.dtCriacao))}
                       </td>
                       <td className="p-2 space-x-2">
@@ -354,7 +354,7 @@ export function Transacoes() {
                               className="text-red-500 hover:text-red-700"
                               onClick={() =>
                                 openModalExcluir(
-                                  'Deseja realmente excluir esta transação?',
+                                  "Deseja realmente excluir esta transação?",
                                   transacao.id,
                                 )
                               }
@@ -365,7 +365,7 @@ export function Transacoes() {
                         )}
                       </td>
                     </tr>
-                  )
+                  );
                 })}
               </tbody>
             </table>
@@ -393,5 +393,5 @@ export function Transacoes() {
         />
       )}
     </div>
-  )
+  );
 }

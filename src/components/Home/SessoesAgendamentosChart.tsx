@@ -1,4 +1,4 @@
-import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts'
+import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 
 import {
   Card,
@@ -7,7 +7,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
+} from "@/components/ui/card";
 import {
   type ChartConfig,
   ChartContainer,
@@ -15,59 +15,59 @@ import {
   ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
-} from '@/components/ui/chart'
-import { useMemo } from 'react'
-import { format, isSameMonth, subMonths } from 'date-fns'
-import { useSelector } from 'react-redux'
-import type { RootState } from '@/store/store'
-import { ptBR } from 'date-fns/locale'
-import { Calendar } from '@phosphor-icons/react'
+} from "@/components/ui/chart";
+import { useMemo } from "react";
+import { format, isSameMonth, subMonths } from "date-fns";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/store/store";
+import { ptBR } from "date-fns/locale";
+import { Calendar } from "@phosphor-icons/react";
 
 const chartConfig = {
   agendamentos: {
-    label: 'Agendamentos',
-    color: '#C3586A',
+    label: "Agendamentos",
+    color: "#C3586A",
   },
   sessoes: {
-    label: 'Sessões',
-    color: '#3395AE',
+    label: "Sessões",
+    color: "#3395AE",
   },
-} satisfies ChartConfig
+} satisfies ChartConfig;
 
 export function SessoesAgendamentosChart() {
   // Generate last 6 months array
   const monthsArray = useMemo(() => {
-    const months = []
-    const now = new Date()
+    const months = [];
+    const now = new Date();
     for (let i = 5; i >= 0; i--) {
-      months.push(subMonths(now, i))
+      months.push(subMonths(now, i));
     }
-    return months
-  }, [])
+    return months;
+  }, []);
 
   const agendamentos = useSelector(
     (state: RootState) => state.agendamentos.data,
-  )
-  const sessoes = useSelector((state: RootState) => state.sessoes.data)
+  );
+  const sessoes = useSelector((state: RootState) => state.sessoes.data);
 
   // Calculate data for each month
   const chartData = useMemo(() => {
     return monthsArray.map((date) => {
       const agendamentosNoMes = agendamentos.filter((agendamento) =>
         isSameMonth(new Date(agendamento.dataAgendamento), date),
-      ).length
+      ).length;
 
       const sessoesNoMes = sessoes.filter((sessao) =>
         isSameMonth(new Date(sessao.dtSessao1), date),
-      ).length
+      ).length;
 
       return {
-        month: format(date, 'MMM', { locale: ptBR }).toUpperCase(),
+        month: format(date, "MMM", { locale: ptBR }).toUpperCase(),
         agendamentos: agendamentosNoMes,
         sessoes: sessoesNoMes,
-      }
-    })
-  }, [agendamentos, sessoes, monthsArray])
+      };
+    });
+  }, [agendamentos, sessoes, monthsArray]);
 
   // Calculate totals
   const totals = useMemo(() => {
@@ -77,8 +77,8 @@ export function SessoesAgendamentosChart() {
         sessoes: acc.sessoes + curr.sessoes,
       }),
       { agendamentos: 0, sessoes: 0 },
-    )
-  }, [chartData])
+    );
+  }, [chartData]);
 
   return (
     <Card>
@@ -88,16 +88,16 @@ export function SessoesAgendamentosChart() {
           <p className="font-semibold">Agendamentos x Sessões</p>
         </CardTitle>
         <CardDescription>
-          {format(monthsArray[0], 'MMMM', { locale: ptBR })
+          {format(monthsArray[0], "MMMM", { locale: ptBR })
             .charAt(0)
             .toUpperCase() +
-            format(monthsArray[0], 'MMMM', { locale: ptBR }).slice(1)}{' '}
-          -{' '}
-          {format(monthsArray[5], 'MMMM', { locale: ptBR })
+            format(monthsArray[0], "MMMM", { locale: ptBR }).slice(1)}{" "}
+          -{" "}
+          {format(monthsArray[5], "MMMM", { locale: ptBR })
             .charAt(0)
             .toLocaleUpperCase() +
-            format(monthsArray[5], 'MMMM', { locale: ptBR }).slice(1)}{' '}
-          {format(monthsArray[5], 'yyyy')}
+            format(monthsArray[5], "MMMM", { locale: ptBR }).slice(1)}{" "}
+          {format(monthsArray[5], "yyyy")}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -105,7 +105,7 @@ export function SessoesAgendamentosChart() {
           <p className="text-4xl">
             <span className="text-rosa font-semibold">
               {totals.agendamentos}
-            </span>{' '}
+            </span>{" "}
             x <span className="text-azul font-semibold">{totals.sessoes}</span>
           </p>
         </div>
@@ -155,5 +155,5 @@ export function SessoesAgendamentosChart() {
         </div>
       </CardFooter>
     </Card>
-  )
+  );
 }

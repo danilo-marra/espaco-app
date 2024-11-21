@@ -5,22 +5,22 @@ import {
   User,
   Users,
   UsersThree,
-} from '@phosphor-icons/react'
-import { useEffect, useMemo, useState } from 'react'
-import { useModal } from '../../hooks/useModal'
-import { useSelector, useDispatch } from 'react-redux'
-import { NovoTerapeutaModal } from '../../components/Terapeuta/NovoTerapeutaModal'
-import { EditarTerapeutaModal } from '../../components/Terapeuta/EditarTerapeutaModal'
-import { ExcluirModal } from '../../components/ExcluirModal'
-import Pagination from '../../components/Pagination'
-import type { Terapeuta } from '../../tipos'
-import * as Dialog from '@radix-ui/react-dialog'
-import type { RootState, AppDispatch } from '../../store/store'
-import { deleteTerapeuta, fetchTerapeutas } from '../../store/terapeutasSlice'
-import { fetchPacientes } from '../../store/pacientesSlice'
-import { dateFormatter } from '../../utils/formatter'
+} from "@phosphor-icons/react";
+import * as Dialog from "@radix-ui/react-dialog";
+import { useEffect, useMemo, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { ExcluirModal } from "../../components/ExcluirModal";
+import Pagination from "../../components/Pagination";
+import { EditarTerapeutaModal } from "../../components/Terapeuta/EditarTerapeutaModal";
+import { NovoTerapeutaModal } from "../../components/Terapeuta/NovoTerapeutaModal";
+import { useModal } from "../../hooks/useModal";
+import { fetchPacientes } from "../../store/pacientesSlice";
+import type { AppDispatch, RootState } from "../../store/store";
+import { deleteTerapeuta, fetchTerapeutas } from "../../store/terapeutasSlice";
+import type { Terapeuta } from "../../tipos";
+import { dateFormatter } from "../../utils/formatter";
 
-const TERAPEUTAS_PER_PAGE = 10
+const TERAPEUTAS_PER_PAGE = 10;
 
 const filterTerapeutas = (
   terapeutas: Terapeuta[],
@@ -28,27 +28,27 @@ const filterTerapeutas = (
 ): Terapeuta[] => {
   return terapeutas.filter((terapeuta) => {
     const matchesTerapeuta =
-      selectedTerapeuta === 'Todos' || terapeuta.id === selectedTerapeuta
+      selectedTerapeuta === "Todos" || terapeuta.id === selectedTerapeuta;
 
-    return matchesTerapeuta
-  })
-}
+    return matchesTerapeuta;
+  });
+};
 
 export function Terapeutas() {
-  const dispatch = useDispatch<AppDispatch>()
-  const terapeutas = useSelector((state: RootState) => state.terapeutas.data)
-  const pacientes = useSelector((state: RootState) => state.pacientes.data)
+  const dispatch = useDispatch<AppDispatch>();
+  const terapeutas = useSelector((state: RootState) => state.terapeutas.data);
+  const pacientes = useSelector((state: RootState) => state.pacientes.data);
 
   // Estados
-  const [currentPage, setCurrentPage] = useState(1)
-  const [selectedTerapeuta, setSelectedTerapeuta] = useState('Todos')
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedTerapeuta, setSelectedTerapeuta] = useState("Todos");
   const [terapeutaEditando, setTerapeutaEditando] = useState<Terapeuta | null>(
     null,
-  )
+  );
   const [terapeutaParaExcluir, setTerapeutaParaExcluir] = useState<
     string | null
-  >(null)
-  const [isSuccess, setIsSuccess] = useState(false)
+  >(null);
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const {
     isModalOpen,
@@ -58,63 +58,63 @@ export function Terapeutas() {
     closeModal,
     openEditModal,
     closeEditModal,
-  } = useModal()
+  } = useModal();
 
   // Dados filtrados e paginação usando useMemo
   const filteredTerapeutas = useMemo(
     () => filterTerapeutas(terapeutas, selectedTerapeuta),
     [terapeutas, selectedTerapeuta],
-  )
+  );
 
   const paginatedTerapeutas = useMemo(() => {
-    const startIndex = (currentPage - 1) * TERAPEUTAS_PER_PAGE
+    const startIndex = (currentPage - 1) * TERAPEUTAS_PER_PAGE;
     return filteredTerapeutas.slice(
       startIndex,
       startIndex + TERAPEUTAS_PER_PAGE,
-    )
-  }, [filteredTerapeutas, currentPage])
+    );
+  }, [filteredTerapeutas, currentPage]);
 
-  const totalPages = Math.ceil(filteredTerapeutas.length / TERAPEUTAS_PER_PAGE)
+  const totalPages = Math.ceil(filteredTerapeutas.length / TERAPEUTAS_PER_PAGE);
 
   // Handlers
   const handleTerapeutaChange = (
     event: React.ChangeEvent<HTMLSelectElement>,
   ) => {
-    setSelectedTerapeuta(event.target.value)
-    setCurrentPage(1)
-  }
+    setSelectedTerapeuta(event.target.value);
+    setCurrentPage(1);
+  };
 
   const handleEditTerapeuta = (terapeuta: Terapeuta) => {
-    setTerapeutaEditando(terapeuta)
-    openEditModal()
-  }
+    setTerapeutaEditando(terapeuta);
+    openEditModal();
+  };
 
   const handleDeleteTerapeuta = async () => {
-    if (!terapeutaParaExcluir) return
+    if (!terapeutaParaExcluir) return;
 
     try {
-      await dispatch(deleteTerapeuta(terapeutaParaExcluir)).unwrap()
-      openModal('Terapeuta excluído com sucesso!')
-      setIsSuccess(true)
+      await dispatch(deleteTerapeuta(terapeutaParaExcluir)).unwrap();
+      openModal("Terapeuta excluído com sucesso!");
+      setIsSuccess(true);
     } catch (error) {
-      openModal('Erro ao excluir terapeuta!')
-      console.error('Erro ao excluir terapeuta:', error)
+      openModal("Erro ao excluir terapeuta!");
+      console.error("Erro ao excluir terapeuta:", error);
     } finally {
-      setTerapeutaParaExcluir(null)
+      setTerapeutaParaExcluir(null);
     }
-  }
+  };
 
   const openModalExcluir = (message: string, terapeutaId: string) => {
-    openModal(message)
-    setTerapeutaParaExcluir(terapeutaId)
-    setIsSuccess(false)
-  }
+    openModal(message);
+    setTerapeutaParaExcluir(terapeutaId);
+    setIsSuccess(false);
+  };
 
   // Effect para carregar dados iniciais
   useEffect(() => {
-    dispatch(fetchTerapeutas())
-    dispatch(fetchPacientes())
-  }, [dispatch])
+    dispatch(fetchTerapeutas());
+    dispatch(fetchPacientes());
+  }, [dispatch]);
 
   return (
     <div className="flex min-h-screen">
@@ -226,7 +226,7 @@ export function Terapeutas() {
                       className="text-red-500 hover:text-red-700"
                       onClick={() =>
                         openModalExcluir(
-                          'Deseja realmente excluir este terapeuta?',
+                          "Deseja realmente excluir este terapeuta?",
                           terapeuta.id,
                         )
                       }
@@ -265,5 +265,5 @@ export function Terapeutas() {
         )}
       </main>
     </div>
-  )
+  );
 }

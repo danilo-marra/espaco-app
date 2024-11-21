@@ -1,32 +1,32 @@
-import { X } from '@phosphor-icons/react'
-import * as Dialog from '@radix-ui/react-dialog'
-import * as RadioGroup from '@radix-ui/react-radio-group'
-import { Controller, useForm } from 'react-hook-form'
-import * as z from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
-import { useState } from 'react'
-import DatePicker from 'react-datepicker'
-import 'react-datepicker/dist/react-datepicker.css'
-import { ptBR } from 'date-fns/locale'
-import { v4 as uuidv4 } from 'uuid'
-import { useDispatch } from 'react-redux'
-import { addTransacao } from '../../store/transacoesSlice'
-import type { AppDispatch } from '../../store/store'
+import { X } from "@phosphor-icons/react";
+import * as Dialog from "@radix-ui/react-dialog";
+import * as RadioGroup from "@radix-ui/react-radio-group";
+import { Controller, useForm } from "react-hook-form";
+import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { useState } from "react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { ptBR } from "date-fns/locale";
+import { v4 as uuidv4 } from "uuid";
+import { useDispatch } from "react-redux";
+import { addTransacao } from "../../store/transacoesSlice";
+import type { AppDispatch } from "../../store/store";
 
 const NovaTransacaoFormSchema = z.object({
   descricao: z.string(),
   valor: z.number(),
-  tipo: z.enum(['entrada', 'saida']),
+  tipo: z.enum(["entrada", "saida"]),
   data: z.date(),
-})
+});
 
-type NovaTransacaoFormInputs = z.infer<typeof NovaTransacaoFormSchema>
+type NovaTransacaoFormInputs = z.infer<typeof NovaTransacaoFormSchema>;
 
 export function NovaTransacaoModal() {
-  const dispatch = useDispatch<AppDispatch>()
-  const [mensagemSucesso, setMensagemSucesso] = useState('')
-  const [mensagemErro, setMensagemErro] = useState('')
+  const dispatch = useDispatch<AppDispatch>();
+  const [mensagemSucesso, setMensagemSucesso] = useState("");
+  const [mensagemErro, setMensagemErro] = useState("");
   const {
     control,
     register,
@@ -35,12 +35,12 @@ export function NovaTransacaoModal() {
     formState: { isSubmitting },
   } = useForm<NovaTransacaoFormInputs>({
     resolver: zodResolver(NovaTransacaoFormSchema),
-  })
+  });
 
   async function handleCreateNewTransacao(data: NovaTransacaoFormInputs) {
     try {
       // Simula um atraso de 2 segundos
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       const novaTransacao = {
         id: uuidv4(),
@@ -48,29 +48,29 @@ export function NovaTransacaoModal() {
         tipo: data.tipo,
         valor: data.valor,
         dtCriacao: data.data,
-      }
+      };
 
       // Faz o dispatch do thunk addTransacao
-      await dispatch(addTransacao(novaTransacao)).unwrap()
+      await dispatch(addTransacao(novaTransacao)).unwrap();
 
       // Limpa os dados do formulário
-      reset()
+      reset();
 
       // Define a mensagem de sucesso
-      setMensagemSucesso('Transação criada com sucesso!')
-      setMensagemErro('') // Limpa a mensagem de erro, se houver
+      setMensagemSucesso("Transação criada com sucesso!");
+      setMensagemErro(""); // Limpa a mensagem de erro, se houver
 
-      console.log('Transação criada:', data)
+      console.log("Transação criada:", data);
     } catch (error) {
-      console.error('Erro ao criar transação:', error)
-      setMensagemErro('Erro ao criar transação. Tente novamente.')
-      setMensagemSucesso('') // Limpa a mensagem de sucesso, se houver
+      console.error("Erro ao criar transação:", error);
+      setMensagemErro("Erro ao criar transação. Tente novamente.");
+      setMensagemSucesso(""); // Limpa a mensagem de sucesso, se houver
     }
   }
 
   function handleFocus() {
-    setMensagemSucesso('')
-    setMensagemErro('')
+    setMensagemSucesso("");
+    setMensagemErro("");
   }
 
   return (
@@ -91,7 +91,7 @@ export function NovaTransacaoModal() {
               id="descricao"
               placeholder="Descrição"
               required
-              {...register('descricao')}
+              {...register("descricao")}
               onFocus={handleFocus}
             />
             <input
@@ -101,7 +101,7 @@ export function NovaTransacaoModal() {
               id="valor"
               placeholder="Valor"
               required
-              {...register('valor', { valueAsNumber: true })}
+              {...register("valor", { valueAsNumber: true })}
               onFocus={handleFocus}
             />
             <Controller
@@ -133,8 +133,8 @@ export function NovaTransacaoModal() {
               <RadioGroup.Root
                 className="flex items-center justify-evenly"
                 onValueChange={(value) => {
-                  field.onChange(value)
-                  handleFocus()
+                  field.onChange(value);
+                  handleFocus();
                 }}
                 value={field.value}
               >
@@ -176,12 +176,12 @@ export function NovaTransacaoModal() {
           <div className="mt-[25px] flex justify-end">
             <button
               className={`bg-azul text-branco hover:bg-azul/75 focus:shadow-azul inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] font-medium leading-none focus:shadow-[0_0_0_2px] focus:outline-none ${
-                isSubmitting ? 'cursor-not-allowed' : ''
+                isSubmitting ? "cursor-not-allowed" : ""
               }`}
               type="submit"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Carregando...' : 'Confirmar'}
+              {isSubmitting ? "Carregando..." : "Confirmar"}
             </button>
           </div>
         </form>
@@ -201,5 +201,5 @@ export function NovaTransacaoModal() {
         </Dialog.Close>
       </Dialog.Content>
     </Dialog.Portal>
-  )
+  );
 }

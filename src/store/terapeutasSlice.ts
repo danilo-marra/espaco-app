@@ -2,38 +2,38 @@ import {
   createSlice,
   createAsyncThunk,
   type PayloadAction,
-} from '@reduxjs/toolkit'
-import axios from 'axios'
-import type { Sessao, Paciente, Terapeuta } from '../tipos'
-import type { TerapeutasState } from './store'
-import httpRequest, { API_URL } from '../utils/api'
+} from "@reduxjs/toolkit";
+import axios from "axios";
+import type { Sessao, Paciente, Terapeuta } from "../tipos";
+import type { TerapeutasState } from "./store";
+import httpRequest, { API_URL } from "../utils/api";
 
 // Estado inicial
 const initialState: TerapeutasState = {
   data: [],
   loading: false,
   error: null,
-}
+};
 
 // Thunk para buscar terapeutas
 export const fetchTerapeutas = createAsyncThunk<Terapeuta[]>(
-  'terapeutas/fetchTerapeuta',
-  async () => httpRequest<Terapeuta[]>(`${API_URL}/terapeutas`, 'GET'),
-)
+  "terapeutas/fetchTerapeuta",
+  async () => httpRequest<Terapeuta[]>(`${API_URL}/terapeutas`, "GET"),
+);
 
 // Thunk para adicionar terapeuta
 export const addTerapeuta = createAsyncThunk<Terapeuta, Terapeuta>(
-  'terapeutas/addTerapeuta',
+  "terapeutas/addTerapeuta",
   async (terapeuta) => {
     const response = await httpRequest<Terapeuta>(
       `${API_URL}/terapeutas`,
-      'POST',
+      "POST",
       terapeuta,
-    )
+    );
     // console.log('Terapeuta adicionado:', terapeuta)
-    return response
+    return response;
   },
-)
+);
 
 // Thunk para editar terapeuta
 export const updateTerapeuta = createAsyncThunk<
@@ -41,27 +41,27 @@ export const updateTerapeuta = createAsyncThunk<
   Terapeuta,
   { rejectValue: string }
 >(
-  'terapeutas/updateTerapeuta',
+  "terapeutas/updateTerapeuta",
   async (terapeuta, { dispatch, rejectWithValue }) => {
     try {
       const updatedTerapeuta = await httpRequest<Terapeuta>(
         `${API_URL}/terapeutas/${terapeuta.id}`,
-        'PUT',
+        "PUT",
         terapeuta,
-      )
-      await dispatch(updatePacientesByTerapeuta(updatedTerapeuta))
-      await dispatch(updateSessoesByTerapeuta(updatedTerapeuta))
+      );
+      await dispatch(updatePacientesByTerapeuta(updatedTerapeuta));
+      await dispatch(updateSessoesByTerapeuta(updatedTerapeuta));
 
-      return updatedTerapeuta
+      return updatedTerapeuta;
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        console.error('Erro ao atualizar terapeuta:', error.message)
-        return rejectWithValue(error.message)
+        console.error("Erro ao atualizar terapeuta:", error.message);
+        return rejectWithValue(error.message);
       }
-      return rejectWithValue('Erro desconhecido')
+      return rejectWithValue("Erro desconhecido");
     }
   },
-)
+);
 
 // Thunk para atualizar pacientes relacionados
 export const updatePacientesByTerapeuta = createAsyncThunk<
@@ -69,18 +69,18 @@ export const updatePacientesByTerapeuta = createAsyncThunk<
   Terapeuta,
   { rejectValue: string }
 >(
-  'pacientes/updatePacientesByTerapeuta',
+  "pacientes/updatePacientesByTerapeuta",
   async (terapeuta: Terapeuta, { rejectWithValue }): Promise<Paciente[]> => {
     try {
       const pacientes = await httpRequest<Paciente[]>(
         `${API_URL}/pacientes`,
-        'GET',
-      )
+        "GET",
+      );
 
       // Filtrar apenas os pacientes que têm o terapeuta específico
       const pacientesRelacionados = pacientes.filter(
         (paciente) => paciente.terapeutaInfo.id === terapeuta.id,
-      )
+      );
 
       // Atualizar os pacientes relacionados
       const pacientesAtualizados = pacientesRelacionados.map((paciente) => ({
@@ -89,32 +89,32 @@ export const updatePacientesByTerapeuta = createAsyncThunk<
           ...paciente.terapeutaInfo,
           nomeTerapeuta: terapeuta.nomeTerapeuta,
         },
-      }))
+      }));
 
       await Promise.all(
         pacientesAtualizados.map((paciente) =>
           httpRequest<Paciente>(
             `${API_URL}/pacientes/${paciente.id}`,
-            'PUT',
+            "PUT",
             paciente,
           ),
         ),
-      )
+      );
 
       console.log(
-        'Pacientes que foram afetados pela atualização',
+        "Pacientes que foram afetados pela atualização",
         pacientesAtualizados,
-      )
-      return pacientesAtualizados
+      );
+      return pacientesAtualizados;
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        console.error('Erro ao atualizar pacientes:', error.message)
-        return Promise.reject(rejectWithValue(error.message))
+        console.error("Erro ao atualizar pacientes:", error.message);
+        return Promise.reject(rejectWithValue(error.message));
       }
-      return Promise.reject(rejectWithValue('Erro desconhecido'))
+      return Promise.reject(rejectWithValue("Erro desconhecido"));
     }
   },
-)
+);
 
 // Thunk para atualizar sessões relacionadas
 export const updateSessoesByTerapeuta = createAsyncThunk<
@@ -122,15 +122,15 @@ export const updateSessoesByTerapeuta = createAsyncThunk<
   Terapeuta,
   { rejectValue: string }
 >(
-  'sessoes/updateSessoesByTerapeuta',
+  "sessoes/updateSessoesByTerapeuta",
   async (terapeuta: Terapeuta, { rejectWithValue }): Promise<Sessao[]> => {
     try {
-      const sessoes = await httpRequest<Sessao[]>(`${API_URL}/sessoes`, 'GET')
+      const sessoes = await httpRequest<Sessao[]>(`${API_URL}/sessoes`, "GET");
 
       // Filtrar apenas as sessões que têm o terapeuta específico
       const sessoesRelacionadas = sessoes.filter(
         (sessao) => sessao.terapeutaInfo.id === terapeuta.id,
-      )
+      );
 
       const sessoesAtualizadas = sessoesRelacionadas.map((sessao) => {
         return {
@@ -140,69 +140,69 @@ export const updateSessoesByTerapeuta = createAsyncThunk<
             nomeTerapeuta: terapeuta.nomeTerapeuta,
             dtEntrada: terapeuta.dtEntrada,
           },
-        }
-      })
+        };
+      });
 
       await Promise.all(
         sessoesAtualizadas.map((sessao) =>
-          httpRequest<Sessao>(`${API_URL}/sessoes/${sessao.id}`, 'PUT', sessao),
+          httpRequest<Sessao>(`${API_URL}/sessoes/${sessao.id}`, "PUT", sessao),
         ),
-      )
+      );
 
       console.log(
-        'Sessões que foram afetadas pela atualização:',
+        "Sessões que foram afetadas pela atualização:",
         sessoesAtualizadas,
-      )
+      );
 
-      return sessoesAtualizadas
+      return sessoesAtualizadas;
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        console.error('Erro ao atualizar sessões:', error.message)
-        return Promise.reject(rejectWithValue(error.message))
+        console.error("Erro ao atualizar sessões:", error.message);
+        return Promise.reject(rejectWithValue(error.message));
       }
-      return Promise.reject(rejectWithValue('Erro desconhecido'))
+      return Promise.reject(rejectWithValue("Erro desconhecido"));
     }
   },
-)
+);
 
 // Thunk para excluir terapeuta
 export const deleteTerapeuta = createAsyncThunk<string, string>(
-  'terapeutas/deleteTerapeuta',
+  "terapeutas/deleteTerapeuta",
   async (id) => {
-    await httpRequest<void>(`${API_URL}/terapeutas/${id}`, 'DELETE')
-    return id
+    await httpRequest<void>(`${API_URL}/terapeutas/${id}`, "DELETE");
+    return id;
   },
-)
+);
 
 // Slice de Terapeutas
 const terapeutasSlice = createSlice({
-  name: 'terapeutas',
+  name: "terapeutas",
   initialState,
   reducers: {
     updateTerapeuta: (state, action: PayloadAction<Terapeuta>) => {
-      const index = state.data.findIndex((t) => t.id === action.payload.id)
+      const index = state.data.findIndex((t) => t.id === action.payload.id);
       if (index !== -1) {
-        state.data[index] = action.payload // Atualiza todo o objeto, incluindo 'foto'
+        state.data[index] = action.payload; // Atualiza todo o objeto, incluindo 'foto'
       }
     },
   },
   extraReducers: (builder) => {
     builder
       .addCase(fetchTerapeutas.pending, (state) => {
-        state.loading = true
+        state.loading = true;
       })
       .addCase(fetchTerapeutas.fulfilled, (state, action) => {
-        state.loading = false
-        state.data = action.payload
+        state.loading = false;
+        state.data = action.payload;
       })
       .addCase(fetchTerapeutas.rejected, (state, action) => {
-        state.loading = false
-        state.error = action.error.message || 'Erro ao buscar terapeutas'
+        state.loading = false;
+        state.error = action.error.message || "Erro ao buscar terapeutas";
       })
       .addCase(
         addTerapeuta.fulfilled,
         (state, action: PayloadAction<Terapeuta>) => {
-          state.data.push(action.payload)
+          state.data.push(action.payload);
         },
       )
       .addCase(
@@ -210,7 +210,7 @@ const terapeutasSlice = createSlice({
         (state, action: PayloadAction<Terapeuta>) => {
           state.data = state.data.map((terapeuta) =>
             terapeuta.id === action.payload.id ? action.payload : terapeuta,
-          )
+          );
         },
       )
       .addCase(
@@ -218,10 +218,10 @@ const terapeutasSlice = createSlice({
         (state, action: PayloadAction<string>) => {
           state.data = state.data.filter(
             (terapeuta) => terapeuta.id !== action.payload,
-          )
+          );
         },
-      )
+      );
   },
-})
+});
 
-export default terapeutasSlice.reducer
+export default terapeutasSlice.reducer;

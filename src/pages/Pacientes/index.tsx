@@ -6,24 +6,24 @@ import {
   User,
   Users,
   UsersThree,
-} from '@phosphor-icons/react'
-import { useEffect, useMemo, useState } from 'react'
-import { dateFormatter } from '../../utils/formatter'
-import { calcularIdade } from '../../utils/caculateAge'
-import Pagination from '../../components/Pagination'
-import * as Dialog from '@radix-ui/react-dialog'
-import { NovoPacienteModal } from '../../components/Paciente/NovoPacienteModal'
-import type { Paciente } from '../../tipos'
-import { EditarPacienteModal } from '../../components/Paciente/EditarPacienteModal'
-import { ExcluirModal } from '../../components/ExcluirModal'
-import { useModal } from '../../hooks/useModal'
-import { useSelector, useDispatch } from 'react-redux'
-import type { RootState, AppDispatch } from '../../store/store'
-import { deletePaciente, fetchPacientes } from '../../store/pacientesSlice'
-import { fetchTerapeutas } from '../../store/terapeutasSlice'
-import { isBirthday } from '../../utils/dateUtils'
+} from "@phosphor-icons/react";
+import * as Dialog from "@radix-ui/react-dialog";
+import { useEffect, useMemo, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { ExcluirModal } from "../../components/ExcluirModal";
+import { EditarPacienteModal } from "../../components/Paciente/EditarPacienteModal";
+import { NovoPacienteModal } from "../../components/Paciente/NovoPacienteModal";
+import Pagination from "../../components/Pagination";
+import { useModal } from "../../hooks/useModal";
+import { deletePaciente, fetchPacientes } from "../../store/pacientesSlice";
+import type { AppDispatch, RootState } from "../../store/store";
+import { fetchTerapeutas } from "../../store/terapeutasSlice";
+import type { Paciente } from "../../tipos";
+import { calcularIdade } from "../../utils/caculateAge";
+import { isBirthday } from "../../utils/dateUtils";
+import { dateFormatter } from "../../utils/formatter";
 
-const PACIENTES_PER_PAGE = 10
+const PACIENTES_PER_PAGE = 10;
 
 const filterPacientes = (
   pacientes: Paciente[],
@@ -33,31 +33,31 @@ const filterPacientes = (
   return pacientes.filter((paciente) => {
     const matchesSearch = paciente.nomePaciente
       .toLowerCase()
-      .includes(searchQuery.toLowerCase())
+      .includes(searchQuery.toLowerCase());
     const matchesTerapeuta =
-      selectedTerapeuta === 'Todos' ||
-      paciente.terapeutaInfo.id === selectedTerapeuta
+      selectedTerapeuta === "Todos" ||
+      paciente.terapeutaInfo.id === selectedTerapeuta;
 
-    return matchesSearch && matchesTerapeuta
-  })
-}
+    return matchesSearch && matchesTerapeuta;
+  });
+};
 
 export function Pacientes() {
-  const dispatch = useDispatch<AppDispatch>()
-  const pacientes = useSelector((state: RootState) => state.pacientes.data)
-  const terapeutas = useSelector((state: RootState) => state.terapeutas.data)
+  const dispatch = useDispatch<AppDispatch>();
+  const pacientes = useSelector((state: RootState) => state.pacientes.data);
+  const terapeutas = useSelector((state: RootState) => state.terapeutas.data);
 
   // Estados
-  const [searchQuery, setSearchQuery] = useState('')
-  const [currentPage, setCurrentPage] = useState(1)
-  const [selectedTerapeuta, setSelectedTerapeuta] = useState('Todos')
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedTerapeuta, setSelectedTerapeuta] = useState("Todos");
   const [pacienteEditando, setPacienteEditando] = useState<Paciente | null>(
     null,
-  )
+  );
   const [pacienteParaExcluir, setPacienteParaExcluir] = useState<string | null>(
     null,
-  )
-  const [isSuccess, setIsSuccess] = useState(false)
+  );
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const {
     isModalOpen,
@@ -67,65 +67,65 @@ export function Pacientes() {
     closeModal,
     openEditModal,
     closeEditModal,
-  } = useModal()
+  } = useModal();
 
   // Dados filtrados e paginação usando useMemo
   const filteredPacientes = useMemo(
     () => filterPacientes(pacientes, searchQuery, selectedTerapeuta),
     [pacientes, searchQuery, selectedTerapeuta],
-  )
+  );
 
   const paginatedPacientes = useMemo(() => {
-    const startIndex = (currentPage - 1) * PACIENTES_PER_PAGE
-    return filteredPacientes.slice(startIndex, startIndex + PACIENTES_PER_PAGE)
-  }, [filteredPacientes, currentPage])
+    const startIndex = (currentPage - 1) * PACIENTES_PER_PAGE;
+    return filteredPacientes.slice(startIndex, startIndex + PACIENTES_PER_PAGE);
+  }, [filteredPacientes, currentPage]);
 
-  const totalPages = Math.ceil(filteredPacientes.length / PACIENTES_PER_PAGE)
+  const totalPages = Math.ceil(filteredPacientes.length / PACIENTES_PER_PAGE);
 
   // Handlers
   const handleTerapeutaChange = (
     event: React.ChangeEvent<HTMLSelectElement>,
   ) => {
-    setSelectedTerapeuta(event.target.value)
-    setCurrentPage(1)
-  }
+    setSelectedTerapeuta(event.target.value);
+    setCurrentPage(1);
+  };
 
   const handleSearchChange = (value: string) => {
-    setSearchQuery(value)
-    setCurrentPage(1)
-  }
+    setSearchQuery(value);
+    setCurrentPage(1);
+  };
 
   const handleEditPaciente = (paciente: Paciente) => {
-    setPacienteEditando(paciente)
-    openEditModal()
-  }
+    setPacienteEditando(paciente);
+    openEditModal();
+  };
 
   const handleDeletePaciente = async () => {
-    if (!pacienteParaExcluir) return
+    if (!pacienteParaExcluir) return;
 
     try {
-      await dispatch(deletePaciente(pacienteParaExcluir)).unwrap()
-      openModal('Paciente excluído com sucesso!')
-      setIsSuccess(true)
+      await dispatch(deletePaciente(pacienteParaExcluir)).unwrap();
+      openModal("Paciente excluído com sucesso!");
+      setIsSuccess(true);
     } catch (error) {
-      openModal('Erro ao excluir paciente!')
-      console.error('Erro ao excluir paciente:', error)
+      openModal("Erro ao excluir paciente!");
+      console.error("Erro ao excluir paciente:", error);
     } finally {
-      setPacienteParaExcluir(null)
+      setPacienteParaExcluir(null);
     }
-  }
+  };
 
   const openModalExcluir = (message: string, pacienteId: string) => {
-    openModal(message)
-    setPacienteParaExcluir(pacienteId)
-    setIsSuccess(false)
-  }
+    openModal(message);
+    setPacienteParaExcluir(pacienteId);
+    setIsSuccess(false);
+  };
 
   // Effect para carregar dados iniciais
   useEffect(() => {
-    dispatch(fetchPacientes())
-    dispatch(fetchTerapeutas())
-  }, [dispatch])
+    dispatch(fetchPacientes());
+    dispatch(fetchTerapeutas());
+  }, [dispatch]);
 
   return (
     <div className="flex min-h-screen">
@@ -213,8 +213,8 @@ export function Pacientes() {
             </thead>
             <tbody className="text-center">
               {paginatedPacientes.map((paciente) => {
-                const birthDate = new Date(paciente.dtNascimento)
-                const birthdayToday = isBirthday(new Date(), birthDate)
+                const birthDate = new Date(paciente.dtNascimento);
+                const birthdayToday = isBirthday(new Date(), birthDate);
 
                 return (
                   <tr key={paciente.id}>
@@ -232,7 +232,7 @@ export function Pacientes() {
                     </td>
                     <td className="p-4">{calcularIdade(birthDate)}</td>
                     <td className="p-4">
-                      {paciente.terapeutaInfo?.nomeTerapeuta || 'Sem Terapeuta'}
+                      {paciente.terapeutaInfo?.nomeTerapeuta || "Sem Terapeuta"}
                     </td>
                     <td className="p-4">{paciente.nomeResponsavel}</td>
                     <td className="p-4">{paciente.telefoneResponsavel}</td>
@@ -255,7 +255,7 @@ export function Pacientes() {
                         className="text-red-500 hover:text-red-700"
                         onClick={() =>
                           openModalExcluir(
-                            'Deseja realmente excluir este paciente?',
+                            "Deseja realmente excluir este paciente?",
                             paciente.id,
                           )
                         }
@@ -264,7 +264,7 @@ export function Pacientes() {
                       </button>
                     </td>
                   </tr>
-                )
+                );
               })}
             </tbody>
           </table>
@@ -295,5 +295,5 @@ export function Pacientes() {
         )}
       </main>
     </div>
-  )
+  );
 }

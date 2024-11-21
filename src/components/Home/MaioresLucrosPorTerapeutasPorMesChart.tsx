@@ -4,73 +4,73 @@ import {
   HandCoins,
   TrendUp,
   User,
-} from '@phosphor-icons/react'
+} from "@phosphor-icons/react";
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
-} from '../ui/card'
-import { Button } from '../ui/button'
-import { format } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
-import { useMemo, useState } from 'react'
+} from "../ui/card";
+import { Button } from "../ui/button";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { useMemo, useState } from "react";
 import {
   ChartContainer,
   ChartTooltipContent,
   type ChartConfig,
-} from '../ui/chart'
-import { Bar, BarChart, LabelList, Tooltip, XAxis, YAxis } from 'recharts'
-import { useSelector } from 'react-redux'
-import type { RootState } from '@/store/store'
-import { calculateRepasseInfo } from '@/utils/calculateRepasseInfo'
-import { priceFormatter } from '@/utils/formatter'
+} from "../ui/chart";
+import { Bar, BarChart, LabelList, Tooltip, XAxis, YAxis } from "recharts";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/store/store";
+import { calculateRepasseInfo } from "@/utils/calculateRepasseInfo";
+import { priceFormatter } from "@/utils/formatter";
 
 export function MaioresLucrosPorTerapeutasPorMesChart() {
-  const [selectedMonth, setSelectedMonth] = useState(new Date())
-  const sessoes = useSelector((state: RootState) => state.sessoes.data)
-  const terapeutas = useSelector((state: RootState) => state.terapeutas.data)
+  const [selectedMonth, setSelectedMonth] = useState(new Date());
+  const sessoes = useSelector((state: RootState) => state.sessoes.data);
+  const terapeutas = useSelector((state: RootState) => state.terapeutas.data);
 
   const handlePreviousMonth = () => {
-    setSelectedMonth((prev) => new Date(prev.setMonth(prev.getMonth() - 1)))
-  }
+    setSelectedMonth((prev) => new Date(prev.setMonth(prev.getMonth() - 1)));
+  };
 
   const handleNextMonth = () => {
-    setSelectedMonth((prev) => new Date(prev.setMonth(prev.getMonth() + 1)))
-  }
+    setSelectedMonth((prev) => new Date(prev.setMonth(prev.getMonth() + 1)));
+  };
 
   // Prepare chart data
   const chartData = useMemo(() => {
     // Filter sessions for the selected month
     const filteredSessoes = sessoes.filter((sessao) => {
-      const sessaoDate = new Date(sessao.dtSessao1)
+      const sessaoDate = new Date(sessao.dtSessao1);
       return (
         sessaoDate.getMonth() === selectedMonth.getMonth() &&
         sessaoDate.getFullYear() === selectedMonth.getFullYear()
-      )
-    })
+      );
+    });
 
     // Group sessions by therapist
     const terapeutaMap: {
       [key: string]: {
-        nome: string
-        atendimentos: number
-        receita: number
-        foto?: string
-      }
-    } = {}
+        nome: string;
+        atendimentos: number;
+        receita: number;
+        foto?: string;
+      };
+    } = {};
 
     for (const sessao of filteredSessoes) {
-      const therapistId = sessao.terapeutaInfo.id
+      const therapistId = sessao.terapeutaInfo.id;
       // Obtenha o terapeuta atualizado
-      const terapeuta = terapeutas.find((t) => t.id === therapistId)
-      if (!terapeuta) continue
-      const therapistName = sessao.terapeutaInfo.nomeTerapeuta
-      const therapistFoto = terapeuta.foto
+      const terapeuta = terapeutas.find((t) => t.id === therapistId);
+      if (!terapeuta) continue;
+      const therapistName = sessao.terapeutaInfo.nomeTerapeuta;
+      const therapistFoto = terapeuta.foto;
 
       // Calculate total value for the session
-      const { totalValue } = calculateRepasseInfo(sessao)
+      const { totalValue } = calculateRepasseInfo(sessao);
 
       if (!terapeutaMap[therapistId]) {
         terapeutaMap[therapistId] = {
@@ -78,7 +78,7 @@ export function MaioresLucrosPorTerapeutasPorMesChart() {
           foto: therapistFoto,
           atendimentos: 0,
           receita: 0,
-        }
+        };
       }
 
       // Assuming each valid date in sessao counts as one atendimento
@@ -89,31 +89,31 @@ export function MaioresLucrosPorTerapeutasPorMesChart() {
         sessao.dtSessao4,
         sessao.dtSessao5,
         sessao.dtSessao6,
-      ].filter(Boolean).length
+      ].filter(Boolean).length;
 
-      terapeutaMap[therapistId].atendimentos += validDatesCount
-      terapeutaMap[therapistId].receita += totalValue
+      terapeutaMap[therapistId].atendimentos += validDatesCount;
+      terapeutaMap[therapistId].receita += totalValue;
     }
 
     // Convert the map to an array
-    const dataArray = Object.values(terapeutaMap)
+    const dataArray = Object.values(terapeutaMap);
 
     // Sort the data by revenue
-    dataArray.sort((a, b) => b.receita - a.receita)
+    dataArray.sort((a, b) => b.receita - a.receita);
 
-    return dataArray
-  }, [sessoes, selectedMonth, terapeutas])
+    return dataArray;
+  }, [sessoes, selectedMonth, terapeutas]);
 
   const renderCustomYAxisTick = (props: {
-    x: number
-    y: number
-    payload: { value: string }
+    x: number;
+    y: number;
+    payload: { value: string };
   }) => {
-    const { x, y, payload } = props
-    const data = chartData.find((item) => item.nome === payload.value)
+    const { x, y, payload } = props;
+    const data = chartData.find((item) => item.nome === payload.value);
 
     if (!data || x === undefined || y === undefined) {
-      return <g />
+      return <g />;
     }
 
     return (
@@ -135,21 +135,21 @@ export function MaioresLucrosPorTerapeutasPorMesChart() {
           {data.nome}
         </text>
       </g>
-    )
-  }
+    );
+  };
 
-  const totalReceita = chartData.reduce((acc, curr) => acc + curr.receita, 0)
+  const totalReceita = chartData.reduce((acc, curr) => acc + curr.receita, 0);
   const totalAtendimentos = chartData.reduce(
     (acc, curr) => acc + curr.atendimentos,
     0,
-  )
+  );
 
   const chartConfig = {
     atendimentos: {
-      label: 'Atendimentos',
-      color: '#3395AE',
+      label: "Atendimentos",
+      color: "#3395AE",
     },
-  } satisfies ChartConfig
+  } satisfies ChartConfig;
 
   return (
     <Card>
@@ -169,10 +169,10 @@ export function MaioresLucrosPorTerapeutasPorMesChart() {
               <CaretLeft className="h-4 w-4" />
             </Button>
             <div className="w-[120px] text-center font-medium">
-              {format(selectedMonth, 'MMMM', { locale: ptBR })
+              {format(selectedMonth, "MMMM", { locale: ptBR })
                 .charAt(0)
                 .toUpperCase() +
-                format(selectedMonth, 'MMMM', { locale: ptBR }).slice(1)}
+                format(selectedMonth, "MMMM", { locale: ptBR }).slice(1)}
             </div>
             <Button
               variant="outline"
@@ -208,11 +208,11 @@ export function MaioresLucrosPorTerapeutasPorMesChart() {
               tick={renderCustomYAxisTick}
             />
             <Tooltip
-              cursor={{ fill: 'transparent' }}
+              cursor={{ fill: "transparent" }}
               content={
                 <ChartTooltipContent
                   formatter={(value: string | number | (string | number)[]) =>
-                    `Atendimentos: ${Array.isArray(value) ? value.join(', ') : value}`
+                    `Atendimentos: ${Array.isArray(value) ? value.join(", ") : value}`
                   }
                 />
               }
@@ -235,7 +235,7 @@ export function MaioresLucrosPorTerapeutasPorMesChart() {
       </CardContent>
       <CardFooter className="flex-col items-start gap-2 text-sm">
         <div className="flex gap-2 font-medium leading-none">
-          Receita total gerada neste mês: {priceFormatter.format(totalReceita)}{' '}
+          Receita total gerada neste mês: {priceFormatter.format(totalReceita)}{" "}
           <TrendUp className="h-4 w-4" />
         </div>
         <div className="leading-none text-muted-foreground">
@@ -243,5 +243,5 @@ export function MaioresLucrosPorTerapeutasPorMesChart() {
         </div>
       </CardFooter>
     </Card>
-  )
+  );
 }

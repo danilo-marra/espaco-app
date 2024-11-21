@@ -1,39 +1,39 @@
-import { X } from '@phosphor-icons/react'
-import * as Dialog from '@radix-ui/react-dialog'
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
-import { z } from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
-import type { AppDispatch } from '../../store/store'
-import { useDispatch } from 'react-redux'
-import { useState } from 'react'
-import { Controller, useForm } from 'react-hook-form'
-import { v4 as uuidv4 } from 'uuid'
-import { addTerapeuta } from '../../store/terapeutasSlice'
-import DatePicker from 'react-datepicker'
-import { ptBR } from 'date-fns/locale'
-import { maskPhone } from '@/utils/formatter'
+import { X } from "@phosphor-icons/react";
+import * as Dialog from "@radix-ui/react-dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import type { AppDispatch } from "../../store/store";
+import { useDispatch } from "react-redux";
+import { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { v4 as uuidv4 } from "uuid";
+import { addTerapeuta } from "../../store/terapeutasSlice";
+import DatePicker from "react-datepicker";
+import { ptBR } from "date-fns/locale";
+import { maskPhone } from "@/utils/formatter";
 
 const NovoTerapeutaFormSchema = z.object({
-  nomeTerapeuta: z.string().min(1, 'Nome do terapeuta é obrigatório'),
+  nomeTerapeuta: z.string().min(1, "Nome do terapeuta é obrigatório"),
   telefoneTerapeuta: z
     .string()
-    .min(13, 'Telefone é obrigatório')
+    .min(13, "Telefone é obrigatório")
     .regex(/^\(\d{2}\) \d{4,5}-\d{4}$/),
-  emailTerapeuta: z.string().email('Email inválido'),
+  emailTerapeuta: z.string().email("Email inválido"),
   enderecoTerapeuta: z.string(),
   dtEntrada: z.date().refine((data) => data <= new Date(), {
-    message: 'Data de entrada não pode ser maior que a data atual',
+    message: "Data de entrada não pode ser maior que a data atual",
   }),
   chavePix: z.string(),
   foto: z.string().optional(),
-})
+});
 
-type NovoTerapeutaFormInputs = z.infer<typeof NovoTerapeutaFormSchema>
+type NovoTerapeutaFormInputs = z.infer<typeof NovoTerapeutaFormSchema>;
 
 export function NovoTerapeutaModal() {
-  const dispatch = useDispatch<AppDispatch>()
-  const [mensagemSucesso, setMensagemSucesso] = useState('')
-  const [mensagemErro, setMensagemErro] = useState('')
+  const dispatch = useDispatch<AppDispatch>();
+  const [mensagemSucesso, setMensagemSucesso] = useState("");
+  const [mensagemErro, setMensagemErro] = useState("");
   const {
     register,
     control,
@@ -43,11 +43,11 @@ export function NovoTerapeutaModal() {
     formState: { isSubmitting, errors },
   } = useForm<NovoTerapeutaFormInputs>({
     resolver: zodResolver(NovoTerapeutaFormSchema),
-  })
+  });
 
   async function handleCreateNewTerapeuta(data: NovoTerapeutaFormInputs) {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       const novoTerapeuta = {
         id: uuidv4(),
@@ -58,40 +58,40 @@ export function NovoTerapeutaModal() {
         dtEntrada: data.dtEntrada,
         chavePix: data.chavePix,
         foto: data.foto,
-      }
+      };
 
       // Faz o dispatch do thunk addTerapeuta
-      await dispatch(addTerapeuta(novoTerapeuta)).unwrap()
+      await dispatch(addTerapeuta(novoTerapeuta)).unwrap();
 
       // Limpa os dados do formulário
-      reset()
+      reset();
 
-      setMensagemSucesso('Terapeuta cadastrado com sucesso!')
-      setMensagemErro('') // Limpa a mensagem de erro, se houver
+      setMensagemSucesso("Terapeuta cadastrado com sucesso!");
+      setMensagemErro(""); // Limpa a mensagem de erro, se houver
 
-      console.log('Terapeuta criado:', data)
+      console.log("Terapeuta criado:", data);
     } catch (error) {
-      console.error('Erro ao cadastrar Terapeuta:', error)
-      setMensagemErro('Erro ao cadastrar Terapeuta. Tente novamente.')
-      setMensagemSucesso('')
+      console.error("Erro ao cadastrar Terapeuta:", error);
+      setMensagemErro("Erro ao cadastrar Terapeuta. Tente novamente.");
+      setMensagemSucesso("");
     }
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    handleFocus()
-    const file = e.target.files?.[0]
+    handleFocus();
+    const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader()
+      const reader = new FileReader();
       reader.onloadend = () => {
-        setValue('foto', reader.result as string)
-      }
-      reader.readAsDataURL(file)
+        setValue("foto", reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   }
 
   function handleFocus() {
-    setMensagemSucesso('')
-    setMensagemErro('')
+    setMensagemSucesso("");
+    setMensagemErro("");
   }
 
   return (
@@ -117,7 +117,7 @@ export function NovoTerapeutaModal() {
               className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
               id="nomeTerapeuta"
               placeholder="Nome do terapeuta"
-              {...register('nomeTerapeuta')}
+              {...register("nomeTerapeuta")}
               onFocus={handleFocus}
             />
             {errors.nomeTerapeuta && (
@@ -136,10 +136,10 @@ export function NovoTerapeutaModal() {
               className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
               id="telefoneTerapeuta"
               placeholder="Telefone do terapeuta"
-              {...register('telefoneTerapeuta', {
+              {...register("telefoneTerapeuta", {
                 onChange: (e) => {
-                  const masked = maskPhone(e.target.value)
-                  e.target.value = masked
+                  const masked = maskPhone(e.target.value);
+                  e.target.value = masked;
                 },
               })}
               onFocus={handleFocus}
@@ -152,7 +152,7 @@ export function NovoTerapeutaModal() {
               className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
               id="emailTerapeuta"
               placeholder="Email do terapeuta"
-              {...register('emailTerapeuta')}
+              {...register("emailTerapeuta")}
               onFocus={handleFocus}
             />
             {errors.emailTerapeuta && (
@@ -163,7 +163,7 @@ export function NovoTerapeutaModal() {
               className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
               id="enderecoTerapeuta"
               placeholder="Endereço do terapeuta"
-              {...register('enderecoTerapeuta')}
+              {...register("enderecoTerapeuta")}
               onFocus={handleFocus}
             />
             <Controller
@@ -176,7 +176,7 @@ export function NovoTerapeutaModal() {
                   placeholderText="Data de entrada"
                   selected={field.value}
                   onChange={(date) => field.onChange(date)}
-                  dateFormat={'dd/MM/yyyy'}
+                  dateFormat={"dd/MM/yyyy"}
                   locale={ptBR}
                   onFocus={handleFocus}
                   autoComplete="off"
@@ -195,19 +195,19 @@ export function NovoTerapeutaModal() {
               className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
               id="chavePix"
               placeholder="Chave PIX"
-              {...register('chavePix')}
+              {...register("chavePix")}
               onFocus={handleFocus}
             />
           </div>
           <div className="mt-6 flex justify-end">
             <button
               className={`bg-azul text-branco hover:bg-azul/75 focus:shadow-azul inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] font-medium leading-none focus:shadow-[0_0_0_2px] focus:outline-none ${
-                isSubmitting ? 'cursor-not-allowed' : ''
+                isSubmitting ? "cursor-not-allowed" : ""
               }`}
               type="submit"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Carregando...' : 'Confirmar'}
+              {isSubmitting ? "Carregando..." : "Confirmar"}
             </button>
           </div>
         </form>
@@ -227,5 +227,5 @@ export function NovoTerapeutaModal() {
         </Dialog.Close>
       </Dialog.Content>
     </Dialog.Portal>
-  )
+  );
 }

@@ -1,4 +1,4 @@
-import { Label, Pie, PieChart } from 'recharts'
+import { Label, Pie, PieChart } from "recharts";
 
 import {
   Card,
@@ -7,126 +7,126 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
-import type { ChartConfig } from '@/components/ui/chart'
+} from "@/components/ui/card";
+import type { ChartConfig } from "@/components/ui/chart";
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from '@/components/ui/chart'
-import { useMemo } from 'react'
-import { CalendarCheck, TrendDown, TrendUp } from '@phosphor-icons/react'
-import { format, subMonths } from 'date-fns'
-import { useSelector } from 'react-redux'
-import type { RootState } from '@/store/store'
-import { ptBR } from 'date-fns/locale'
+} from "@/components/ui/chart";
+import { useMemo } from "react";
+import { CalendarCheck, TrendDown, TrendUp } from "@phosphor-icons/react";
+import { format, subMonths } from "date-fns";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/store/store";
+import { ptBR } from "date-fns/locale";
 
 const chartConfig = {
   sessoes: {
-    label: 'Sessões',
+    label: "Sessões",
   },
   pagamentoPendente: {
-    label: 'Pagamento Pendente',
-    color: '#b91c1c',
+    label: "Pagamento Pendente",
+    color: "#b91c1c",
   },
   pagamentoRealizado: {
-    label: 'Pagamento Realizado',
-    color: '#f97316',
+    label: "Pagamento Realizado",
+    color: "#f97316",
   },
   notaFiscalEmitida: {
-    label: 'Nota Fiscal Emitida',
-    color: '#eab308',
+    label: "Nota Fiscal Emitida",
+    color: "#eab308",
   },
   notaFiscalEnviada: {
-    label: 'Nota Fiscal Enviada',
-    color: '#22c55e',
+    label: "Nota Fiscal Enviada",
+    color: "#22c55e",
   },
-} satisfies ChartConfig
+} satisfies ChartConfig;
 
 export function StatusPagamentosChart() {
   // Generate an array of the last 6 months
   const monthsArray = useMemo(() => {
-    const months = []
-    const now = new Date()
+    const months = [];
+    const now = new Date();
     for (let i = 5; i >= 0; i--) {
-      months.push(subMonths(now, i))
+      months.push(subMonths(now, i));
     }
-    return months
-  }, [])
+    return months;
+  }, []);
 
   // Get all sessions from redux store
-  const sessoes = useSelector((state: RootState) => state.sessoes.data)
+  const sessoes = useSelector((state: RootState) => state.sessoes.data);
 
   // Filter and count sessions by status for the last 6 months
   const statusCounts = useMemo(() => {
     const filteredSessions = sessoes.filter((sessao) => {
-      const sessaoDate = new Date(sessao.dtSessao1)
-      const sixMonthsAgo = subMonths(new Date(), 6)
-      return sessaoDate >= sixMonthsAgo
-    })
+      const sessaoDate = new Date(sessao.dtSessao1);
+      const sixMonthsAgo = subMonths(new Date(), 6);
+      return sessaoDate >= sixMonthsAgo;
+    });
 
     return filteredSessions.reduce<Record<string, number>>((acc, sessao) => {
-      const status = sessao.statusSessao || 'Não Definido'
-      acc[status] = (acc[status] || 0) + 1
-      return acc
-    }, {})
-  }, [sessoes])
+      const status = sessao.statusSessao || "Não Definido";
+      acc[status] = (acc[status] || 0) + 1;
+      return acc;
+    }, {});
+  }, [sessoes]);
 
   // Prepare chart data
   const chartData = useMemo(() => {
     return [
       {
-        statusSessao: 'Pagamento Pendente',
-        sessoes: statusCounts['Pagamento Pendente'] || 0,
+        statusSessao: "Pagamento Pendente",
+        sessoes: statusCounts["Pagamento Pendente"] || 0,
         fill: chartConfig.pagamentoPendente.color,
       },
       {
-        statusSessao: 'Pagamento Realizado',
-        sessoes: statusCounts['Pagamento Realizado'] || 0,
+        statusSessao: "Pagamento Realizado",
+        sessoes: statusCounts["Pagamento Realizado"] || 0,
         fill: chartConfig.pagamentoRealizado.color,
       },
       {
-        statusSessao: 'Nota Fiscal Emitida',
-        sessoes: statusCounts['Nota Fiscal Emitida'] || 0,
+        statusSessao: "Nota Fiscal Emitida",
+        sessoes: statusCounts["Nota Fiscal Emitida"] || 0,
         fill: chartConfig.notaFiscalEmitida.color,
       },
       {
-        statusSessao: 'Nota Fiscal Enviada',
-        sessoes: statusCounts['Nota Fiscal Enviada'] || 0,
+        statusSessao: "Nota Fiscal Enviada",
+        sessoes: statusCounts["Nota Fiscal Enviada"] || 0,
         fill: chartConfig.notaFiscalEnviada.color,
       },
-    ]
-  }, [statusCounts])
+    ];
+  }, [statusCounts]);
 
   // Calculate total sessoes
   const totalSessoes = useMemo(() => {
-    return chartData.reduce((acc, curr) => acc + curr.sessoes, 0)
-  }, [chartData])
+    return chartData.reduce((acc, curr) => acc + curr.sessoes, 0);
+  }, [chartData]);
 
   // Calculate percentage change from previous month
   const percentageChange = useMemo(() => {
-    const currentMonth = new Date().getMonth()
-    const currentYear = new Date().getFullYear()
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
 
     const thisMonth = sessoes.filter((sessao) => {
-      const date = new Date(sessao.dtSessao1)
+      const date = new Date(sessao.dtSessao1);
       return (
         date.getMonth() === currentMonth && date.getFullYear() === currentYear
-      )
-    }).length
+      );
+    }).length;
 
     const lastMonth = sessoes.filter((sessao) => {
-      const date = new Date(sessao.dtSessao1)
-      const lastMonthDate = subMonths(new Date(), 1)
+      const date = new Date(sessao.dtSessao1);
+      const lastMonthDate = subMonths(new Date(), 1);
       return (
         date.getMonth() === lastMonthDate.getMonth() &&
         date.getFullYear() === lastMonthDate.getFullYear()
-      )
-    }).length
+      );
+    }).length;
 
-    if (lastMonth === 0) return 100
-    return Math.round(((thisMonth - lastMonth) / lastMonth) * 100)
-  }, [sessoes])
+    if (lastMonth === 0) return 100;
+    return Math.round(((thisMonth - lastMonth) / lastMonth) * 100);
+  }, [sessoes]);
 
   return (
     <Card className="flex flex-col">
@@ -136,17 +136,17 @@ export function StatusPagamentosChart() {
           <p className="font-semibold">Sessões Realizadas</p>
         </CardTitle>
         <CardDescription>
-          {' '}
-          {format(monthsArray[0], 'MMMM', { locale: ptBR })
+          {" "}
+          {format(monthsArray[0], "MMMM", { locale: ptBR })
             .charAt(0)
             .toUpperCase() +
-            format(monthsArray[0], 'MMMM', { locale: ptBR }).slice(1)}{' '}
-          -{' '}
-          {format(monthsArray[5], 'MMMM', { locale: ptBR })
+            format(monthsArray[0], "MMMM", { locale: ptBR }).slice(1)}{" "}
+          -{" "}
+          {format(monthsArray[5], "MMMM", { locale: ptBR })
             .charAt(0)
             .toLocaleUpperCase() +
-            format(monthsArray[5], 'MMMM', { locale: ptBR }).slice(1)}{' '}
-          {format(monthsArray[5], 'yyyy')}
+            format(monthsArray[5], "MMMM", { locale: ptBR }).slice(1)}{" "}
+          {format(monthsArray[5], "yyyy")}
         </CardDescription>
       </CardHeader>
       <CardContent className="flex-1 pb-0">
@@ -168,7 +168,7 @@ export function StatusPagamentosChart() {
             >
               <Label
                 content={({ viewBox }) => {
-                  if (viewBox && 'cx' in viewBox && 'cy' in viewBox) {
+                  if (viewBox && "cx" in viewBox && "cy" in viewBox) {
                     return (
                       <text
                         x={viewBox.cx}
@@ -188,10 +188,10 @@ export function StatusPagamentosChart() {
                           y={(viewBox.cy || 0) + 24}
                           className="fill-rosa font-semibold"
                         >
-                          {totalSessoes === 1 ? 'Sessão' : 'Sessões'}
+                          {totalSessoes === 1 ? "Sessão" : "Sessões"}
                         </tspan>
                       </text>
-                    )
+                    );
                   }
                 }}
               />
@@ -201,7 +201,7 @@ export function StatusPagamentosChart() {
       </CardContent>
       <CardFooter className="flex-col gap-2 text-sm">
         <div className="flex items-center gap-2 font-medium leading-none">
-          {percentageChange > 0 ? 'Aumento' : 'Redução'} de{' '}
+          {percentageChange > 0 ? "Aumento" : "Redução"} de{" "}
           {Math.abs(percentageChange)}% neste mês
           {percentageChange > 0 ? (
             <TrendUp className="h-4 w-4" />
@@ -214,5 +214,5 @@ export function StatusPagamentosChart() {
         </div>
       </CardFooter>
     </Card>
-  )
+  );
 }

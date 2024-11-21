@@ -1,27 +1,27 @@
-import { useState } from 'react'
+import { useState } from "react";
 
 export function useModal() {
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [modalMessage, setModalMessage] = useState('')
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const openModal = (message: string) => {
-    setModalMessage(message)
-    setIsModalOpen(true)
-  }
+    setModalMessage(message);
+    setIsModalOpen(true);
+  };
 
   const closeModal = () => {
-    setModalMessage('')
-    setIsModalOpen(false)
-  }
+    setModalMessage("");
+    setIsModalOpen(false);
+  };
 
   const openEditModal = () => {
-    setIsEditModalOpen(true)
-  }
+    setIsEditModalOpen(true);
+  };
 
   const closeEditModal = () => {
-    setIsEditModalOpen(false)
-  }
+    setIsEditModalOpen(false);
+  };
 
   return {
     isModalOpen,
@@ -31,5 +31,5 @@ export function useModal() {
     closeModal,
     openEditModal,
     closeEditModal,
-  }
+  };
 }

@@ -1,11 +1,11 @@
-import { Routes, Route } from 'react-router-dom'
-import { Home } from './pages/Home'
-import { Agendas } from './pages/Agendas'
-import { Terapeutas } from './pages/Terapeutas'
-import { DefaultLayout } from './layouts/DefaulLayout'
-import { Transacoes } from './pages/Transacoes'
-import { Sessoes } from './pages/Sessoes'
-import { Pacientes } from './pages/Pacientes'
+import { Routes, Route } from "react-router-dom";
+import { Home } from "./pages/Home";
+import { Agendas } from "./pages/Agendas";
+import { Terapeutas } from "./pages/Terapeutas";
+import { DefaultLayout } from "./layouts/DefaulLayout";
+import { Transacoes } from "./pages/Transacoes";
+import { Sessoes } from "./pages/Sessoes";
+import { Pacientes } from "./pages/Pacientes";
 
 export function Router() {
   return (
@@ -19,5 +19,5 @@ export function Router() {
         <Route path="/sessoes" element={<Sessoes />} />
       </Route>
     </Routes>
-  )
+  );
 }

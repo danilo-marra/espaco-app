@@ -1,4 +1,4 @@
-import { SignOut, User } from '@phosphor-icons/react'
+import { SignOut, User } from "@phosphor-icons/react";
 
 export function Header() {
   return (
@@ -32,5 +32,5 @@ export function Header() {
         </div>
       </div>
     </header>
-  )
+  );
 }

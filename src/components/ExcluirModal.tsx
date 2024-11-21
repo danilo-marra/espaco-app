@@ -1,13 +1,13 @@
-import { useState, useEffect } from 'react'
-import * as Dialog from '@radix-ui/react-dialog'
+import { useState, useEffect } from "react";
+import * as Dialog from "@radix-ui/react-dialog";
 
 interface ExcluirModalProps {
-  isOpen: boolean
-  onOpenChange: (isOpen: boolean) => void
-  title: string
-  message: string
-  onConfirm: () => void
-  isSuccess: boolean
+  isOpen: boolean;
+  onOpenChange: (isOpen: boolean) => void;
+  title: string;
+  message: string;
+  onConfirm: () => void;
+  isSuccess: boolean;
 }
 
 export function ExcluirModal({
@@ -18,11 +18,11 @@ export function ExcluirModal({
   onConfirm,
   isSuccess,
 }: ExcluirModalProps) {
-  const [localIsSuccess, setLocalIsSuccess] = useState(isSuccess)
+  const [localIsSuccess, setLocalIsSuccess] = useState(isSuccess);
 
   useEffect(() => {
-    setLocalIsSuccess(isSuccess)
-  }, [isSuccess])
+    setLocalIsSuccess(isSuccess);
+  }, [isSuccess]);
 
   return (
     <Dialog.Root open={isOpen} onOpenChange={onOpenChange}>
@@ -61,5 +61,5 @@ export function ExcluirModal({
         </div>
       </Dialog.Content>
     </Dialog.Root>
-  )
+  );
 }

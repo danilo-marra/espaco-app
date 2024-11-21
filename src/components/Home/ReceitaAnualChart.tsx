@@ -1,38 +1,38 @@
-import { CaretLeft, CaretRight, ChartBar } from '@phosphor-icons/react'
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
-import { addYears, format, subYears } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
-import { Bar, BarChart, CartesianGrid, Legend, XAxis, YAxis } from 'recharts'
-import { priceFormatter } from '@/utils/formatter'
-import { useSelector } from 'react-redux'
-import { selectTransacoesSummary, type RootState } from '@/store/store'
-import { useMemo, useState } from 'react'
-import { createSelector } from '@reduxjs/toolkit'
-import { Button } from '../ui/button'
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '../ui/chart'
+import { CaretLeft, CaretRight, ChartBar } from "@phosphor-icons/react";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { addYears, format, subYears } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { Bar, BarChart, CartesianGrid, Legend, XAxis, YAxis } from "recharts";
+import { priceFormatter } from "@/utils/formatter";
+import { useSelector } from "react-redux";
+import { selectTransacoesSummary, type RootState } from "@/store/store";
+import { useMemo, useState } from "react";
+import { createSelector } from "@reduxjs/toolkit";
+import { Button } from "../ui/button";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "../ui/chart";
 
 type Totals = {
-  faturamento: number
-  despesa: number
-  lucro: number
-}
+  faturamento: number;
+  despesa: number;
+  lucro: number;
+};
 
 function isTotalKey(key: string): key is keyof Totals {
-  return ['faturamento', 'despesa', 'lucro'].includes(key)
+  return ["faturamento", "despesa", "lucro"].includes(key);
 }
 
 export default function ReceitaAnualChart() {
-  const [selectedYear, setSelectedYear] = useState<Date>(new Date())
+  const [selectedYear, setSelectedYear] = useState<Date>(new Date());
 
   const monthsArray = useMemo(() => {
-    const year = selectedYear.getFullYear()
-    const months = []
+    const year = selectedYear.getFullYear();
+    const months = [];
     for (let i = 0; i < 12; i++) {
-      const date = new Date(year, i, 1)
-      months.push(date)
+      const date = new Date(year, i, 1);
+      months.push(date);
     }
-    return months
-  }, [selectedYear])
+    return months;
+  }, [selectedYear]);
 
   const selectMonthlySummaries = useMemo(
     () =>
@@ -40,38 +40,38 @@ export default function ReceitaAnualChart() {
         [(state: RootState) => state, () => monthsArray],
         (state, months) =>
           months.map((date) => {
-            const month = date.getMonth()
-            const year = date.getFullYear()
-            const summarySelector = selectTransacoesSummary(month, year)
-            return { date, summary: summarySelector(state) }
+            const month = date.getMonth();
+            const year = date.getFullYear();
+            const summarySelector = selectTransacoesSummary(month, year);
+            return { date, summary: summarySelector(state) };
           }),
       ),
     [monthsArray],
-  )
+  );
 
-  const summaries = useSelector(selectMonthlySummaries)
+  const summaries = useSelector(selectMonthlySummaries);
 
   const chartData = summaries.map(({ date, summary }) => ({
-    month: format(date, 'MMM', { locale: ptBR }).toUpperCase(),
+    month: format(date, "MMM", { locale: ptBR }).toUpperCase(),
     faturamento: summary.entrada || 0,
     despesa: summary.saida || 0,
     lucro: summary.total || 0,
-  }))
+  }));
 
   const chartConfig = {
     faturamento: {
-      label: 'Faturamento',
-      color: '#3395AE',
+      label: "Faturamento",
+      color: "#3395AE",
     },
     despesa: {
-      label: 'Despesa',
-      color: '#ef4444',
+      label: "Despesa",
+      color: "#ef4444",
     },
     lucro: {
-      label: 'Lucro',
-      color: '#10b981',
+      label: "Lucro",
+      color: "#10b981",
     },
-  }
+  };
 
   const totals = useMemo(() => {
     return chartData.reduce(
@@ -81,16 +81,16 @@ export default function ReceitaAnualChart() {
         lucro: acc.lucro + curr.lucro,
       }),
       { faturamento: 0, despesa: 0, lucro: 0 },
-    )
-  }, [chartData])
+    );
+  }, [chartData]);
 
   const handlePreviousYear = () => {
-    setSelectedYear((prevDate) => subYears(prevDate, 1))
-  }
+    setSelectedYear((prevDate) => subYears(prevDate, 1));
+  };
 
   const handleNextYear = () => {
-    setSelectedYear((prevDate) => addYears(prevDate, 1))
-  }
+    setSelectedYear((prevDate) => addYears(prevDate, 1));
+  };
 
   return (
     <Card>
@@ -110,7 +110,7 @@ export default function ReceitaAnualChart() {
               <CaretLeft className="h-4 w-4" />
             </Button>
             <div className="w-[120px] text-center font-medium">
-              {format(selectedYear, 'yyyy', { locale: ptBR })}
+              {format(selectedYear, "yyyy", { locale: ptBR })}
             </div>
             <Button
               variant="outline"
@@ -144,8 +144,8 @@ export default function ReceitaAnualChart() {
               content={({ payload }) => (
                 <div className="flex justify-center items-center space-x-4 mt-4">
                   {payload?.map((entry) => {
-                    const key = entry.value.toLowerCase()
-                    const total = isTotalKey(key) ? totals[key] : 0
+                    const key = entry.value.toLowerCase();
+                    const total = isTotalKey(key) ? totals[key] : 0;
 
                     return (
                       <div key={entry.value} className="flex items-center">
@@ -157,13 +157,13 @@ export default function ReceitaAnualChart() {
                           style={{ color: entry.color }}
                           className="text-sm"
                         >
-                          {entry.value}:{' '}
+                          {entry.value}:{" "}
                           <span className="font-semibold">
                             {priceFormatter.format(total)}
                           </span>
                         </span>
                       </div>
-                    )
+                    );
                   })}
                 </div>
               )}
@@ -193,5 +193,5 @@ export default function ReceitaAnualChart() {
         </ChartContainer>
       </CardContent>
     </Card>
-  )
+  );
 }

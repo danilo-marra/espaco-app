@@ -1,8 +1,8 @@
-import { BrowserRouter } from 'react-router-dom'
-import { Router } from './Router'
-import { Provider } from 'react-redux'
-import { store } from './store/store'
-import { Toaster } from 'sonner'
+import { BrowserRouter } from "react-router-dom";
+import { Router } from "./Router";
+import { Provider } from "react-redux";
+import { store } from "./store/store";
+import { Toaster } from "sonner";
 
 export function App() {
   return (
@@ -12,5 +12,5 @@ export function App() {
         <Router />
       </BrowserRouter>
     </Provider>
-  )
+  );
 }

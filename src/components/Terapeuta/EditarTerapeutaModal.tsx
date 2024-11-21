@@ -1,40 +1,40 @@
-import { X } from '@phosphor-icons/react'
-import * as Dialog from '@radix-ui/react-dialog'
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
-import { z } from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useDispatch, useSelector } from 'react-redux'
-import type { AppDispatch, RootState } from '../../store/store'
-import { useEffect, useState } from 'react'
-import { Controller, useForm } from 'react-hook-form'
-import { updateTerapeuta } from '../../store/terapeutasSlice'
-import DatePicker from 'react-datepicker'
-import { ptBR } from 'date-fns/locale'
-import { maskPhone } from '@/utils/formatter'
-import { toast } from 'sonner'
+import { X } from "@phosphor-icons/react";
+import * as Dialog from "@radix-ui/react-dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "../../store/store";
+import { useEffect, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { updateTerapeuta } from "../../store/terapeutasSlice";
+import DatePicker from "react-datepicker";
+import { ptBR } from "date-fns/locale";
+import { maskPhone } from "@/utils/formatter";
+import { toast } from "sonner";
 
 const EditarTerapeutaFormSchema = z.object({
   id: z.string().uuid(),
-  nomeTerapeuta: z.string().min(1, 'Nome do terapeuta é obrigatório'),
+  nomeTerapeuta: z.string().min(1, "Nome do terapeuta é obrigatório"),
   telefoneTerapeuta: z
     .string()
-    .min(13, 'Telefone é obrigatório')
+    .min(13, "Telefone é obrigatório")
     .regex(/^\(\d{2}\) \d{4,5}-\d{4}$/),
-  emailTerapeuta: z.string().email('Email inválido'),
+  emailTerapeuta: z.string().email("Email inválido"),
   enderecoTerapeuta: z.string(),
   dtEntrada: z.date().refine((data) => data <= new Date(), {
-    message: 'Data de entrada não pode ser maior que a data atual',
+    message: "Data de entrada não pode ser maior que a data atual",
   }),
   chavePix: z.string(),
   foto: z.string().optional(),
-})
+});
 
-type EditarTerapeutaFormInputs = z.infer<typeof EditarTerapeutaFormSchema>
+type EditarTerapeutaFormInputs = z.infer<typeof EditarTerapeutaFormSchema>;
 
 interface EditarTerapeutaModalProps {
-  terapeutaId: string
-  open: boolean
-  onClose: () => void
+  terapeutaId: string;
+  open: boolean;
+  onClose: () => void;
 }
 
 export function EditarTerapeutaModal({
@@ -42,10 +42,10 @@ export function EditarTerapeutaModal({
   open,
   onClose,
 }: EditarTerapeutaModalProps) {
-  const dispatch = useDispatch<AppDispatch>()
-  const terapeutas = useSelector((state: RootState) => state.terapeutas.data)
-  const [mensagemSucesso, setMensagemSucesso] = useState('')
-  const [mensagemErro, setMensagemErro] = useState('')
+  const dispatch = useDispatch<AppDispatch>();
+  const terapeutas = useSelector((state: RootState) => state.terapeutas.data);
+  const [mensagemSucesso, setMensagemSucesso] = useState("");
+  const [mensagemErro, setMensagemErro] = useState("");
 
   const {
     register,
@@ -56,10 +56,10 @@ export function EditarTerapeutaModal({
     formState: { isSubmitting, errors },
   } = useForm<EditarTerapeutaFormInputs>({
     resolver: zodResolver(EditarTerapeutaFormSchema),
-  })
+  });
 
   useEffect(() => {
-    const terapeuta = terapeutas.find((t) => t.id === terapeutaId)
+    const terapeuta = terapeutas.find((t) => t.id === terapeutaId);
     if (terapeuta) {
       reset({
         id: terapeuta.id,
@@ -70,13 +70,13 @@ export function EditarTerapeutaModal({
         dtEntrada: new Date(terapeuta.dtEntrada),
         chavePix: terapeuta.chavePix,
         foto: terapeuta.foto,
-      })
+      });
     }
-  }, [terapeutaId, terapeutas, reset])
+  }, [terapeutaId, terapeutas, reset]);
 
   async function handleEditTerapeuta(data: EditarTerapeutaFormInputs) {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       const terapeutaEditado = {
         id: data.id,
@@ -87,38 +87,38 @@ export function EditarTerapeutaModal({
         dtEntrada: data.dtEntrada,
         chavePix: data.chavePix,
         foto: data.foto,
-      }
+      };
 
-      await dispatch(updateTerapeuta(terapeutaEditado)).unwrap()
+      await dispatch(updateTerapeuta(terapeutaEditado)).unwrap();
 
-      reset()
+      reset();
 
-      toast.success('Terapeuta atualizado com sucesso!')
-      console.log('Terapeuta atualizado:', data)
-      setMensagemErro('')
-      onClose()
+      toast.success("Terapeuta atualizado com sucesso!");
+      console.log("Terapeuta atualizado:", data);
+      setMensagemErro("");
+      onClose();
     } catch (error) {
-      toast.error('Erro ao atualizar Terapeuta')
-      setMensagemSucesso('')
-      console.error('Erro ao atualizar Terapeuta:', error)
+      toast.error("Erro ao atualizar Terapeuta");
+      setMensagemSucesso("");
+      console.error("Erro ao atualizar Terapeuta:", error);
     }
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    handleFocus()
-    const file = e.target.files?.[0]
+    handleFocus();
+    const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader()
+      const reader = new FileReader();
       reader.onloadend = () => {
-        setValue('foto', reader.result as string)
-      }
-      reader.readAsDataURL(file)
+        setValue("foto", reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   }
 
   function handleFocus() {
-    setMensagemSucesso('')
-    setMensagemErro('')
+    setMensagemSucesso("");
+    setMensagemErro("");
   }
 
   return (
@@ -152,7 +152,7 @@ export function EditarTerapeutaModal({
                 className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
                 id="nomeTerapeuta"
                 placeholder="Nome do terapeuta"
-                {...register('nomeTerapeuta')}
+                {...register("nomeTerapeuta")}
                 onFocus={handleFocus}
               />
               {errors.nomeTerapeuta && (
@@ -171,10 +171,10 @@ export function EditarTerapeutaModal({
                 className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
                 id="telefoneTerapeuta"
                 placeholder="Telefone do terapeuta"
-                {...register('telefoneTerapeuta', {
+                {...register("telefoneTerapeuta", {
                   onChange: (e) => {
-                    const masked = maskPhone(e.target.value)
-                    e.target.value = masked
+                    const masked = maskPhone(e.target.value);
+                    e.target.value = masked;
                   },
                 })}
                 onFocus={handleFocus}
@@ -188,7 +188,7 @@ export function EditarTerapeutaModal({
                 className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
                 id="emailTerapeuta"
                 placeholder="Email do terapeuta"
-                {...register('emailTerapeuta')}
+                {...register("emailTerapeuta")}
                 onFocus={handleFocus}
               />
               {errors.emailTerapeuta && (
@@ -199,7 +199,7 @@ export function EditarTerapeutaModal({
                 className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
                 id="enderecoTerapeuta"
                 placeholder="Endereço do terapeuta"
-                {...register('enderecoTerapeuta')}
+                {...register("enderecoTerapeuta")}
                 onFocus={handleFocus}
               />
               <Controller
@@ -212,7 +212,7 @@ export function EditarTerapeutaModal({
                     placeholderText="Data de entrada"
                     selected={field.value}
                     onChange={(date) => field.onChange(date)}
-                    dateFormat={'dd/MM/yyyy'}
+                    dateFormat={"dd/MM/yyyy"}
                     locale={ptBR}
                     onFocus={handleFocus}
                     autoComplete="off"
@@ -231,19 +231,19 @@ export function EditarTerapeutaModal({
                 className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
                 id="chavePix"
                 placeholder="Chave PIX"
-                {...register('chavePix')}
+                {...register("chavePix")}
                 onFocus={handleFocus}
               />
             </div>
             <div className="mt-6 flex justify-end">
               <button
                 className={`bg-azul text-branco hover:bg-azul/75 focus:shadow-azul inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] font-medium leading-none focus:shadow-[0_0_0_2px] focus:outline-none ${
-                  isSubmitting ? 'cursor-not-allowed' : ''
+                  isSubmitting ? "cursor-not-allowed" : ""
                 }`}
                 type="submit"
                 disabled={isSubmitting}
               >
-                {isSubmitting ? 'Carregando...' : 'Confirmar'}
+                {isSubmitting ? "Carregando..." : "Confirmar"}
               </button>
             </div>
           </form>
@@ -264,5 +264,5 @@ export function EditarTerapeutaModal({
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
-  )
+  );
 }

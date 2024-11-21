@@ -1,33 +1,33 @@
-import { X } from '@phosphor-icons/react'
-import * as Dialog from '@radix-ui/react-dialog'
-import * as RadioGroup from '@radix-ui/react-radio-group'
-import { Controller, useForm } from 'react-hook-form'
-import * as z from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useEffect, useState } from 'react'
-import DatePicker from 'react-datepicker'
-import 'react-datepicker/dist/react-datepicker.css'
-import { ptBR } from 'date-fns/locale'
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
-import { useDispatch, useSelector } from 'react-redux'
-import { updateTransacao } from '../../store/transacoesSlice'
-import type { AppDispatch, RootState } from '../../store/store'
-import type { Transacao } from '@/tipos'
+import { X } from "@phosphor-icons/react";
+import * as Dialog from "@radix-ui/react-dialog";
+import * as RadioGroup from "@radix-ui/react-radio-group";
+import { Controller, useForm } from "react-hook-form";
+import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect, useState } from "react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { ptBR } from "date-fns/locale";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { useDispatch, useSelector } from "react-redux";
+import { updateTransacao } from "../../store/transacoesSlice";
+import type { AppDispatch, RootState } from "../../store/store";
+import type { Transacao } from "@/tipos";
 
 const EditarTransacaoFormSchema = z.object({
   id: z.string(),
   descricao: z.string(),
   valor: z.number(),
-  tipo: z.enum(['entrada', 'saida']),
+  tipo: z.enum(["entrada", "saida"]),
   data: z.date(),
-})
+});
 
-type EditarTransacaoFormInputs = z.infer<typeof EditarTransacaoFormSchema>
+type EditarTransacaoFormInputs = z.infer<typeof EditarTransacaoFormSchema>;
 
 interface EditarTransacaoModalProps {
-  transacaoId: string
-  open: boolean
-  onClose: () => void
+  transacaoId: string;
+  open: boolean;
+  onClose: () => void;
 }
 
 export function EditarTransacaoModal({
@@ -43,15 +43,15 @@ export function EditarTransacaoModal({
     formState: { isSubmitting },
   } = useForm<EditarTransacaoFormInputs>({
     resolver: zodResolver(EditarTransacaoFormSchema),
-  })
+  });
 
-  const dispatch = useDispatch<AppDispatch>()
-  const transacoes = useSelector((state: RootState) => state.transacoes.data)
-  const [mensagemSucesso, setMensagemSucesso] = useState('')
-  const [mensagemErro, setMensagemErro] = useState('')
+  const dispatch = useDispatch<AppDispatch>();
+  const transacoes = useSelector((state: RootState) => state.transacoes.data);
+  const [mensagemSucesso, setMensagemSucesso] = useState("");
+  const [mensagemErro, setMensagemErro] = useState("");
 
   useEffect(() => {
-    const transacao = transacoes.find((t) => t.id === transacaoId)
+    const transacao = transacoes.find((t) => t.id === transacaoId);
     if (transacao) {
       reset({
         id: transacao.id,
@@ -59,14 +59,14 @@ export function EditarTransacaoModal({
         valor: transacao.valor,
         tipo: transacao.tipo,
         data: new Date(transacao.dtCriacao),
-      })
+      });
     }
-  }, [transacaoId, transacoes, reset])
+  }, [transacaoId, transacoes, reset]);
 
   async function handleEditTransacao(data: EditarTransacaoFormInputs) {
     try {
       // Simula um atraso de 2 segundos
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       const transacaoEditada: Transacao = {
         id: data.id,
@@ -74,29 +74,29 @@ export function EditarTransacaoModal({
         tipo: data.tipo,
         valor: data.valor,
         dtCriacao: data.data,
-      }
+      };
 
       // Faz o dispatch do thunk updateTransacao
-      await dispatch(updateTransacao(transacaoEditada)).unwrap()
+      await dispatch(updateTransacao(transacaoEditada)).unwrap();
 
       // Limpa os dados do formulário
-      reset()
+      reset();
 
       // Define a mensagem de sucesso
-      setMensagemSucesso('Transação editada com sucesso!')
-      setMensagemErro('') // Limpa a mensagem de erro, se houver
-      console.log('Transação editada:', data)
-      onClose() // Fecha o modal após a edição
+      setMensagemSucesso("Transação editada com sucesso!");
+      setMensagemErro(""); // Limpa a mensagem de erro, se houver
+      console.log("Transação editada:", data);
+      onClose(); // Fecha o modal após a edição
     } catch (error) {
-      console.error('Erro ao editar transação:', error)
-      setMensagemErro('Erro ao editar transação. Tente novamente.')
-      setMensagemSucesso('') // Limpa a mensagem de sucesso, se houver
+      console.error("Erro ao editar transação:", error);
+      setMensagemErro("Erro ao editar transação. Tente novamente.");
+      setMensagemSucesso(""); // Limpa a mensagem de sucesso, se houver
     }
   }
 
   function handleFocus() {
-    setMensagemSucesso('')
-    setMensagemErro('')
+    setMensagemSucesso("");
+    setMensagemErro("");
   }
 
   return (
@@ -118,7 +118,7 @@ export function EditarTransacaoModal({
                 id="descricao"
                 placeholder="Descrição"
                 required
-                {...register('descricao')}
+                {...register("descricao")}
                 onFocus={handleFocus}
               />
               <input
@@ -128,7 +128,7 @@ export function EditarTransacaoModal({
                 id="valor"
                 placeholder="Valor"
                 required
-                {...register('valor', { valueAsNumber: true })}
+                {...register("valor", { valueAsNumber: true })}
                 onFocus={handleFocus}
               />
               <Controller
@@ -160,8 +160,8 @@ export function EditarTransacaoModal({
                 <RadioGroup.Root
                   className="flex items-center justify-evenly"
                   onValueChange={(value) => {
-                    field.onChange(value)
-                    handleFocus()
+                    field.onChange(value);
+                    handleFocus();
                   }}
                   value={field.value}
                 >
@@ -203,12 +203,12 @@ export function EditarTransacaoModal({
             <div className="mt-[25px] flex justify-end">
               <button
                 className={`bg-azul text-branco hover:bg-azul/75 focus:shadow-azul inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] font-medium leading-none focus:shadow-[0_0_0_2px] focus:outline-none ${
-                  isSubmitting ? 'cursor-not-allowed' : ''
+                  isSubmitting ? "cursor-not-allowed" : ""
                 }`}
                 type="submit"
                 disabled={isSubmitting}
               >
-                {isSubmitting ? 'Carregando...' : 'Confirmar'}
+                {isSubmitting ? "Carregando..." : "Confirmar"}
               </button>
             </div>
           </form>
@@ -229,5 +229,5 @@ export function EditarTransacaoModal({
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
-  )
+  );
 }

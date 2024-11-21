@@ -1,4 +1,4 @@
-import { zodResolver } from '@hookform/resolvers/zod'
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Dialog,
   DialogContent,
@@ -6,79 +6,85 @@ import {
   DialogHeader,
   DialogOverlay,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { useForm, Controller } from 'react-hook-form'
-import { z } from 'zod'
-import { useDispatch, useSelector } from 'react-redux'
-import type { AppDispatch, RootState } from '@/store/store'
-import { useEffect, useMemo, useRef } from 'react'
-import type { Agendamento } from '@/tipos'
+} from "@/components/ui/dialog";
+import { useForm, Controller } from "react-hook-form";
+import { z } from "zod";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "@/store/store";
+import { useEffect, useMemo, useRef } from "react";
+import type { Agendamento } from "@/tipos";
 import {
   addAgendamento,
   deleteAgendamento,
   updateAgendamento,
-} from '@/store/agendamentosSlice'
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
-import { DialogPortal } from '@radix-ui/react-dialog'
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'
-import { cn } from '@/lib/utils'
-import { CalendarIcon } from '@radix-ui/react-icons'
-import { addWeeks, differenceInWeeks, format, isBefore, setDay } from 'date-fns'
-import { Calendar } from '../ui/calendar'
-import { ptBR } from 'date-fns/locale'
-import { Label } from '../ui/label'
+} from "@/store/agendamentosSlice";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { DialogPortal } from "@radix-ui/react-dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { cn } from "@/lib/utils";
+import { CalendarIcon } from "@radix-ui/react-icons";
+import {
+  addWeeks,
+  differenceInWeeks,
+  format,
+  isBefore,
+  setDay,
+} from "date-fns";
+import { Calendar } from "../ui/calendar";
+import { ptBR } from "date-fns/locale";
+import { Label } from "../ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../ui/select'
-import * as RadioGroup from '@radix-ui/react-radio-group'
-import { maskTime } from '@/utils/formatter'
-import { toast } from 'sonner'
-import { Checkbox } from '../ui/checkbox'
-import { v4 as uuidv4 } from 'uuid'
+} from "../ui/select";
+import * as RadioGroup from "@radix-ui/react-radio-group";
+import { maskTime } from "@/utils/formatter";
+import { toast } from "sonner";
+import { Checkbox } from "../ui/checkbox";
+import { v4 as uuidv4 } from "uuid";
 
 const EditarAgendaFormSchema = z
   .object({
     id: z.string(),
-    pacienteId: z.string().min(1, 'Selecione um paciente'),
+    pacienteId: z.string().min(1, "Selecione um paciente"),
     dataAgendamento: z.date({
-      required_error: 'Selecione uma data',
-      invalid_type_error: 'Selecione uma data válida',
+      required_error: "Selecione uma data",
+      invalid_type_error: "Selecione uma data válida",
     }),
     horarioAgendamento: z
       .string()
-      .min(1, 'Selecione um horário')
+      .min(1, "Selecione um horário")
       .regex(/^([0-1]\d|2[0-3]):([0-5]\d)$/),
     localAgendamento: z.enum([
-      'Sala Verde',
-      'Sala Azul',
-      'Não Precisa de Sala',
+      "Sala Verde",
+      "Sala Azul",
+      "Não Precisa de Sala",
     ]),
-    modalidadeAgendamento: z.enum(['Presencial', 'Online']),
+    modalidadeAgendamento: z.enum(["Presencial", "Online"]),
     tipoAgendamento: z.enum([
-      'Sessão',
-      'Orientação Parental',
-      'Visita Escolar',
-      'Reunião Escolar',
-      'Supervisão',
-      'Outros',
+      "Sessão",
+      "Orientação Parental",
+      "Visita Escolar",
+      "Reunião Escolar",
+      "Supervisão",
+      "Outros",
     ]),
-    statusAgendamento: z.enum(['Confirmado', 'Remarcado', 'Cancelado']),
+    statusAgendamento: z.enum(["Confirmado", "Remarcado", "Cancelado"]),
     observacoesAgendamento: z.string().optional(),
-    periodicidade: z.enum(['Não repetir', 'Semanal', 'Quinzenal']),
+    periodicidade: z.enum(["Não repetir", "Semanal", "Quinzenal"]),
     diasDaSemana: z
       .array(
         z.enum([
-          'Domingo',
-          'Segunda-feira',
-          'Terça-feira',
-          'Quarta-feira',
-          'Quinta-feira',
-          'Sexta-feira',
-          'Sábado',
+          "Domingo",
+          "Segunda-feira",
+          "Terça-feira",
+          "Quarta-feira",
+          "Quinta-feira",
+          "Sexta-feira",
+          "Sábado",
         ]),
       )
       .optional(),
@@ -86,26 +92,26 @@ const EditarAgendaFormSchema = z
   })
   .superRefine((data, ctx) => {
     if (
-      (data.periodicidade === 'Semanal' ||
-        data.periodicidade === 'Quinzenal') &&
+      (data.periodicidade === "Semanal" ||
+        data.periodicidade === "Quinzenal") &&
       !data.dataFimRecorrencia
     ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'Data fim é obrigatória para agendamentos recorrentes',
-        path: ['dataFimRecorrencia'],
-      })
+        message: "Data fim é obrigatória para agendamentos recorrentes",
+        path: ["dataFimRecorrencia"],
+      });
     }
-  })
+  });
 
-type AgendamentoOperation = Agendamento | string
+type AgendamentoOperation = Agendamento | string;
 
-type EditarAgendaFormInputs = z.infer<typeof EditarAgendaFormSchema>
+type EditarAgendaFormInputs = z.infer<typeof EditarAgendaFormSchema>;
 
 interface EditarAgendaModalProps {
-  agendamentoId: string
-  open: boolean
-  onClose: () => void
+  agendamentoId: string;
+  open: boolean;
+  onClose: () => void;
 }
 
 export function EditarAgendaModal({
@@ -123,106 +129,107 @@ export function EditarAgendaModal({
   } = useForm<EditarAgendaFormInputs>({
     resolver: zodResolver(EditarAgendaFormSchema),
     defaultValues: {
-      id: '',
-      pacienteId: '',
+      id: "",
+      pacienteId: "",
       dataAgendamento: undefined,
-      horarioAgendamento: '',
+      horarioAgendamento: "",
       localAgendamento: undefined,
       modalidadeAgendamento: undefined,
       tipoAgendamento: undefined,
       statusAgendamento: undefined,
-      observacoesAgendamento: '',
-      periodicidade: 'Não repetir',
+      observacoesAgendamento: "",
+      periodicidade: "Não repetir",
       diasDaSemana: [],
       dataFimRecorrencia: undefined,
     },
-  })
-  const dispatch = useDispatch<AppDispatch>()
+  });
+  const dispatch = useDispatch<AppDispatch>();
   const agendamentos = useSelector(
     (state: RootState) => state.agendamentos.data,
-  )
-  const pacientes = useSelector((state: RootState) => state.pacientes.data)
-  const pacienteId = watch('pacienteId')
+  );
+  const pacientes = useSelector((state: RootState) => state.pacientes.data);
+  const pacienteId = watch("pacienteId");
   const pacienteSelecionado = useMemo(
     () => pacientes.find((paciente) => paciente.id === pacienteId),
     [pacienteId, pacientes],
-  )
+  );
 
-  const calendarTriggerRef = useRef<HTMLButtonElement>(null)
+  const calendarTriggerRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    const currentAgendamento = agendamentos.find((a) => a.id === agendamentoId)
+    const currentAgendamento = agendamentos.find((a) => a.id === agendamentoId);
     if (currentAgendamento) {
       // Find all related appointments if it has recurrenceId
-      const isRecurrent = currentAgendamento.recurrenceId
-      let periodicidade: 'Não repetir' | 'Semanal' | 'Quinzenal' = 'Não repetir'
+      const isRecurrent = currentAgendamento.recurrenceId;
+      let periodicidade: "Não repetir" | "Semanal" | "Quinzenal" =
+        "Não repetir";
       let diasDaSemana: Array<
-        | 'Domingo'
-        | 'Segunda-feira'
-        | 'Terça-feira'
-        | 'Quarta-feira'
-        | 'Quinta-feira'
-        | 'Sexta-feira'
-        | 'Sábado'
-      > = []
-      let dataFimRecorrencia: Date | undefined
+        | "Domingo"
+        | "Segunda-feira"
+        | "Terça-feira"
+        | "Quarta-feira"
+        | "Quinta-feira"
+        | "Sexta-feira"
+        | "Sábado"
+      > = [];
+      let dataFimRecorrencia: Date | undefined;
 
       if (isRecurrent) {
         // Get all appointments with same recurrenceId
         const recurrentAgendamentos = agendamentos.filter(
           (a) => a.recurrenceId === currentAgendamento.recurrenceId,
-        )
+        );
 
         // Sort by date to get the last one
         const sortedAgendamentos = recurrentAgendamentos.sort(
           (a, b) =>
             new Date(b.dataAgendamento).getTime() -
             new Date(a.dataAgendamento).getTime(),
-        )
+        );
 
         // Get unique days of week
         diasDaSemana = recurrentAgendamentos
           .map((a) => {
-            const dayName = format(new Date(a.dataAgendamento), 'cccc', {
+            const dayName = format(new Date(a.dataAgendamento), "cccc", {
               locale: ptBR,
-            })
+            });
             // Capitalize first letter and map to correct day name
             switch (dayName) {
-              case 'domingo':
-                return 'Domingo'
-              case 'segunda-feira':
-                return 'Segunda-feira'
-              case 'terça-feira':
-                return 'Terça-feira'
-              case 'quarta-feira':
-                return 'Quarta-feira'
-              case 'quinta-feira':
-                return 'Quinta-feira'
-              case 'sexta-feira':
-                return 'Sexta-feira'
-              case 'sábado':
-                return 'Sábado'
+              case "domingo":
+                return "Domingo";
+              case "segunda-feira":
+                return "Segunda-feira";
+              case "terça-feira":
+                return "Terça-feira";
+              case "quarta-feira":
+                return "Quarta-feira";
+              case "quinta-feira":
+                return "Quinta-feira";
+              case "sexta-feira":
+                return "Sexta-feira";
+              case "sábado":
+                return "Sábado";
               default:
-                return undefined
+                return undefined;
             }
           })
           .filter(
             (day): day is (typeof diasDaSemana)[number] => day !== undefined,
           )
-          .filter((day, index, self) => self.indexOf(day) === index)
+          .filter((day, index, self) => self.indexOf(day) === index);
 
         // Last appointment date is the end date
-        dataFimRecorrencia = new Date(sortedAgendamentos[0].dataAgendamento)
+        dataFimRecorrencia = new Date(sortedAgendamentos[0].dataAgendamento);
 
         // Determine periodicity based on dates
         const firstDate = new Date(
           sortedAgendamentos[sortedAgendamentos.length - 1].dataAgendamento,
-        )
+        );
         const secondDate = new Date(
           sortedAgendamentos[sortedAgendamentos.length - 2].dataAgendamento,
-        )
-        const weeksDiff = differenceInWeeks(secondDate, firstDate)
-        periodicidade = weeksDiff === 1 ? 'Semanal' : 'Quinzenal'
+        );
+        const weeksDiff = differenceInWeeks(secondDate, firstDate);
+        periodicidade = weeksDiff === 1 ? "Semanal" : "Quinzenal";
       }
 
       reset({
@@ -238,40 +245,40 @@ export function EditarAgendaModal({
         periodicidade,
         diasDaSemana,
         dataFimRecorrencia,
-      })
+      });
     }
-  }, [agendamentoId, agendamentos, reset])
+  }, [agendamentoId, agendamentos, reset]);
 
   async function handleEditAgendamento(data: EditarAgendaFormInputs) {
     try {
       // Agrupa todas as operações assíncronas que serão executadas
-      const operations: Promise<AgendamentoOperation>[] = []
+      const operations: Promise<AgendamentoOperation>[] = [];
 
       const pacienteSelecionado = pacientes.find(
         (p) => p.id === data.pacienteId,
-      )
-      if (!pacienteSelecionado) throw new Error('Paciente não encontrado')
+      );
+      if (!pacienteSelecionado) throw new Error("Paciente não encontrado");
 
-      const currentAgendamento = agendamentos.find((a) => a.id === data.id)
-      if (!currentAgendamento) throw new Error('Agendamento não encontrado')
+      const currentAgendamento = agendamentos.find((a) => a.id === data.id);
+      if (!currentAgendamento) throw new Error("Agendamento não encontrado");
 
-      if (data.periodicidade !== 'Não repetir') {
+      if (data.periodicidade !== "Não repetir") {
         const recurrentAgendamentos = currentAgendamento.recurrenceId
           ? agendamentos.filter(
               (a) => a.recurrenceId === currentAgendamento.recurrenceId,
             )
-          : [currentAgendamento]
+          : [currentAgendamento];
 
-        const recurrenceId = currentAgendamento.recurrenceId || uuidv4()
-        const updatedAgendamentos: Agendamento[] = []
-        let currentDate = data.dataAgendamento
+        const recurrenceId = currentAgendamento.recurrenceId || uuidv4();
+        const updatedAgendamentos: Agendamento[] = [];
+        let currentDate = data.dataAgendamento;
 
         const existingAgendamentosByDate = new Map(
           recurrentAgendamentos.map((a) => [
-            format(new Date(a.dataAgendamento), 'yyyy-MM-dd'),
+            format(new Date(a.dataAgendamento), "yyyy-MM-dd"),
             a,
           ]),
-        )
+        );
 
         while (currentDate <= data.dataFimRecorrencia!) {
           for (const diaSemana of data.diasDaSemana || []) {
@@ -279,11 +286,11 @@ export function EditarAgendaModal({
               currentDate,
               diaSemana,
               data.periodicidade,
-            )
-            if (nextDate > data.dataFimRecorrencia!) continue
+            );
+            if (nextDate > data.dataFimRecorrencia!) continue;
 
-            const dateKey = format(nextDate, 'yyyy-MM-dd')
-            const existingAgendamento = existingAgendamentosByDate.get(dateKey)
+            const dateKey = format(nextDate, "yyyy-MM-dd");
+            const existingAgendamento = existingAgendamentosByDate.get(dateKey);
 
             const agendamentoToUpdate: Agendamento = {
               id: existingAgendamento?.id || uuidv4(),
@@ -296,41 +303,41 @@ export function EditarAgendaModal({
               modalidadeAgendamento: data.modalidadeAgendamento,
               tipoAgendamento: data.tipoAgendamento,
               statusAgendamento: data.statusAgendamento,
-              observacoesAgendamento: data.observacoesAgendamento || '',
-            }
+              observacoesAgendamento: data.observacoesAgendamento || "",
+            };
 
             // Adiciona as operações ao array de promises
             if (existingAgendamento) {
               operations.push(
                 dispatch(updateAgendamento(agendamentoToUpdate)).unwrap(),
-              )
+              );
             } else {
               operations.push(
                 dispatch(addAgendamento(agendamentoToUpdate)).unwrap(),
-              )
+              );
             }
 
-            updatedAgendamentos.push(agendamentoToUpdate)
+            updatedAgendamentos.push(agendamentoToUpdate);
           }
 
           currentDate =
-            data.periodicidade === 'Semanal'
+            data.periodicidade === "Semanal"
               ? addWeeks(currentDate, 1)
-              : addWeeks(currentDate, 2)
+              : addWeeks(currentDate, 2);
         }
 
         const oldAgendamentosToDelete = recurrentAgendamentos.filter(
           (old) =>
             !updatedAgendamentos.some((updated) => updated.id === old.id),
-        )
+        );
 
         // Adiciona as operações de delete ao array de promises
         for (const agendamento of oldAgendamentosToDelete) {
-          operations.push(dispatch(deleteAgendamento(agendamento.id)).unwrap())
+          operations.push(dispatch(deleteAgendamento(agendamento.id)).unwrap());
         }
 
         // Aguarda todas as operações serem concluídas
-        await Promise.all(operations)
+        await Promise.all(operations);
       } else {
         const agendamentoAtualizado: Agendamento = {
           ...currentAgendamento,
@@ -342,17 +349,17 @@ export function EditarAgendaModal({
           modalidadeAgendamento: data.modalidadeAgendamento,
           tipoAgendamento: data.tipoAgendamento,
           statusAgendamento: data.statusAgendamento,
-          observacoesAgendamento: data.observacoesAgendamento || '',
-        }
+          observacoesAgendamento: data.observacoesAgendamento || "",
+        };
 
-        await dispatch(updateAgendamento(agendamentoAtualizado)).unwrap()
+        await dispatch(updateAgendamento(agendamentoAtualizado)).unwrap();
       }
 
-      toast.success('Agendamento atualizado com sucesso!')
-      onClose()
+      toast.success("Agendamento atualizado com sucesso!");
+      onClose();
     } catch (error) {
-      console.error('Erro completo:', error)
-      toast.error('Erro ao editar agendamento')
+      console.error("Erro completo:", error);
+      toast.error("Erro ao editar agendamento");
     }
   }
 
@@ -364,23 +371,26 @@ export function EditarAgendaModal({
   ): Date {
     const dayMap: { [key: string]: number } = {
       Domingo: 0,
-      'Segunda-feira': 1,
-      'Terça-feira': 2,
-      'Quarta-feira': 3,
-      'Quinta-feira': 4,
-      'Sexta-feira': 5,
+      "Segunda-feira": 1,
+      "Terça-feira": 2,
+      "Quarta-feira": 3,
+      "Quinta-feira": 4,
+      "Sexta-feira": 5,
       Sábado: 6,
-    }
+    };
 
-    const targetDay = dayMap[diaSemana]
-    let proximaData = setDay(baseDate, targetDay, { weekStartsOn: 0 })
+    const targetDay = dayMap[diaSemana];
+    let proximaData = setDay(baseDate, targetDay, { weekStartsOn: 0 });
 
     if (isBefore(proximaData, baseDate)) {
-      proximaData = setDay(proximaData, targetDay, { weekStartsOn: 0 })
-      proximaData = addWeeks(proximaData, periodicidade === 'Quinzenal' ? 2 : 1)
+      proximaData = setDay(proximaData, targetDay, { weekStartsOn: 0 });
+      proximaData = addWeeks(
+        proximaData,
+        periodicidade === "Quinzenal" ? 2 : 1,
+      );
     }
 
-    return proximaData
+    return proximaData;
   }
 
   return (
@@ -423,7 +433,7 @@ export function EditarAgendaModal({
                   <Select
                     value={value}
                     onValueChange={(val) => {
-                      onChange(val)
+                      onChange(val);
                     }}
                   >
                     <SelectTrigger className="shadow-rosa/50 focus:shadow-rosa w-full h-[40px] rounded-md px-4">
@@ -453,7 +463,7 @@ export function EditarAgendaModal({
                 disabled
                 className="shadow-rosa/50 focus:shadow-rosa w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px] bg-gray-100"
                 placeholder="Nome do Terapeuta"
-                value={pacienteSelecionado?.terapeutaInfo.nomeTerapeuta || ''}
+                value={pacienteSelecionado?.terapeutaInfo.nomeTerapeuta || ""}
               />
             </div>
             <h3 className="font-medium text-azul text-xl mb-4">
@@ -481,14 +491,14 @@ export function EditarAgendaModal({
                             id="dataAgendamento"
                             ref={calendarTriggerRef}
                             className={cn(
-                              'shadow-rosa/50 focus:shadow-rosa w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px] text-left flex items-center',
-                              !field.value && 'text-slate-400',
+                              "shadow-rosa/50 focus:shadow-rosa w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px] text-left flex items-center",
+                              !field.value && "text-slate-400",
                             )}
                           >
                             <CalendarIcon className="mr-2 h-4 w-4" />
                             {field.value
-                              ? format(field.value, 'dd/MM/yyyy')
-                              : 'Selecione uma data'}
+                              ? format(field.value, "dd/MM/yyyy")
+                              : "Selecione uma data"}
                           </button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0" align="start">
@@ -496,15 +506,15 @@ export function EditarAgendaModal({
                             mode="single"
                             selected={field.value}
                             onSelect={(date) => {
-                              field.onChange(date)
-                              calendarTriggerRef.current?.click()
-                              calendarTriggerRef.current?.focus()
+                              field.onChange(date);
+                              calendarTriggerRef.current?.click();
+                              calendarTriggerRef.current?.focus();
                             }}
                             initialFocus
                             locale={ptBR}
                             classNames={{
-                              day_selected: 'bg-rosa text-white',
-                              month: 'capitalize',
+                              day_selected: "bg-rosa text-white",
+                              month: "capitalize",
                             }}
                           />
                         </PopoverContent>
@@ -529,10 +539,10 @@ export function EditarAgendaModal({
                     type="text"
                     maxLength={5}
                     placeholder="hh:mm"
-                    {...register('horarioAgendamento', {
+                    {...register("horarioAgendamento", {
                       onChange: (e) => {
-                        const masked = maskTime(e.target.value)
-                        e.target.value = masked
+                        const masked = maskTime(e.target.value);
+                        e.target.value = masked;
                       },
                     })}
                     className="shadow-rosa/50 focus:shadow-rosa w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
@@ -561,7 +571,7 @@ export function EditarAgendaModal({
                       className="flex items-center gap-x-6"
                       value={value}
                       onValueChange={(val) => {
-                        onChange(val)
+                        onChange(val);
                       }}
                     >
                       <div className="flex items-center gap-2">
@@ -631,7 +641,7 @@ export function EditarAgendaModal({
                   name="periodicidade"
                   render={({ field: { onChange, value } }) => (
                     <Select
-                      value={value || 'Não repetir'}
+                      value={value || "Não repetir"}
                       onValueChange={onChange}
                     >
                       <SelectTrigger className="shadow-rosa/50 focus:shadow-rosa w-full h-[40px] rounded-md px-4">
@@ -647,8 +657,8 @@ export function EditarAgendaModal({
                 />
               </div>
               {/* Dias da Semana */}
-              {(watch('periodicidade') === 'Semanal' ||
-                watch('periodicidade') === 'Quinzenal') && (
+              {(watch("periodicidade") === "Semanal" ||
+                watch("periodicidade") === "Quinzenal") && (
                 <div className="space-y-2">
                   <label
                     htmlFor="diasDaSemana"
@@ -662,13 +672,13 @@ export function EditarAgendaModal({
                     render={({ field: { onChange, value } }) => (
                       <div className="flex flex-wrap gap-2">
                         {[
-                          'Domingo',
-                          'Segunda-feira',
-                          'Terça-feira',
-                          'Quarta-feira',
-                          'Quinta-feira',
-                          'Sexta-feira',
-                          'Sábado',
+                          "Domingo",
+                          "Segunda-feira",
+                          "Terça-feira",
+                          "Quarta-feira",
+                          "Quinta-feira",
+                          "Sexta-feira",
+                          "Sábado",
                         ].map((dia) => (
                           <label
                             key={dia}
@@ -679,21 +689,21 @@ export function EditarAgendaModal({
                               id={dia}
                               checked={value?.includes(
                                 dia as
-                                  | 'Domingo'
-                                  | 'Segunda-feira'
-                                  | 'Terça-feira'
-                                  | 'Quarta-feira'
-                                  | 'Quinta-feira'
-                                  | 'Sexta-feira'
-                                  | 'Sábado',
+                                  | "Domingo"
+                                  | "Segunda-feira"
+                                  | "Terça-feira"
+                                  | "Quarta-feira"
+                                  | "Quinta-feira"
+                                  | "Sexta-feira"
+                                  | "Sábado",
                               )}
                               onCheckedChange={(checked) => {
                                 if (checked) {
-                                  onChange([...(value || []), dia])
+                                  onChange([...(value || []), dia]);
                                 } else {
                                   onChange(
                                     (value || []).filter((d) => d !== dia),
-                                  )
+                                  );
                                 }
                               }}
                               className="w-4 h-4 border rounded data-[state=checked]:bg-rosa data-[state=checked]:border-rosa"
@@ -707,8 +717,8 @@ export function EditarAgendaModal({
                 </div>
               )}
               {/* Data Fim Recorrência */}
-              {(watch('periodicidade') === 'Semanal' ||
-                watch('periodicidade') === 'Quinzenal') && (
+              {(watch("periodicidade") === "Semanal" ||
+                watch("periodicidade") === "Quinzenal") && (
                 <div className="space-y-2">
                   <label
                     className="text-sm text-slate-500"
@@ -727,14 +737,14 @@ export function EditarAgendaModal({
                             id="dataFimRecorrencia"
                             ref={calendarTriggerRef}
                             className={cn(
-                              'shadow-rosa/50 focus:shadow-rosa w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px] text-left flex items-center',
-                              !field.value && 'text-slate-400',
+                              "shadow-rosa/50 focus:shadow-rosa w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px] text-left flex items-center",
+                              !field.value && "text-slate-400",
                             )}
                           >
                             <CalendarIcon className="mr-2 h-4 w-4" />
                             {field.value
-                              ? format(field.value, 'dd/MM/yyyy')
-                              : 'Selecione uma data fim da recorrência'}
+                              ? format(field.value, "dd/MM/yyyy")
+                              : "Selecione uma data fim da recorrência"}
                           </button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0" align="start">
@@ -742,15 +752,15 @@ export function EditarAgendaModal({
                             mode="single"
                             selected={field.value}
                             onSelect={(date) => {
-                              field.onChange(date)
-                              calendarTriggerRef.current?.click()
-                              calendarTriggerRef.current?.focus()
+                              field.onChange(date);
+                              calendarTriggerRef.current?.click();
+                              calendarTriggerRef.current?.focus();
                             }}
                             initialFocus
                             locale={ptBR}
                             classNames={{
-                              day_selected: 'bg-rosa text-white',
-                              month: 'capitalize',
+                              day_selected: "bg-rosa text-white",
+                              month: "capitalize",
                             }}
                           />
                         </PopoverContent>
@@ -779,7 +789,7 @@ export function EditarAgendaModal({
                     <RadioGroup.Root
                       value={value}
                       onValueChange={(val) => {
-                        onChange(val)
+                        onChange(val);
                       }}
                       className="flex items-center gap-x-6"
                     >
@@ -826,7 +836,7 @@ export function EditarAgendaModal({
                     <Select
                       value={value}
                       onValueChange={(val) => {
-                        onChange(val)
+                        onChange(val);
                       }}
                     >
                       <SelectTrigger className="shadow-rosa/50 focus:shadow-rosa w-full h-[40px] rounded-md px-4">
@@ -867,7 +877,7 @@ export function EditarAgendaModal({
                       id="statusAgendamento"
                       value={value}
                       onValueChange={(val) => {
-                        onChange(val)
+                        onChange(val);
                       }}
                       className="flex items-center gap-x-6"
                     >
@@ -933,7 +943,7 @@ export function EditarAgendaModal({
                   Observações
                 </label>
                 <textarea
-                  {...register('observacoesAgendamento')}
+                  {...register("observacoesAgendamento")}
                   id="observacoesAgendamento"
                   className="shadow-rosa/50 focus:shadow-rosa w-full min-h-[80px] rounded-md px-4 py-2 text-[15px] leading-normal shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
                   placeholder="Observações do agendamento"
@@ -946,15 +956,15 @@ export function EditarAgendaModal({
               disabled={isSubmitting || Object.keys(errors).length > 0}
               className={`w-full bg-rosa hover:bg-rosa/90 text-white font-medium py-2 px-4 rounded-md transition-colors ${
                 isSubmitting || Object.keys(errors).length > 0
-                  ? 'opacity-50 cursor-not-allowed'
-                  : ''
+                  ? "opacity-50 cursor-not-allowed"
+                  : ""
               }`}
             >
-              {isSubmitting ? 'Editando...' : 'Editar'}
+              {isSubmitting ? "Editando..." : "Editar"}
             </button>
           </form>
         </DialogContent>
       </DialogPortal>
     </Dialog>
-  )
+  );
 }

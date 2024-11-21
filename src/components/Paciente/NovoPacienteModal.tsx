@@ -1,46 +1,46 @@
-import { X } from '@phosphor-icons/react'
-import * as Dialog from '@radix-ui/react-dialog'
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
-import { Controller, useForm } from 'react-hook-form'
-import DatePicker from 'react-datepicker'
-import { ptBR } from 'date-fns/locale'
-import { z } from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useDispatch, useSelector } from 'react-redux'
-import type { AppDispatch, RootState } from '../../store/store'
-import { useState } from 'react'
-import { v4 as uuidv4 } from 'uuid'
-import { addPaciente } from '../../store/pacientesSlice'
-import { maskCPF, maskPhone } from '@/utils/formatter'
+import { X } from "@phosphor-icons/react";
+import * as Dialog from "@radix-ui/react-dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { Controller, useForm } from "react-hook-form";
+import DatePicker from "react-datepicker";
+import { ptBR } from "date-fns/locale";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "../../store/store";
+import { useState } from "react";
+import { v4 as uuidv4 } from "uuid";
+import { addPaciente } from "../../store/pacientesSlice";
+import { maskCPF, maskPhone } from "@/utils/formatter";
 
 const NovoPacienteFormSchema = z.object({
-  nomePaciente: z.string().min(1, 'Nome do paciente é obrigatório'),
+  nomePaciente: z.string().min(1, "Nome do paciente é obrigatório"),
   dtNascimento: z.date().refine((data) => data <= new Date(), {
-    message: 'Data de entrada não pode ser maior que a data atual',
+    message: "Data de entrada não pode ser maior que a data atual",
   }),
-  terapeutaId: z.string().min(1, 'Selecione um(a) terapeuta'),
+  terapeutaId: z.string().min(1, "Selecione um(a) terapeuta"),
   nomeResponsavel: z.string(),
   telefoneResponsavel: z
     .string()
-    .min(13, 'Telefone é obrigatório')
+    .min(13, "Telefone é obrigatório")
     .regex(/^\(\d{2}\) \d{4,5}-\d{4}$/),
   emailResponsavel: z.string(),
   cpfResponsavel: z
     .string()
-    .min(14, 'CPF é obrigatório')
+    .min(14, "CPF é obrigatório")
     .regex(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/),
   enderecoResponsavel: z.string(),
-  origem: z.enum(['Indicação', 'Instagram', 'Busca no Google', 'Outros']),
+  origem: z.enum(["Indicação", "Instagram", "Busca no Google", "Outros"]),
   dtEntradaPaciente: z.date().nullable().optional(),
-})
+});
 
-type NovoPacienteFormInputs = z.infer<typeof NovoPacienteFormSchema>
+type NovoPacienteFormInputs = z.infer<typeof NovoPacienteFormSchema>;
 
 export function NovoPacienteModal() {
-  const dispatch = useDispatch<AppDispatch>()
-  const terapeutas = useSelector((state: RootState) => state.terapeutas.data)
-  const [mensagemSucesso, setMensagemSucesso] = useState('')
-  const [mensagemErro, setMensagemErro] = useState('')
+  const dispatch = useDispatch<AppDispatch>();
+  const terapeutas = useSelector((state: RootState) => state.terapeutas.data);
+  const [mensagemSucesso, setMensagemSucesso] = useState("");
+  const [mensagemErro, setMensagemErro] = useState("");
 
   const {
     register,
@@ -51,29 +51,29 @@ export function NovoPacienteModal() {
   } = useForm<NovoPacienteFormInputs>({
     resolver: zodResolver(NovoPacienteFormSchema),
     defaultValues: {
-      nomePaciente: '',
+      nomePaciente: "",
       dtNascimento: undefined,
-      terapeutaId: '',
-      nomeResponsavel: '',
-      telefoneResponsavel: '',
-      emailResponsavel: '',
-      cpfResponsavel: '',
-      enderecoResponsavel: '',
+      terapeutaId: "",
+      nomeResponsavel: "",
+      telefoneResponsavel: "",
+      emailResponsavel: "",
+      cpfResponsavel: "",
+      enderecoResponsavel: "",
       origem: undefined, // undefined para select vazio
       dtEntradaPaciente: null,
     },
-  })
+  });
 
   async function handleCreateNewPaciente(data: NovoPacienteFormInputs) {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       const terapeutaSelecionado = terapeutas.find(
         (terapeuta) => terapeuta.id === data.terapeutaId,
-      )
+      );
 
       if (!terapeutaSelecionado) {
-        throw new Error('Terapeuta não encontrado')
+        throw new Error("Terapeuta não encontrado");
       }
 
       const novoPaciente = {
@@ -88,24 +88,24 @@ export function NovoPacienteModal() {
         enderecoResponsavel: data.enderecoResponsavel,
         origem: data.origem,
         dtEntradaPaciente: data.dtEntradaPaciente || new Date(), // Usa data atual se não preenchido
-      }
+      };
 
       // Faz o dispatch do thunk addPaciente
-      dispatch(addPaciente(novoPaciente)).unwrap()
+      dispatch(addPaciente(novoPaciente)).unwrap();
 
-      reset()
-      setMensagemSucesso('Paciente cadastrado com sucesso!')
-      setMensagemErro('')
+      reset();
+      setMensagemSucesso("Paciente cadastrado com sucesso!");
+      setMensagemErro("");
     } catch (error) {
-      console.error('Erro ao cadastrar Paciente:', error)
-      setMensagemErro('Erro ao cadastrar Paciente. Tente novamente.')
-      setMensagemSucesso('')
+      console.error("Erro ao cadastrar Paciente:", error);
+      setMensagemErro("Erro ao cadastrar Paciente. Tente novamente.");
+      setMensagemSucesso("");
     }
   }
 
   function handleFocus() {
-    setMensagemSucesso('')
-    setMensagemErro('')
+    setMensagemSucesso("");
+    setMensagemErro("");
   }
 
   return (
@@ -129,7 +129,7 @@ export function NovoPacienteModal() {
               className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
               id="nomePaciente"
               placeholder="Nome do paciente"
-              {...register('nomePaciente')}
+              {...register("nomePaciente")}
               onFocus={handleFocus}
             />
             {errors.nomePaciente && (
@@ -187,7 +187,7 @@ export function NovoPacienteModal() {
             <select
               className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
               id="terapeutaId"
-              {...register('terapeutaId')}
+              {...register("terapeutaId")}
               onFocus={handleFocus}
             >
               <option value="">Selecione o terapeuta</option>
@@ -210,7 +210,7 @@ export function NovoPacienteModal() {
               className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
               id="nomeResponsavel"
               placeholder="Nome do responsável"
-              {...register('nomeResponsavel')}
+              {...register("nomeResponsavel")}
               onFocus={handleFocus}
             />
             <input
@@ -218,10 +218,10 @@ export function NovoPacienteModal() {
               className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
               id="telefoneResponsavel"
               placeholder="Telefone do responsável"
-              {...register('telefoneResponsavel', {
+              {...register("telefoneResponsavel", {
                 onChange: (e) => {
-                  const masked = maskPhone(e.target.value)
-                  e.target.value = masked
+                  const masked = maskPhone(e.target.value);
+                  e.target.value = masked;
                 },
               })}
               maxLength={15}
@@ -232,7 +232,7 @@ export function NovoPacienteModal() {
               className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
               id="emailResponsavel"
               placeholder="Email do responsável"
-              {...register('emailResponsavel')}
+              {...register("emailResponsavel")}
               onFocus={handleFocus}
             />
             <input
@@ -240,10 +240,10 @@ export function NovoPacienteModal() {
               className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
               id="cpfResponsavel"
               placeholder="CPF do responsável"
-              {...register('cpfResponsavel', {
+              {...register("cpfResponsavel", {
                 onChange: (e) => {
-                  const masked = maskCPF(e.target.value)
-                  e.target.value = masked
+                  const masked = maskCPF(e.target.value);
+                  e.target.value = masked;
                 },
               })}
               onFocus={handleFocus}
@@ -256,13 +256,13 @@ export function NovoPacienteModal() {
               className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
               id="enderecoResponsavel"
               placeholder="Endereço do responsável"
-              {...register('enderecoResponsavel')}
+              {...register("enderecoResponsavel")}
               onFocus={handleFocus}
             />
             <select
               className="shadow-rosa/50 focus:shadow-rosa block w-full h-[40px] rounded-md px-4 text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
               id="origem"
-              {...register('origem')}
+              {...register("origem")}
               onFocus={handleFocus}
             >
               <option value="">Selecione a origem</option>
@@ -276,12 +276,12 @@ export function NovoPacienteModal() {
           <div className="mt-6 flex justify-end">
             <button
               className={`bg-azul text-branco hover:bg-azul/75 focus:shadow-azul inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] font-medium leading-none focus:shadow-[0_0_0_2px] focus:outline-none ${
-                isSubmitting ? 'cursor-not-allowed' : ''
+                isSubmitting ? "cursor-not-allowed" : ""
               }`}
               type="submit"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Carregando...' : 'Confirmar'}
+              {isSubmitting ? "Carregando..." : "Confirmar"}
             </button>
           </div>
         </form>
@@ -301,5 +301,5 @@ export function NovoPacienteModal() {
         </Dialog.Close>
       </Dialog.Content>
     </Dialog.Portal>
-  )
+  );
 }

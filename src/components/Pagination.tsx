@@ -1,9 +1,9 @@
-import type React from 'react'
+import type React from "react";
 
 interface PaginationProps {
-  currentPage: number
-  totalPages: number
-  onPageChange: (page: number) => void
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
 }
 
 const Pagination: React.FC<PaginationProps> = ({
@@ -33,7 +33,7 @@ const Pagination: React.FC<PaginationProps> = ({
         Próxima Página
       </button>
     </div>
-  )
-}
+  );
+};
 
-export default Pagination
+export default Pagination;
